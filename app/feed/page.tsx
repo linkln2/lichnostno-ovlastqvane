@@ -102,7 +102,7 @@ export default function FeedPage() {
                   {locale === "bg" ? "Отвори в TikTok →" : "Open in TikTok →"}
                 </a>
               </div>
-              <TikTokEmbed uniqueId={tiktokUsername} mode="creator" />
+              <TikTokEmbed username={tiktokUsername} />
             </div>
           ) : (
             <div className="w-full max-w-[500px]">
@@ -129,7 +129,7 @@ export default function FeedPage() {
                   {locale === "bg" ? "Отвори във Facebook →" : "Open in Facebook →"}
                 </a>
               </div>
-              <FacebookEmbed href={site.facebook} tabs="timeline" width={500} height={700} />
+              <FacebookEmbed href={site.facebook} />
             </div>
           )}
         </div>

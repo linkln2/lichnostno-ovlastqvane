@@ -1,116 +1,72 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect } from "react";
 
 type TikTokEmbedProps = {
-  uniqueId: string;
-  mode?: "creator" | "video";
-  videoId?: string;
-  url?: string;
+  username: string;
 };
 
 /**
- * Renders a TikTok embed.
+ * Renders a TikTok creator profile embed via an iframe.
  *
- * - mode="creator" (default): Shows the creator's profile with their latest
- *   videos. Auto-fetches from TikTok — no API key needed. Uses data-unique-id.
- * - mode="video": Shows a single video embed. Uses data-video-id.
- *
- * The official TikTok embed script (embed.js) processes blockquote.tiktok-embed
- * elements on the page. For dynamic content (client-side navigation), we
- * re-inject a fresh script element each time to force re-processing.
+ * Loads /embeds/tiktok.html (a static file with the TikTok blockquote + embed.js).
+ * The iframe approach ensures embed.js runs fresh each time, avoiding
+ * client-side navigation re-scan issues.
  */
-export default function TikTokEmbed({
-  uniqueId,
-  mode = "creator",
-  videoId,
-  url,
-}: TikTokEmbedProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export default function TikTokEmbed({ username }: TikTokEmbedProps) {
   const [loaded, setLoaded] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
 
+  // Show fallback link after timeout
   useEffect(() => {
-    setLoaded(false);
-
-    // Remove any existing TikTok embed script so the new one re-processes
-    const existing = document.getElementById("tiktok-embed-script");
-    if (existing) existing.remove();
-
-    // Inject a fresh script — the browser will execute it and scan for
-    // .tiktok-embed elements, replacing them with iframes.
-    const script = document.createElement("script");
-    script.id = "tiktok-embed-script";
-    script.src = "https://www.tiktok.com/embed.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    // Poll for rendered iframe or processed embed
-    const checkInterval = setInterval(() => {
-      const container = containerRef.current;
-      if (!container) return;
-      const iframe = container.querySelector("iframe");
-      const embed = container.querySelector(".tiktok-embed");
-      // Creator embed: script adds wrapper divs around the blockquote
-      // Video embed: script replaces blockquote with iframe
-      if (iframe || (embed && embed.children.length > 1)) {
-        setLoaded(true);
-        clearInterval(checkInterval);
-      }
-    }, 500);
-
-    // Timeout fallback — show content even if detection fails
-    const timeout = setTimeout(() => setLoaded(true), 6000);
-
-    return () => {
-      clearInterval(checkInterval);
-      clearTimeout(timeout);
-    };
-  }, [uniqueId, mode, videoId]);
-
-  const cite =
-    url ||
-    (mode === "creator"
-      ? `https://www.tiktok.com/@${uniqueId}`
-      : `https://www.tiktok.com/@${uniqueId}/video/${videoId}`);
+    const timer = setTimeout(() => {
+      if (!loaded) setShowFallback(true);
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [loaded]);
 
   return (
-    <div ref={containerRef} className="relative w-full overflow-hidden">
+    <div className="relative w-full overflow-hidden rounded-xl bg-stone-100">
+      {/* Loading state */}
       {!loaded && (
-        <div className="flex h-[500px] w-full max-w-[780px] items-center justify-center rounded-xl bg-stone-100">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
-            <div className="text-sm text-stone-400">Loading TikTok…</div>
+        <div className="flex h-[600px] w-full items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-stone-300 border-t-stone-800" />
+            <div className="text-sm text-stone-400">
+              Loading TikTok @{username}…
+            </div>
+            {showFallback && (
+              <a
+                href={`https://www.tiktok.com/@${username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 rounded-full bg-stone-900 px-4 py-2 text-xs font-semibold text-white hover:bg-stone-800"
+              >
+                Open @{username} on TikTok →
+              </a>
+            )}
           </div>
         </div>
       )}
-      {mode === "creator" ? (
-        <blockquote
-          className="tiktok-embed"
-          cite={cite}
-          data-unique-id={uniqueId}
-          data-embed-from="oembed"
-          data-embed-type="creator"
-          style={{ maxWidth: "780px", minWidth: "288px", width: "100%" }}
-        >
-          <section>
-            <a
-              target="_blank"
-              href={`https://www.tiktok.com/@${uniqueId}?refer=creator_embed`}
-            >
-              @{uniqueId}
-            </a>
-          </section>
-        </blockquote>
-      ) : (
-        <blockquote
-          className="tiktok-embed"
-          cite={cite}
-          data-video-id={videoId}
-          style={{ maxWidth: "380px", minWidth: "288px", width: "100%" }}
-        >
-          <section></section>
-        </blockquote>
-      )}
+
+      {/* The actual embed iframe */}
+      <iframe
+        src="/embeds/tiktok.html"
+        title={`TikTok @${username}`}
+        className="w-full border-0"
+        style={{
+          width: "100%",
+          maxWidth: "780px",
+          minHeight: "600px",
+          height: loaded ? "800px" : "600px",
+          display: "block",
+          margin: "0 auto",
+        }}
+        onLoad={() => setLoaded(true)}
+        loading="lazy"
+        allow="fullscreen"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation"
+      />
     </div>
   );
 }

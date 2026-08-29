@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import CountdownTimer from "@/components/CountdownTimer";
+import TikTokEmbed from "@/components/TikTokEmbed";
+import FacebookEmbed from "@/components/FacebookEmbed";
 import { tr } from "@/lib/i18n";
 import {
   hero,
@@ -11,12 +14,14 @@ import {
   events,
   testimonials,
   blogPosts,
+  site,
   formatDateRange,
   localized,
 } from "@/lib/content";
 
 export default function HomePage() {
   const { locale } = useLocale();
+  const [videoTab, setVideoTab] = useState<"tiktok" | "facebook">("tiktok");
   const upcoming = events.filter((e) => e.status === "upcoming");
   const nextEvent = upcoming[0];
   const steps = [
@@ -221,6 +226,78 @@ export default function HomePage() {
             >
               {tr("btn_all_testimonials", locale)} →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Video feed */}
+      <section className="bg-stone-50 py-16 sm:py-20">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
+            {tr("feed_title", locale)}
+          </h2>
+          <p className="mt-3 text-center text-stone-500">
+            {tr("feed_subtitle", locale)}
+          </p>
+
+          {/* Platform tabs */}
+          <div className="mt-8 flex justify-center gap-3">
+            <button
+              onClick={() => setVideoTab("tiktok")}
+              className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors ${
+                videoTab === "tiktok"
+                  ? "bg-stone-900 text-white"
+                  : "bg-white text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
+              </svg>
+              {tr("feed_tiktok", locale)}
+            </button>
+            <button
+              onClick={() => setVideoTab("facebook")}
+              className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors ${
+                videoTab === "facebook"
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.99 3.66 9.13 8.44 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.45 2.89h-2.33v6.99C18.34 21.13 22 16.99 22 12z" />
+              </svg>
+              {tr("feed_facebook", locale)}
+            </button>
+          </div>
+
+          {/* Embed */}
+          <div className="mt-8 flex justify-center">
+            {videoTab === "tiktok" ? (
+              <div className="w-full max-w-[780px]">
+                <TikTokEmbed username="azraltar" />
+              </div>
+            ) : (
+              <div className="w-full max-w-[500px]">
+                <FacebookEmbed href={site.facebook} />
+              </div>
+            )}
+          </div>
+
+          {/* Follow CTA */}
+          <div className="mt-8 text-center">
+            <a
+              href={videoTab === "tiktok" ? site.tiktok : site.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-amber-700 hover:text-amber-800"
+            >
+              {videoTab === "tiktok"
+                ? tr("feed_follow_tiktok", locale)
+                : locale === "bg"
+                  ? "Последвай ни във Facebook"
+                  : "Follow us on Facebook"}
+              {" →"}
+            </a>
           </div>
         </div>
       </section>
