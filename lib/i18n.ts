@@ -24,14 +24,14 @@ export const t: Dict = {
   nav_register: { bg: "Запиши се", en: "Register" },
 
   // Countdown
-  countdown_label: { bg: "Стартираме на", en: "Launching on" },
+  countdown_label: { bg: "Следващ уебинар", en: "Next webinar" },
   countdown_days: { bg: "Дни", en: "Days" },
   countdown_hours: { bg: "Часа", en: "Hours" },
   countdown_minutes: { bg: "Минути", en: "Minutes" },
   countdown_seconds: { bg: "Секунди", en: "Seconds" },
   countdown_title: {
-    bg: "Обратното броене започна",
-    en: "The countdown has begun",
+    bg: "Обратното броене до следващия уебинар",
+    en: "Countdown to the next webinar",
   },
   countdown_subtitle: {
     bg: "Нещо могъщо се подготвя. Бъди сред първите, които ще го преживеят.",

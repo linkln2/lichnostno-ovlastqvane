@@ -49,7 +49,7 @@ export default function EventsPage() {
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">
                   {event.description[locale]}
                 </p>
-                <div className="mt-4 flex items-center justify-between text-sm">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm">
                   <span className="text-stone-500">📍 {event.location[locale]}</span>
                   <span className="font-semibold text-amber-700">{event.price[locale]}</span>
                 </div>

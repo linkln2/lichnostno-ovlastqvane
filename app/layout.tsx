@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import Header from "@/components/Header";
@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   title: "Личностно овластяване | Personal Empowerment",
   description:
     "Семинари, коучинг и общност за личностно овластяване. Върни си своя вътрешен авторитет.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -68,16 +68,16 @@ export default function CountdownTimer() {
           {locale === "bg" ? "Стартирахме!" : "We're live!"}
         </p>
       ) : (
-        <div className="mt-6 flex justify-center gap-3 sm:gap-4">
+        <div className="mt-6 grid grid-cols-4 gap-2 sm:gap-4">
           {units.map((unit, i) => (
             <div
               key={i}
-              className="flex min-w-[70px] flex-col items-center rounded-xl bg-white/10 px-3 py-4 backdrop-blur-sm sm:min-w-[90px] sm:px-5"
+              className="flex flex-col items-center rounded-xl bg-white/10 px-1 py-3 backdrop-blur-sm sm:px-5 sm:py-4"
             >
-              <span className="text-3xl font-bold tabular-nums text-white sm:text-4xl">
+              <span className="text-2xl font-bold tabular-nums text-white sm:text-4xl">
                 {mounted ? pad(unit.value) : "--"}
               </span>
-              <span className="mt-1 text-[10px] uppercase tracking-wider text-amber-200 sm:text-xs">
+              <span className="mt-1 text-[9px] uppercase tracking-wider text-amber-200 sm:text-xs">
                 {unit.label}
               </span>
             </div>

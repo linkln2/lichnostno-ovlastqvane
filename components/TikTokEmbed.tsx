@@ -66,7 +66,7 @@ export default function TikTokEmbed({
   const cite = url || (mode === "creator" ? `https://www.tiktok.com/@${uniqueId}` : `https://www.tiktok.com/@${uniqueId}/video/${videoId}`);
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative w-full overflow-hidden">
       {!loaded && (
         <div className="flex h-[500px] w-full max-w-[780px] items-center justify-center rounded-xl bg-stone-100">
           <div className="flex flex-col items-center gap-2">
@@ -82,7 +82,7 @@ export default function TikTokEmbed({
           data-unique-id={uniqueId}
           data-embed-from="oembed"
           data-embed-type="creator"
-          style={{ maxWidth: "780px", minWidth: "288px" }}
+          style={{ maxWidth: "780px", minWidth: "288px", width: "100%" }}
         >
           <section>
             <a
@@ -98,7 +98,7 @@ export default function TikTokEmbed({
           className="tiktok-embed"
           cite={cite}
           data-video-id={videoId}
-          style={{ maxWidth: "380px", minWidth: "325px" }}
+          style={{ maxWidth: "380px", minWidth: "288px", width: "100%" }}
         >
           <section></section>
         </blockquote>
