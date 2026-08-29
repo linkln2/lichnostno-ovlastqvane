@@ -91,19 +91,79 @@ The roadmap is organized into **4 phases** that fit within the 73-day window to 
 
 ---
 
-## Post-Launch (Backlog)
+## Post-Launch — Phased Monetization & Growth
 
-Items intentionally deferred until after the 10.11.2026 launch:
+Items deferred until after the 10.11.2026 launch. The sequence below is based on
+the market research in [`docs/WHITEPAPER.md`](./docs/WHITEPAPER.md) — start with
+low-cost, low-dev tools, then build custom systems when volume justifies it.
 
-- [ ] Online payments for paid events (Stripe integration)
-- [ ] Migrate JSON data store to a database (Supabase / Postgres)
-- [ ] Admin dashboard with auth (NextAuth)
-- [ ] Email automation for registrations (Resend / SendGrid)
-- [ ] CMS for blog content (Sanity / Payload)
+### Post-Launch Phase 1 — First Sales _(target: within 2 weeks of launch)_
+
+> Goal: Revenue path live with minimal development.
+
+- [ ] **Stripe Payment Links** — create a payment link per event in the Stripe
+      dashboard; wire the "Register" button to open the link. Zero custom code
+      needed — just a URL per event in `lib/content.ts`.
+- [ ] **Cal.com embed** — embed a free Cal.com booking page on the Services
+      page for 1:1 coaching sessions. No backend needed — iframe or React embed.
+- [ ] Keep the existing free registration form as a fallback (bank transfer /
+      cash at the door option)
+- [ ] Track registrations manually (Stripe dashboard + JSON store) until Phase 3
+
+**Rationale:** Stripe Payment Links cost only the Stripe processing fee (~2.9% +
+0.30 BGN) with no platform fee. Cal.com's free plan supports 1 user with
+unlimited bookings. Combined, these two give a complete revenue path with
+~1 day of work. See [Whitepaper §3, Option B](./docs/WHITEPAPER.md#опция-б--stripe-payment-links--checkout-page-леко-собствено-решение).
+
+### Post-Launch Phase 2 — Growth & Automation _(target: month 2–3)_
+
+> Goal: Non-technical event management + automated confirmations.
+
+- [ ] **Airtable or Notion API** for event calendar — Denitsa adds/edits events
+      in a spreadsheet; the site fetches them via public API. Replaces static
+      data in `lib/content.ts` for events.
+- [ ] **Zapier** automation — Stripe payment → add row to Airtable → send
+      confirmation email (via Gmail or Resend free tier)
+- [ ] **Email confirmations** — automated email on successful registration with
+      event details and calendar invite attachment
+- [ ] Migrate JSON data store to **Supabase** (Postgres) — needed before volume
+      makes file-based storage unreliable
+- [ ] Admin dashboard with **NextAuth** — protected view to list registrations,
+      inquiries, and subscribers
+
+**Rationale:** Airtable/Notion gives a non-technical admin a CMS-like interface
+without building one. Zapier bridges Stripe → email without code. See
+[Whitepaper §4](./docs/WHITEPAPER.md#4-опции-за-календар-на-събития).
+
+### Post-Launch Phase 3 — Custom Platform _(target: month 4–6, when events are monthly+)_
+
+> Goal: Full custom event system — no third-party ticketing dependency.
+
+- [ ] **Custom events module** in the app — database-driven event list, seat
+      capacity / availability tracking, Stripe Checkout Sessions via API
+- [ ] **QR code tickets** — generate unique QR per registration, email
+      automatically, scan at the door (simple mobile check-in page)
+- [ ] **Admin panel** — create/edit events, view registrations, export attendee
+      lists, check-in management
+- [ ] **CMS for blog** — migrate from static content to Sanity or Payload for
+      blog post management
+- [ ] Replace Cal.com embed with native booking system (if volume justifies)
+
+**Rationale:** Only worth the development investment when events run monthly or
+more frequently. Until then, Stripe Payment Links + Cal.com + Airtable cover
+the needs at a fraction of the cost. See
+[Whitepaper §3, Option C](./docs/WHITEPAPER.md#опция-в--собствена-система-вградена-в-приложението-stripe-api--база-данни).
+
+### Post-Launch Phase 4 — Enhancement Backlog
+
+Features with no firm timeline — pick up as needed:
+
 - [ ] Multi-event calendar with iCal export
 - [ ] Video testimonials embeds
 - [ ] PWA / offline support
 - [ ] Additional languages (Russian, German)
+- [ ] Ticket Tailor / Humanitix integration (if marketplace discoverability
+      becomes valuable — see [Whitepaper §2.1](./docs/WHITEPAPER.md#21-международни-платформи-за-продажба-на-билети))
 
 ---
 

@@ -209,12 +209,35 @@ JSON file writes are not atomic. For the launch volume this is acceptable. If co
 
 ## Future Architecture Evolution
 
+Based on the market research in [`WHITEPAPER.md`](./WHITEPAPER.md), the
+post-launch evolution follows a phased approach — starting with low-cost
+third-party tools and building custom systems only when volume justifies it.
+
 ```
-Phase 1-4 (now)          Post-launch
-─────────────            ──────────────
-JSON files      ──→      Supabase (Postgres)
-No auth         ──→      NextAuth (admin dashboard)
-No email        ──→      Resend (transactional email)
-No payments     ──→      Stripe (event payments)
-Static blog     ──→      Sanity / Payload CMS
+Launch (now)              Post-Launch P1           Post-Launch P2           Post-Launch P3
+─────────────             ─────────────────         ─────────────────         ─────────────────
+JSON files                Stripe Payment Links      Supabase (Postgres)       Custom events module
+No payments          ──→  Cal.com (1:1 booking) ──→ Airtable/Notion API  ──→  Stripe Checkout API
+No auth                   (no backend needed)       Zapier (email auto)       QR tickets + admin
+No email                                            NextAuth (admin)          Sanity/Payload CMS
+Static events                                       Resend (email)            Native booking system
 ```
+
+### Key decisions (from white paper)
+
+| Area | Launch | Post-Launch P1 | Post-Launch P2 | Post-Launch P3 |
+| --- | --- | --- | --- | --- |
+| **Payments** | Free registration form | Stripe Payment Links (zero code) | — | Stripe Checkout API (custom) |
+| **1:1 booking** | Contact form | Cal.com embed (free plan) | — | Native booking system |
+| **Event data** | Static (`lib/content.ts`) | — | Airtable/Notion API | Database (Supabase) |
+| **Email** | None | — | Zapier + Gmail/Resend | Resend (transactional) |
+| **Auth** | None | — | NextAuth (admin view) | Full admin panel |
+| **Blog** | Static content | — | — | Sanity / Payload CMS |
+
+> **Why phased?** Stripe Payment Links require zero development (just a URL per
+> event). Cal.com's free plan covers 1:1 bookings without backend work.
+> Airtable/Notion gives a non-technical admin a CMS without building one. The
+> custom platform (Phase 3) is only worth building when events run monthly+ and
+> the volume justifies the development investment. See
+> [`WHITEPAPER.md`](./WHITEPAPER.md) for the full market research and pricing
+> comparison.

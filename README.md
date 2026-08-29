@@ -134,6 +134,7 @@ See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) for the complete deployment gui
 | [docs/I18N.md](./docs/I18N.md) | Internationalization system guide |
 | [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) | Deployment & hosting guide |
 | [docs/COUNTDOWN.md](./docs/COUNTDOWN.md) | Launch countdown tracker to **10 November 2026** |
+| [docs/WHITEPAPER.md](./docs/WHITEPAPER.md) | Market research: ticketing, calendar, and booking options (BG) |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | How to contribute to the project |
 
 ## Roadmap & Launch Countdown
