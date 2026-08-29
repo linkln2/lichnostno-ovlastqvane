@@ -13,6 +13,7 @@ const navItems: { href: string; key: string }[] = [
   { href: "/services", key: "nav_services" },
   { href: "/events", key: "nav_events" },
   { href: "/testimonials", key: "nav_testimonials" },
+  { href: "/feed", key: "nav_feed" },
   { href: "/blog", key: "nav_blog" },
   { href: "/contact", key: "nav_contact" },
 ];

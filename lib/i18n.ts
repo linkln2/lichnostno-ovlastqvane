@@ -19,8 +19,42 @@ export const t: Dict = {
   nav_events: { bg: "Събития", en: "Events" },
   nav_testimonials: { bg: "Отзиви", en: "Testimonials" },
   nav_blog: { bg: "Блог", en: "Blog" },
+  nav_feed: { bg: "Видеа", en: "Videos" },
   nav_contact: { bg: "Контакти", en: "Contact" },
   nav_register: { bg: "Запиши се", en: "Register" },
+
+  // Countdown
+  countdown_label: { bg: "Стартираме на", en: "Launching on" },
+  countdown_days: { bg: "Дни", en: "Days" },
+  countdown_hours: { bg: "Часа", en: "Hours" },
+  countdown_minutes: { bg: "Минути", en: "Minutes" },
+  countdown_seconds: { bg: "Секунди", en: "Seconds" },
+  countdown_title: {
+    bg: "Обратното броене започна",
+    en: "The countdown has begun",
+  },
+  countdown_subtitle: {
+    bg: "Нещо могъщо се подготвя. Бъди сред първите, които ще го преживеят.",
+    en: "Something powerful is being prepared. Be among the first to experience it.",
+  },
+
+  // Video feed
+  feed_title: { bg: "Видеа", en: "Videos" },
+  feed_subtitle: {
+    bg: "Кратки видеа от семинарите, практиките и ежедневието.",
+    en: "Short videos from seminars, practices, and daily life.",
+  },
+  feed_tiktok: { bg: "TikTok", en: "TikTok" },
+  feed_facebook: { bg: "Facebook", en: "Facebook" },
+  feed_all: { bg: "Всички", en: "All" },
+  feed_empty: {
+    bg: "Все още няма добавени видеа. Очаквайте скоро!",
+    en: "No videos added yet. Coming soon!",
+  },
+  feed_follow_tiktok: {
+    bg: "Последвай ни в TikTok за още видеа",
+    en: "Follow us on TikTok for more videos",
+  },
 
   // Buttons / common
   btn_register: { bg: "Запиши се за събитието", en: "Register for event" },

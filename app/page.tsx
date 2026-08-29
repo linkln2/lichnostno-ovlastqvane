@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
+import CountdownTimer from "@/components/CountdownTimer";
 import { tr } from "@/lib/i18n";
 import {
   hero,
@@ -34,29 +35,54 @@ export default function HomePage() {
         }} />
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-block rounded-full border border-amber-200 bg-amber-100/60 px-4 py-1 text-xs font-medium text-amber-800">
+            {/* Logo with glow + float animation */}
+            <div className="relative mx-auto mb-8 h-28 w-28 sm:h-32 sm:w-32 animate-fade-in">
+              <div className="absolute inset-0 rounded-full bg-amber-400 blur-2xl animate-glow" />
+              <img
+                src="/logo.png"
+                alt={locale === "bg" ? "Личностно овластяване — лого" : "Personal Empowerment — logo"}
+                className="relative h-28 w-28 rounded-full object-cover shadow-lg ring-4 ring-white/60 animate-float sm:h-32 sm:w-32"
+              />
+            </div>
+            <span className="inline-block rounded-full border border-amber-200 bg-amber-100/60 px-4 py-1 text-xs font-medium text-amber-800 animate-fade-in-up delay-100">
               {tr("hero_badge", locale)}
             </span>
-            <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl sm:leading-tight">
+            <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl sm:leading-tight animate-fade-in-up delay-200">
               {hero.title[locale]}
             </h1>
-            <p className="mt-6 text-lg leading-relaxed text-stone-600">
+            <p className="mt-6 text-lg leading-relaxed text-stone-600 animate-fade-in-up delay-300">
               {hero.subtitle[locale]}
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row animate-fade-in-up delay-400">
               <Link
                 href="/events"
-                className="w-full rounded-full bg-amber-600 px-6 py-3 text-center font-semibold text-white shadow-sm transition-colors hover:bg-amber-700 sm:w-auto"
+                className="w-full rounded-full bg-amber-600 px-6 py-3 text-center font-semibold text-white shadow-sm transition-all hover:bg-amber-700 hover:shadow-md sm:w-auto"
               >
                 {tr("btn_register", locale)}
               </Link>
               <Link
                 href="/contact"
-                className="w-full rounded-full border border-stone-300 bg-white px-6 py-3 text-center font-semibold text-stone-700 transition-colors hover:bg-stone-100 sm:w-auto"
+                className="w-full rounded-full border border-stone-300 bg-white px-6 py-3 text-center font-semibold text-stone-700 transition-all hover:bg-stone-100 hover:shadow-sm sm:w-auto"
               >
                 {tr("hero_cta_secondary", locale)}
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Countdown to launch */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 py-12 sm:py-16">
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: "radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)",
+          backgroundSize: "28px 28px",
+        }} />
+        <div className="relative mx-auto max-w-4xl px-4 sm:px-6">
+          <h2 className="text-center text-xl font-bold text-white sm:text-2xl">
+            {tr("countdown_title", locale)}
+          </h2>
+          <div className="mt-6">
+            <CountdownTimer />
           </div>
         </div>
       </section>

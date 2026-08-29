@@ -432,3 +432,79 @@ export function formatDateRange(start: string, end: string, locale: Locale): str
 export function localized(name: Bi, locale: Locale): string {
   return name[locale];
 }
+
+// ─── Launch countdown target ────────────────────────────────────────────────
+// Format: "YYYY-MM-DDTHH:mm:ss" in local time
+export const launchDate = "2026-11-10T10:00:00";
+
+// ─── Video feed ──────────────────────────────────────────────────────────────
+// Add videos here. For TikTok, use the full video URL and extract the numeric
+// video ID from it (the long number in the URL path).
+// For Facebook, use the full video/post URL.
+// To add more videos, simply append objects to this array.
+
+export type VideoItem = {
+  id: string; // unique internal id
+  platform: "tiktok" | "facebook";
+  url: string; // full URL to the video/post
+  videoId?: string; // TikTok numeric video ID (extracted from URL)
+  caption: Bi;
+  date: string; // ISO date for sorting
+};
+
+export const videos: VideoItem[] = [
+  // ── TikTok videos (@azraltar) ──
+  // Replace these with real video URLs from https://www.tiktok.com/@azraltar
+  // Example format: https://www.tiktok.com/@azraltar/video/7298765432109876543
+  {
+    id: "tt-1",
+    platform: "tiktok",
+    url: "https://www.tiktok.com/@azraltar/video/7298765432109876543",
+    videoId: "7298765432109876543",
+    caption: {
+      bg: "Какво е личностно овластяване? Кратко обяснение.",
+      en: "What is personal empowerment? A short explanation.",
+    },
+    date: "2025-08-20",
+  },
+  {
+    id: "tt-2",
+    platform: "tiktok",
+    url: "https://www.tiktok.com/@azraltar/video/7298765432109876544",
+    videoId: "7298765432109876544",
+    caption: {
+      bg: "Три практики за ежедневно овластяване.",
+      en: "Three practices for daily empowerment.",
+    },
+    date: "2025-08-15",
+  },
+  {
+    id: "tt-3",
+    platform: "tiktok",
+    url: "https://www.tiktok.com/@azraltar/video/7298765432109876545",
+    videoId: "7298765432109876545",
+    caption: {
+      bg: "Кои са „културните инженери“?",
+      en: "Who are the \"cultural engineers\"?",
+    },
+    date: "2025-08-10",
+  },
+  // ── Facebook videos ──
+  // Replace with real Facebook video/post URLs
+  {
+    id: "fb-1",
+    platform: "facebook",
+    url: "https://www.facebook.com/profile.php?id=61562005563695",
+    caption: {
+      bg: "Семинарът в Приморско — моменти от събитието.",
+      en: "The Primorsko seminar — moments from the event.",
+    },
+    date: "2025-08-25",
+  },
+];
+
+export function getVideosByPlatform(platform: "all" | "tiktok" | "facebook"): VideoItem[] {
+  const sorted = [...videos].sort((a, b) => b.date.localeCompare(a.date));
+  if (platform === "all") return sorted;
+  return sorted.filter((v) => v.platform === platform);
+}
