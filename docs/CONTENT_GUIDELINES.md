@@ -64,6 +64,17 @@ The site is **fully bilingual** — every piece of user-facing content exists in
 | **Blog** | Articles: title, excerpt, body, date, author, image |
 | **Contact** | Contact info (email, phone, social), form labels, success message |
 
+### Contact details (verified)
+
+| Field | Value |
+| --- | --- |
+| Email | `elegiaood@gmail.com` |
+| Phone | `087 944 7749` (intl: `+359 87 944 7749`) |
+| Location | Бургас 8000, България / Burgas 8000, Bulgaria |
+| Facebook | `https://www.facebook.com/profile.php?id=61562005563695` |
+| Instagram | `@lichnostno_ovlastyavane` |
+| TikTok | `@azraltar` |
+
 ---
 
 ## Key Content (From Public Sources)

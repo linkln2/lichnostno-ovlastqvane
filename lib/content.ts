@@ -8,10 +8,13 @@ export type BiList = { bg: string[]; en: string[] };
 export const site = {
   name: "Личностно овластяване",
   nameEn: "Personal Empowerment",
-  email: "info@lichnostno-ovlastqvane.bg",
-  phone: "+359 88 888 8888",
-  city: { bg: "Бургас, България", en: "Burgas, Bulgaria" },
+  email: "elegiaood@gmail.com",
+  phone: "+359 87 944 7749",
+  phoneDisplay: "087 944 7749",
+  city: { bg: "Бургас 8000, България", en: "Burgas 8000, Bulgaria" },
   facebook: "https://www.facebook.com/profile.php?id=61562005563695",
+  instagram: "https://www.instagram.com/lichnostno_ovlastyavane",
+  tiktok: "https://www.tiktok.com/@azraltar",
 };
 
 export const hero: {

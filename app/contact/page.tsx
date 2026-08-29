@@ -69,7 +69,7 @@ export default function ContactPage() {
                 <div>
                   <div className="text-sm text-stone-500">{tr("form_phone", locale)}</div>
                   <a href={`tel:${site.phone.replace(/\s/g, "")}`} className="font-medium text-stone-900 hover:text-amber-700">
-                    {site.phone}
+                    {site.phoneDisplay}
                   </a>
                 </div>
               </li>
@@ -91,6 +91,34 @@ export default function ContactPage() {
                     className="font-medium text-stone-900 hover:text-amber-700"
                   >
                     {locale === "bg" ? "Страницата ни" : "Our page"}
+                  </a>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-xl">📷</span>
+                <div>
+                  <div className="text-sm text-stone-500">Instagram</div>
+                  <a
+                    href={site.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-stone-900 hover:text-amber-700"
+                  >
+                    @lichnostno_ovlastyavane
+                  </a>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-xl">🎵</span>
+                <div>
+                  <div className="text-sm text-stone-500">TikTok</div>
+                  <a
+                    href={site.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-stone-900 hover:text-amber-700"
+                  >
+                    @azraltar
                   </a>
                 </div>
               </li>
