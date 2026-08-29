@@ -30,6 +30,13 @@ export default function FacebookEmbed({
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    // Facebook SDK requires a fb-root div
+    if (!document.getElementById("fb-root")) {
+      const fbRoot = document.createElement("div");
+      fbRoot.id = "fb-root";
+      document.body.prepend(fbRoot);
+    }
+
     const sdkId = "facebook-jssdk";
     if (!document.getElementById(sdkId)) {
       const script = document.createElement("script");

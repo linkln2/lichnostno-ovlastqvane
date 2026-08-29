@@ -34,38 +34,41 @@ export default function HomePage() {
           backgroundSize: "32px 32px",
         }} />
         <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="flex flex-col items-center gap-8 sm:gap-10 lg:flex-row lg:items-center lg:gap-14">
             {/* Logo with glow + float animation */}
-            <div className="relative mx-auto mb-8 h-28 w-28 sm:h-32 sm:w-32 animate-fade-in">
-              <div className="absolute inset-0 rounded-full bg-amber-400 blur-2xl animate-glow" />
+            <div className="relative h-40 w-40 shrink-0 animate-fade-in sm:h-52 sm:w-52 lg:h-72 lg:w-72">
+              <div className="absolute inset-0 rounded-full bg-amber-400 blur-3xl animate-glow" />
               <img
                 src="/logo.png"
                 alt={locale === "bg" ? "Личностно овластяване — лого" : "Personal Empowerment — logo"}
-                className="relative h-28 w-28 rounded-full object-cover shadow-lg ring-4 ring-white/60 animate-float sm:h-32 sm:w-32"
+                className="relative h-40 w-40 rounded-full object-cover shadow-xl ring-4 ring-white/60 animate-float sm:h-52 sm:w-52 lg:h-72 lg:w-72"
               />
             </div>
-            <span className="inline-block rounded-full border border-amber-200 bg-amber-100/60 px-4 py-1 text-xs font-medium text-amber-800 animate-fade-in-up delay-100">
-              {tr("hero_badge", locale)}
-            </span>
-            <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl sm:leading-tight animate-fade-in-up delay-200">
-              {hero.title[locale]}
-            </h1>
-            <p className="mt-6 text-lg leading-relaxed text-stone-600 animate-fade-in-up delay-300">
-              {hero.subtitle[locale]}
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row animate-fade-in-up delay-400">
-              <Link
-                href="/events"
-                className="w-full rounded-full bg-amber-600 px-6 py-3 text-center font-semibold text-white shadow-sm transition-all hover:bg-amber-700 hover:shadow-md sm:w-auto"
-              >
-                {tr("btn_register", locale)}
-              </Link>
-              <Link
-                href="/contact"
-                className="w-full rounded-full border border-stone-300 bg-white px-6 py-3 text-center font-semibold text-stone-700 transition-all hover:bg-stone-100 hover:shadow-sm sm:w-auto"
-              >
-                {tr("hero_cta_secondary", locale)}
-              </Link>
+            {/* Text content */}
+            <div className="max-w-2xl text-center lg:text-left">
+              <span className="inline-block rounded-full border border-amber-200 bg-amber-100/60 px-4 py-1 text-xs font-medium text-amber-800 animate-fade-in-up delay-100">
+                {tr("hero_badge", locale)}
+              </span>
+              <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl sm:leading-tight lg:text-6xl lg:leading-[1.1] animate-fade-in-up delay-200">
+                {hero.title[locale]}
+              </h1>
+              <p className="mt-6 text-lg leading-relaxed text-stone-600 animate-fade-in-up delay-300">
+                {hero.subtitle[locale]}
+              </p>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start animate-fade-in-up delay-400">
+                <Link
+                  href="/events"
+                  className="w-full rounded-full bg-amber-600 px-6 py-3 text-center font-semibold text-white shadow-sm transition-all hover:bg-amber-700 hover:shadow-md sm:w-auto"
+                >
+                  {tr("btn_register", locale)}
+                </Link>
+                <Link
+                  href="/contact"
+                  className="w-full rounded-full border border-stone-300 bg-white px-6 py-3 text-center font-semibold text-stone-700 transition-all hover:bg-stone-100 hover:shadow-sm sm:w-auto"
+                >
+                  {tr("hero_cta_secondary", locale)}
+                </Link>
+              </div>
             </div>
           </div>
         </div>

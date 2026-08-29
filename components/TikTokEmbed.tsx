@@ -17,7 +17,8 @@ type TikTokEmbedProps = {
  * - mode="video": Shows a single video embed. Uses data-video-id.
  *
  * The official TikTok embed script (embed.js) processes blockquote.tiktok-embed
- * elements on the page.
+ * elements on the page. For dynamic content (client-side navigation), we
+ * re-inject a fresh script element each time to force re-processing.
  */
 export default function TikTokEmbed({
   uniqueId,
@@ -29,33 +30,36 @@ export default function TikTokEmbed({
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const scriptId = "tiktok-embed-script";
-    let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+    setLoaded(false);
 
-    if (!script) {
-      script = document.createElement("script");
-      script.id = scriptId;
-      script.src = "https://www.tiktok.com/embed.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
+    // Remove any existing TikTok embed script so the new one re-processes
+    const existing = document.getElementById("tiktok-embed-script");
+    if (existing) existing.remove();
 
-    // Poll for rendered iframe/content
+    // Inject a fresh script — the browser will execute it and scan for
+    // .tiktok-embed elements, replacing them with iframes.
+    const script = document.createElement("script");
+    script.id = "tiktok-embed-script";
+    script.src = "https://www.tiktok.com/embed.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Poll for rendered iframe or processed embed
     const checkInterval = setInterval(() => {
-      const iframe = containerRef.current?.querySelector("iframe");
-      const embedContent = containerRef.current?.querySelector(".tiktok-embed");
-      if (iframe || (embedContent && embedContent.children.length > 1)) {
+      const container = containerRef.current;
+      if (!container) return;
+      const iframe = container.querySelector("iframe");
+      const embed = container.querySelector(".tiktok-embed");
+      // Creator embed: script adds wrapper divs around the blockquote
+      // Video embed: script replaces blockquote with iframe
+      if (iframe || (embed && embed.children.length > 1)) {
         setLoaded(true);
         clearInterval(checkInterval);
       }
-    }, 600);
-
-    // Re-trigger script execution for dynamic content
-    const clone = script.cloneNode(true) as HTMLScriptElement;
-    script.replaceWith(clone);
+    }, 500);
 
     // Timeout fallback — show content even if detection fails
-    const timeout = setTimeout(() => setLoaded(true), 5000);
+    const timeout = setTimeout(() => setLoaded(true), 6000);
 
     return () => {
       clearInterval(checkInterval);
@@ -63,7 +67,11 @@ export default function TikTokEmbed({
     };
   }, [uniqueId, mode, videoId]);
 
-  const cite = url || (mode === "creator" ? `https://www.tiktok.com/@${uniqueId}` : `https://www.tiktok.com/@${uniqueId}/video/${videoId}`);
+  const cite =
+    url ||
+    (mode === "creator"
+      ? `https://www.tiktok.com/@${uniqueId}`
+      : `https://www.tiktok.com/@${uniqueId}/video/${videoId}`);
 
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden">
