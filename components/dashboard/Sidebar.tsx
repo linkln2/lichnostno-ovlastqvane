@@ -8,7 +8,6 @@ import {
   Package,
   Receipt,
   Settings,
-  Sparkles,
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -36,14 +35,16 @@ export function Sidebar({
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-white/60 bg-white/45 backdrop-blur-xl md:flex">
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-700 text-white">
-          <Sparkles className="h-5 w-5" />
-        </div>
+        <img
+          src="/logo.png"
+          alt="Logo"
+          className="h-9 w-9 rounded-full object-cover ring-2 ring-white/60"
+        />
         <span
           className="text-lg font-semibold tracking-tight text-zinc-900"
           style={{ fontFamily: "var(--font-fraunces)" }}
         >
-          Studio
+          Dashboard
         </span>
       </div>
 

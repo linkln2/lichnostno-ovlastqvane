@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Badge } from "@/components/ui/badge";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
+import { Modal, Field, inputClass, selectClass, FormActions } from "./Modal";
 import { cn } from "@/lib/utils";
 
 // ─── Shared helpers ──────────────────────────────────────────────
@@ -12,6 +14,9 @@ function useFetch<T>(url: string) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,9 +41,9 @@ function useFetch<T>(url: string) {
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [url, reloadKey]);
 
-  return { data, loading, error };
+  return { data, loading, error, reload };
 }
 
 function LoadingState() {
@@ -58,17 +63,15 @@ function LoadingState() {
 function ErrorState({ message }: { message: string }) {
   return (
     <GlassCard className="p-12">
-      <p className="text-center text-sm text-rose-500">
-        Failed to load: {message}
-      </p>
+      <p className="text-center text-sm text-rose-500">Failed to load: {message}</p>
     </GlassCard>
   );
 }
 
-function EmptyState({ message }: { message: string }) {
+function EmptyState({ message, onCreate, createLabel }: { message: string; onCreate?: () => void; createLabel?: string }) {
   return (
     <GlassCard className="p-12">
-      <div className="flex flex-col items-center gap-2 text-center">
+      <div className="flex flex-col items-center gap-4 text-center">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-zinc-400">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -76,153 +79,184 @@ function EmptyState({ message }: { message: string }) {
           </svg>
         </div>
         <p className="text-sm text-zinc-400">{message}</p>
+        {onCreate && (
+          <button
+            onClick={onCreate}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-800"
+          >
+            <Plus className="h-4 w-4" />
+            {createLabel || "Create"}
+          </button>
+        )}
       </div>
     </GlassCard>
   );
 }
 
-function PageHeader({ title, subtitle, count }: { title: string; subtitle: string; count?: number }) {
+function PageHeader({
+  title,
+  subtitle,
+  count,
+  onCreate,
+  createLabel,
+}: {
+  title: string;
+  subtitle: string;
+  count?: number;
+  onCreate?: () => void;
+  createLabel?: string;
+}) {
   return (
     <div className="mb-6 flex items-end justify-between">
       <div>
         <h2 className="text-lg font-semibold text-zinc-900">{title}</h2>
         <p className="text-sm text-zinc-500">{subtitle}</p>
       </div>
-      {count !== undefined && (
-        <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-          {count} total
-        </span>
-      )}
+      <div className="flex items-center gap-3">
+        {count !== undefined && (
+          <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+            {count} total
+          </span>
+        )}
+        {onCreate && (
+          <button
+            onClick={onCreate}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-800 outline-none focus-visible:ring-2 focus-visible:ring-indigo-700 focus-visible:ring-offset-2"
+          >
+            <Plus className="h-4 w-4" />
+            {createLabel || "Create"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RowActions({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={onEdit}
+        className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-indigo-50 hover:text-indigo-700 outline-none focus-visible:ring-2 focus-visible:ring-indigo-700"
+        aria-label="Edit"
+      >
+        <Pencil className="h-4 w-4" />
+      </button>
+      <button
+        onClick={onDelete}
+        className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-rose-50 hover:text-rose-600 outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
+        aria-label="Delete"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
     </div>
   );
 }
 
 function fmtDate(iso: string) {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 function fmtPrice(cents: number, currency = "eur") {
   const symbols: Record<string, string> = { eur: "€", bgn: "лв", usd: "$" };
-  const sym = symbols[currency] || "€";
-  return `${sym}${(cents / 100).toFixed(2)}`;
+  return `${symbols[currency] || "€"}${(cents / 100).toFixed(2)}`;
 }
 
-// ─── Events tab ──────────────────────────────────────────────────
-
-const eventStatusColors: Record<string, "paid" | "pending" | "refunded"> = {
-  upcoming: "paid",
-  past: "refunded",
-  cancelled: "pending",
-};
-
-export function EventsTab() {
-  const { data, loading, error } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/events");
-
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-
-  return (
-    <div>
-      <PageHeader title="Events" subtitle="Manage seminars and workshops" count={data?.totalDocs} />
-      {data?.docs.length === 0 ? (
-        <EmptyState message="No events yet. Create one in the Payload admin." />
-      ) : (
-        <GlassCard>
-          <Table>
-            <THead>
-              <TR className="hover:bg-transparent">
-                <TH>Title</TH>
-                <TH>Location</TH>
-                <TH>Starts</TH>
-                <TH>Capacity</TH>
-                <TH>Status</TH>
-              </TR>
-            </THead>
-            <TBody>
-              {data?.docs.map((e) => (
-                <TR key={e.id}>
-                  <TD className="font-medium text-zinc-900">{e.title}</TD>
-                  <TD className="text-zinc-600">{e.location}</TD>
-                  <TD className="font-mono text-xs text-zinc-500">{fmtDate(e.startsAt)}</TD>
-                  <TD className="font-mono text-zinc-700">{e.capacity}</TD>
-                  <TD><Badge variant={eventStatusColors[e.status] || "default"}>{e.status}</Badge></TD>
-                </TR>
-              ))}
-            </TBody>
-          </Table>
-        </GlassCard>
-      )}
-    </div>
-  );
-}
-
-// ─── Blog tab ────────────────────────────────────────────────────
-
-const blogStatusColors: Record<string, "paid" | "pending" | "refunded"> = {
-  published: "paid",
-  draft: "pending",
-  scheduled: "pending",
-};
-
-export function BlogTab() {
-  const { data, loading, error } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/blog-posts");
-
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-
-  return (
-    <div>
-      <PageHeader title="Blog" subtitle="Published posts and drafts" count={data?.totalDocs} />
-      {data?.docs.length === 0 ? (
-        <EmptyState message="No blog posts yet. Create one in the Payload admin." />
-      ) : (
-        <GlassCard>
-          <Table>
-            <THead>
-              <TR className="hover:bg-transparent">
-                <TH>Title</TH>
-                <TH>Excerpt</TH>
-                <TH>Publish date</TH>
-                <TH>Visibility</TH>
-                <TH>Status</TH>
-              </TR>
-            </THead>
-            <TBody>
-              {data?.docs.map((p) => (
-                <TR key={p.id}>
-                  <TD className="font-medium text-zinc-900">{p.title}</TD>
-                  <TD className="max-w-xs truncate text-zinc-600">{p.excerpt || "—"}</TD>
-                  <TD className="font-mono text-xs text-zinc-500">{fmtDate(p.publishAt)}</TD>
-                  <TD className="text-zinc-600">{p.visibility}</TD>
-                  <TD><Badge variant={blogStatusColors[p.status] || "default"}>{p.status}</Badge></TD>
-                </TR>
-              ))}
-            </TBody>
-          </Table>
-        </GlassCard>
-      )}
-    </div>
-  );
+async function apiCall(url: string, method: string, body?: unknown) {
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return res.json();
 }
 
 // ─── Products tab ────────────────────────────────────────────────
 
+const productStatusVariant: Record<string, "paid" | "pending" | "refunded"> = {
+  published: "paid",
+  draft: "pending",
+  archived: "refunded",
+};
+
 export function ProductsTab() {
-  const { data, loading, error } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/products");
+  const { data, loading, error, reload } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/products");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    name: "",
+    priceCents: "",
+    category: "digital",
+    productType: "digital",
+    status: "draft",
+    inventory: "0",
+  });
+
+  function openCreate() {
+    setEditing(null);
+    setForm({ name: "", priceCents: "", category: "digital", productType: "digital", status: "draft", inventory: "0" });
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  function openEdit(p: any) {
+    setEditing(p);
+    setForm({
+      name: p.name || "",
+      priceCents: String(p.priceCents ?? ""),
+      category: p.category || "digital",
+      productType: p.productType || "digital",
+      status: p.status || "draft",
+      inventory: String(p.inventory ?? "0"),
+    });
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setFormError(null);
+    try {
+      if (editing) {
+        await apiCall(`/api/dashboard/products/${editing.id}`, "PATCH", form);
+      } else {
+        await apiCall("/api/dashboard/products", "POST", form);
+      }
+      setModalOpen(false);
+      reload();
+    } catch (err) {
+      setFormError(String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(p: any) {
+    if (!confirm(`Delete "${p.name}"?`)) return;
+    try {
+      await apiCall(`/api/dashboard/products/${p.id}`, "DELETE");
+      reload();
+    } catch (err) {
+      alert(`Delete failed: ${err}`);
+    }
+  }
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
 
   return (
     <div>
-      <PageHeader title="Products" subtitle="Shop inventory and digital goods" count={data?.totalDocs} />
+      <PageHeader title="Products" subtitle="Shop inventory and digital goods" count={data?.totalDocs} onCreate={openCreate} createLabel="New product" />
       {data?.docs.length === 0 ? (
-        <EmptyState message="No products yet. Create one in the Payload admin." />
+        <EmptyState message="No products yet." onCreate={openCreate} createLabel="New product" />
       ) : (
         <GlassCard>
           <Table>
@@ -234,6 +268,7 @@ export function ProductsTab() {
                 <TH className="text-right">Price</TH>
                 <TH>Inventory</TH>
                 <TH>Status</TH>
+                <TH></TH>
               </TR>
             </THead>
             <TBody>
@@ -244,18 +279,333 @@ export function ProductsTab() {
                   <TD className="text-zinc-600">{p.productType}</TD>
                   <TD className="text-right font-mono font-medium text-zinc-900">{fmtPrice(p.priceCents)}</TD>
                   <TD className="font-mono text-zinc-700">{p.productType === "physical" ? p.inventory : "—"}</TD>
-                  <TD><Badge variant={p.status === "published" ? "paid" : p.status === "draft" ? "pending" : "refunded"}>{p.status}</Badge></TD>
+                  <TD><Badge variant={productStatusVariant[p.status] || "default"}>{p.status}</Badge></TD>
+                  <TD><RowActions onEdit={() => openEdit(p)} onDelete={() => handleDelete(p)} /></TD>
                 </TR>
               ))}
             </TBody>
           </Table>
         </GlassCard>
       )}
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit product" : "New product"}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Field label="Name"><input className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
+          <Field label="Price (cents)"><input type="number" className={inputClass} value={form.priceCents} onChange={(e) => setForm({ ...form, priceCents: e.target.value })} required placeholder="e.g. 1900 = €19.00" /></Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Category">
+              <select className={selectClass} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                <option value="digital">Digital</option>
+                <option value="physical">Physical</option>
+                <option value="merchandise">Merchandise</option>
+                <option value="course">Course</option>
+              </select>
+            </Field>
+            <Field label="Product type">
+              <select className={selectClass} value={form.productType} onChange={(e) => setForm({ ...form, productType: e.target.value })}>
+                <option value="digital">Digital</option>
+                <option value="physical">Physical</option>
+              </select>
+            </Field>
+          </div>
+          {form.productType === "physical" && (
+            <Field label="Inventory"><input type="number" className={inputClass} value={form.inventory} onChange={(e) => setForm({ ...form, inventory: e.target.value })} /></Field>
+          )}
+          <Field label="Status">
+            <select className={selectClass} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+            </select>
+          </Field>
+          {formError && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{formError}</p>}
+          <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update" : "Create"} />
+        </form>
+      </Modal>
     </div>
   );
 }
 
-// ─── Orders tab ──────────────────────────────────────────────────
+// ─── Events tab ──────────────────────────────────────────────────
+
+const eventStatusVariant: Record<string, "paid" | "pending" | "refunded"> = {
+  upcoming: "paid",
+  past: "refunded",
+  cancelled: "pending",
+};
+
+export function EventsTab() {
+  const { data, loading, error, reload } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/events");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    titleBg: "", titleEn: "", slug: "", locationBg: "", locationEn: "",
+    startsAt: "", endsAt: "", capacity: "0", status: "upcoming",
+  });
+
+  function openCreate() {
+    setEditing(null);
+    setForm({ titleBg: "", titleEn: "", slug: "", locationBg: "", locationEn: "", startsAt: "", endsAt: "", capacity: "0", status: "upcoming" });
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  function openEdit(e: any) {
+    setEditing(e);
+    setForm({
+      titleBg: "", titleEn: e.title || "", slug: e.slug || "",
+      locationBg: "", locationEn: e.location || "",
+      startsAt: e.startsAt ? e.startsAt.slice(0, 16) : "",
+      endsAt: e.endsAt ? e.endsAt.slice(0, 16) : "",
+      capacity: String(e.capacity ?? "0"),
+      status: e.status || "upcoming",
+    });
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setFormError(null);
+    try {
+      const payload = { ...form };
+      if (editing) {
+        await apiCall(`/api/dashboard/events/${editing.id}`, "PATCH", payload);
+      } else {
+        await apiCall("/api/dashboard/events", "POST", payload);
+      }
+      setModalOpen(false);
+      reload();
+    } catch (err) {
+      setFormError(String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(e: any) {
+    if (!confirm(`Delete "${e.title}"?`)) return;
+    try {
+      await apiCall(`/api/dashboard/events/${e.id}`, "DELETE");
+      reload();
+    } catch (err) {
+      alert(`Delete failed: ${err}`);
+    }
+  }
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
+
+  return (
+    <div>
+      <PageHeader title="Events" subtitle="Seminars and workshops" count={data?.totalDocs} onCreate={openCreate} createLabel="New event" />
+      {data?.docs.length === 0 ? (
+        <EmptyState message="No events yet." onCreate={openCreate} createLabel="New event" />
+      ) : (
+        <GlassCard>
+          <Table>
+            <THead>
+              <TR className="hover:bg-transparent">
+                <TH>Title</TH>
+                <TH>Location</TH>
+                <TH>Starts</TH>
+                <TH>Capacity</TH>
+                <TH>Status</TH>
+                <TH></TH>
+              </TR>
+            </THead>
+            <TBody>
+              {data?.docs.map((e) => (
+                <TR key={e.id}>
+                  <TD className="font-medium text-zinc-900">{e.title}</TD>
+                  <TD className="text-zinc-600">{e.location}</TD>
+                  <TD className="font-mono text-xs text-zinc-500">{fmtDate(e.startsAt)}</TD>
+                  <TD className="font-mono text-zinc-700">{e.capacity}</TD>
+                  <TD><Badge variant={eventStatusVariant[e.status] || "default"}>{e.status}</Badge></TD>
+                  <TD><RowActions onEdit={() => openEdit(e)} onDelete={() => handleDelete(e)} /></TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        </GlassCard>
+      )}
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit event" : "New event"} className="max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Title (BG)"><input className={inputClass} value={form.titleBg} onChange={(e) => setForm({ ...form, titleBg: e.target.value })} placeholder="Български" /></Field>
+            <Field label="Title (EN)"><input className={inputClass} value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} required placeholder="English" /></Field>
+          </div>
+          <Field label="Slug"><input className={inputClass} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required placeholder="my-event-2026" /></Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Location (BG)"><input className={inputClass} value={form.locationBg} onChange={(e) => setForm({ ...form, locationBg: e.target.value })} /></Field>
+            <Field label="Location (EN)"><input className={inputClass} value={form.locationEn} onChange={(e) => setForm({ ...form, locationEn: e.target.value })} /></Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Starts at"><input type="datetime-local" className={inputClass} value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })} required /></Field>
+            <Field label="Ends at"><input type="datetime-local" className={inputClass} value={form.endsAt} onChange={(e) => setForm({ ...form, endsAt: e.target.value })} /></Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Capacity"><input type="number" className={inputClass} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} required /></Field>
+            <Field label="Status">
+              <select className={selectClass} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                <option value="upcoming">Upcoming</option>
+                <option value="past">Past</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </Field>
+          </div>
+          {formError && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{formError}</p>}
+          <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update" : "Create"} />
+        </form>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── Blog tab ────────────────────────────────────────────────────
+
+const blogStatusVariant: Record<string, "paid" | "pending" | "refunded"> = {
+  published: "paid",
+  draft: "pending",
+  scheduled: "pending",
+};
+
+export function BlogTab() {
+  const { data, loading, error, reload } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/blog-posts");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    titleBg: "", titleEn: "", slug: "", excerptBg: "", excerptEn: "",
+    status: "draft", visibility: "public", publishAt: "",
+  });
+
+  function openCreate() {
+    setEditing(null);
+    setForm({ titleBg: "", titleEn: "", slug: "", excerptBg: "", excerptEn: "", status: "draft", visibility: "public", publishAt: "" });
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  function openEdit(p: any) {
+    setEditing(p);
+    setForm({
+      titleBg: "", titleEn: p.title || "", slug: p.slug || "",
+      excerptBg: "", excerptEn: p.excerpt || "",
+      status: p.status || "draft", visibility: p.visibility || "public",
+      publishAt: p.publishAt ? p.publishAt.slice(0, 16) : "",
+    });
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setFormError(null);
+    try {
+      if (editing) {
+        await apiCall(`/api/dashboard/blog-posts/${editing.id}`, "PATCH", form);
+      } else {
+        await apiCall("/api/dashboard/blog-posts", "POST", form);
+      }
+      setModalOpen(false);
+      reload();
+    } catch (err) {
+      setFormError(String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(p: any) {
+    if (!confirm(`Delete "${p.title}"?`)) return;
+    try {
+      await apiCall(`/api/dashboard/blog-posts/${p.id}`, "DELETE");
+      reload();
+    } catch (err) {
+      alert(`Delete failed: ${err}`);
+    }
+  }
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
+
+  return (
+    <div>
+      <PageHeader title="Blog" subtitle="Published posts and drafts" count={data?.totalDocs} onCreate={openCreate} createLabel="New post" />
+      {data?.docs.length === 0 ? (
+        <EmptyState message="No blog posts yet." onCreate={openCreate} createLabel="New post" />
+      ) : (
+        <GlassCard>
+          <Table>
+            <THead>
+              <TR className="hover:bg-transparent">
+                <TH>Title</TH>
+                <TH>Excerpt</TH>
+                <TH>Publish date</TH>
+                <TH>Visibility</TH>
+                <TH>Status</TH>
+                <TH></TH>
+              </TR>
+            </THead>
+            <TBody>
+              {data?.docs.map((p) => (
+                <TR key={p.id}>
+                  <TD className="font-medium text-zinc-900">{p.title}</TD>
+                  <TD className="max-w-xs truncate text-zinc-600">{p.excerpt || "—"}</TD>
+                  <TD className="font-mono text-xs text-zinc-500">{fmtDate(p.publishAt)}</TD>
+                  <TD className="text-zinc-600">{p.visibility}</TD>
+                  <TD><Badge variant={blogStatusVariant[p.status] || "default"}>{p.status}</Badge></TD>
+                  <TD><RowActions onEdit={() => openEdit(p)} onDelete={() => handleDelete(p)} /></TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        </GlassCard>
+      )}
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit post" : "New post"} className="max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Title (BG)"><input className={inputClass} value={form.titleBg} onChange={(e) => setForm({ ...form, titleBg: e.target.value })} /></Field>
+            <Field label="Title (EN)"><input className={inputClass} value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} required /></Field>
+          </div>
+          <Field label="Slug"><input className={inputClass} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required placeholder="my-post" /></Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Excerpt (BG)"><textarea className={inputClass} rows={2} value={form.excerptBg} onChange={(e) => setForm({ ...form, excerptBg: e.target.value })} /></Field>
+            <Field label="Excerpt (EN)"><textarea className={inputClass} rows={2} value={form.excerptEn} onChange={(e) => setForm({ ...form, excerptEn: e.target.value })} /></Field>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <Field label="Status">
+              <select className={selectClass} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="scheduled">Scheduled</option>
+              </select>
+            </Field>
+            <Field label="Visibility">
+              <select className={selectClass} value={form.visibility} onChange={(e) => setForm({ ...form, visibility: e.target.value })}>
+                <option value="public">Public</option>
+                <option value="members-only">Members only</option>
+              </select>
+            </Field>
+            <Field label="Publish at"><input type="datetime-local" className={inputClass} value={form.publishAt} onChange={(e) => setForm({ ...form, publishAt: e.target.value })} /></Field>
+          </div>
+          {formError && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{formError}</p>}
+          <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update" : "Create"} />
+        </form>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── Orders tab (read-only) ──────────────────────────────────────
 
 const orderStatusVariant: Record<string, "paid" | "pending" | "refunded"> = {
   paid: "paid",
@@ -291,9 +641,7 @@ export function OrdersTab() {
               {data?.docs.map((o) => (
                 <TR key={o.id}>
                   <TD className="font-mono text-xs text-zinc-500">#{o.id}</TD>
-                  <TD className="text-zinc-600">
-                    {o.items?.length || 0} item{(o.items?.length || 0) !== 1 ? "s" : ""}
-                  </TD>
+                  <TD className="text-zinc-600">{o.items?.length || 0} item{(o.items?.length || 0) !== 1 ? "s" : ""}</TD>
                   <TD className="text-right font-mono font-medium text-zinc-900">{fmtPrice(o.totalCents, o.currency)}</TD>
                   <TD className="font-mono text-xs text-zinc-500">{fmtDate(o.createdAt)}</TD>
                   <TD><Badge variant={orderStatusVariant[o.status] || "default"}>{o.status}</Badge></TD>
@@ -307,7 +655,7 @@ export function OrdersTab() {
   );
 }
 
-// ─── Subscribers tab ─────────────────────────────────────────────
+// ─── Subscribers tab (with tiers management) ─────────────────────
 
 const subStatusVariant: Record<string, "paid" | "pending" | "refunded"> = {
   active: "paid",
@@ -318,44 +666,162 @@ const subStatusVariant: Record<string, "paid" | "pending" | "refunded"> = {
 };
 
 export function SubscribersTab() {
-  const { data, loading, error } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/subscriptions");
+  const { data: subData, loading: subLoading, error: subError } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/subscriptions");
+  const { data: tierData, loading: tierLoading, error: tierError, reload: reloadTiers } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/subscription-tiers");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [perksInput, setPerksInput] = useState("");
+  const [form, setForm] = useState({
+    name: "", priceCents: "", interval: "month", stripePriceId: "",
+  });
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
+  function openCreateTier() {
+    setEditing(null);
+    setForm({ name: "", priceCents: "", interval: "month", stripePriceId: "" });
+    setPerksInput("");
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  function openEditTier(t: any) {
+    setEditing(t);
+    setForm({
+      name: t.name || "",
+      priceCents: String(t.priceCents ?? ""),
+      interval: t.interval || "month",
+      stripePriceId: t.stripePriceId || "",
+    });
+    setPerksInput((t.perks || []).map((p: any) => p.perk).join("\n"));
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setFormError(null);
+    try {
+      const perks = perksInput.split("\n").map((p) => p.trim()).filter(Boolean);
+      const payload = { ...form, perks };
+      if (editing) {
+        await apiCall(`/api/dashboard/subscription-tiers/${editing.id}`, "PATCH", payload);
+      } else {
+        await apiCall("/api/dashboard/subscription-tiers", "POST", payload);
+      }
+      setModalOpen(false);
+      reloadTiers();
+    } catch (err) {
+      setFormError(String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteTier(t: any) {
+    if (!confirm(`Delete tier "${t.name}"?`)) return;
+    try {
+      await apiCall(`/api/dashboard/subscription-tiers/${t.id}`, "DELETE");
+      reloadTiers();
+    } catch (err) {
+      alert(`Delete failed: ${err}`);
+    }
+  }
+
+  if (subLoading || tierLoading) return <LoadingState />;
+  if (subError || tierError) return <ErrorState message={subError || tierError || ""} />;
 
   return (
-    <div>
-      <PageHeader title="Subscribers" subtitle="Active and past subscriptions" count={data?.totalDocs} />
-      {data?.docs.length === 0 ? (
-        <EmptyState message="No subscribers yet. They'll appear here after Stripe checkout." />
-      ) : (
-        <GlassCard>
-          <Table>
-            <THead>
-              <TR className="hover:bg-transparent">
-                <TH>ID</TH>
-                <TH>Tier</TH>
-                <TH>Period start</TH>
-                <TH>Period end</TH>
-                <TH>Cancel at period end</TH>
-                <TH>Status</TH>
-              </TR>
-            </THead>
-            <TBody>
-              {data?.docs.map((s) => (
-                <TR key={s.id}>
-                  <TD className="font-mono text-xs text-zinc-500">#{s.id}</TD>
-                  <TD className="text-zinc-600">{s.tier || "—"}</TD>
-                  <TD className="font-mono text-xs text-zinc-500">{fmtDate(s.currentPeriodStart)}</TD>
-                  <TD className="font-mono text-xs text-zinc-500">{fmtDate(s.currentPeriodEnd)}</TD>
-                  <TD className="text-zinc-600">{s.cancelAtPeriodEnd ? "Yes" : "No"}</TD>
-                  <TD><Badge variant={subStatusVariant[s.status] || "default"}>{s.status}</Badge></TD>
+    <div className="space-y-8">
+      {/* Subscription tiers */}
+      <div>
+        <PageHeader title="Subscription Tiers" subtitle="Manage membership plans" count={tierData?.totalDocs} onCreate={openCreateTier} createLabel="New tier" />
+        {tierData?.docs.length === 0 ? (
+          <EmptyState message="No tiers yet." onCreate={openCreateTier} createLabel="New tier" />
+        ) : (
+          <GlassCard>
+            <Table>
+              <THead>
+                <TR className="hover:bg-transparent">
+                  <TH>Name</TH>
+                  <TH>Interval</TH>
+                  <TH className="text-right">Price</TH>
+                  <TH>Stripe Price ID</TH>
+                  <TH>Perks</TH>
+                  <TH></TH>
                 </TR>
-              ))}
-            </TBody>
-          </Table>
-        </GlassCard>
-      )}
+              </THead>
+              <TBody>
+                {tierData?.docs.map((t) => (
+                  <TR key={t.id}>
+                    <TD className="font-medium text-zinc-900">{t.name}</TD>
+                    <TD className="text-zinc-600">{t.interval}</TD>
+                    <TD className="text-right font-mono font-medium text-zinc-900">{fmtPrice(t.priceCents)}</TD>
+                    <TD className="font-mono text-xs text-zinc-500">{t.stripePriceId || "—"}</TD>
+                    <TD className="text-zinc-600">{(t.perks || []).length}</TD>
+                    <TD><RowActions onEdit={() => openEditTier(t)} onDelete={() => handleDeleteTier(t)} /></TD>
+                  </TR>
+                ))}
+              </TBody>
+            </Table>
+          </GlassCard>
+        )}
+      </div>
+
+      {/* Active subscriptions */}
+      <div>
+        <PageHeader title="Subscriptions" subtitle="Active and past memberships" count={subData?.totalDocs} />
+        {subData?.docs.length === 0 ? (
+          <EmptyState message="No subscribers yet." />
+        ) : (
+          <GlassCard>
+            <Table>
+              <THead>
+                <TR className="hover:bg-transparent">
+                  <TH>ID</TH>
+                  <TH>Tier</TH>
+                  <TH>Period start</TH>
+                  <TH>Period end</TH>
+                  <TH>Cancel at end</TH>
+                  <TH>Status</TH>
+                </TR>
+              </THead>
+              <TBody>
+                {subData?.docs.map((s) => (
+                  <TR key={s.id}>
+                    <TD className="font-mono text-xs text-zinc-500">#{s.id}</TD>
+                    <TD className="text-zinc-600">{s.tier || "—"}</TD>
+                    <TD className="font-mono text-xs text-zinc-500">{fmtDate(s.currentPeriodStart)}</TD>
+                    <TD className="font-mono text-xs text-zinc-500">{fmtDate(s.currentPeriodEnd)}</TD>
+                    <TD className="text-zinc-600">{s.cancelAtPeriodEnd ? "Yes" : "No"}</TD>
+                    <TD><Badge variant={subStatusVariant[s.status] || "default"}>{s.status}</Badge></TD>
+                  </TR>
+                ))}
+              </TBody>
+            </Table>
+          </GlassCard>
+        )}
+      </div>
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit tier" : "New tier"}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Field label="Name"><input className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder="VIP / Premium / Basic" /></Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Price (cents)"><input type="number" className={inputClass} value={form.priceCents} onChange={(e) => setForm({ ...form, priceCents: e.target.value })} required placeholder="e.g. 1900 = €19.00" /></Field>
+            <Field label="Interval">
+              <select className={selectClass} value={form.interval} onChange={(e) => setForm({ ...form, interval: e.target.value })}>
+                <option value="month">Monthly</option>
+                <option value="year">Yearly</option>
+              </select>
+            </Field>
+          </div>
+          <Field label="Stripe Price ID"><input className={inputClass} value={form.stripePriceId} onChange={(e) => setForm({ ...form, stripePriceId: e.target.value })} placeholder="price_..." /></Field>
+          <Field label="Perks (one per line)"><textarea className={inputClass} rows={4} value={perksInput} onChange={(e) => setPerksInput(e.target.value)} placeholder="Exclusive content&#10;Monthly group call&#10;Priority booking" /></Field>
+          {formError && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{formError}</p>}
+          <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update" : "Create"} />
+        </form>
+      </Modal>
     </div>
   );
 }
@@ -370,30 +836,15 @@ export function SettingsTab() {
         <GlassCard className="p-6">
           <h3 className="mb-4 text-sm font-semibold text-zinc-900">Studio profile</h3>
           <div className="space-y-4">
-            <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-zinc-500">Studio name</label>
-              <input
-                type="text"
-                defaultValue="Личностно овластяване"
-                className="w-full rounded-lg border border-white/60 bg-white/40 px-3 py-2 text-sm text-zinc-900 outline-none focus-visible:ring-2 focus-visible:ring-indigo-700"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-zinc-500">Support email</label>
-              <input
-                type="email"
-                defaultValue="info@lichnostno.bg"
-                className="w-full rounded-lg border border-white/60 bg-white/40 px-3 py-2 text-sm text-zinc-900 outline-none focus-visible:ring-2 focus-visible:ring-indigo-700"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-zinc-500">Currency</label>
-              <select className="w-full rounded-lg border border-white/60 bg-white/40 px-3 py-2 text-sm text-zinc-900 outline-none focus-visible:ring-2 focus-visible:ring-indigo-700">
+            <Field label="Studio name"><input className={inputClass} defaultValue="Личностно овластяване" /></Field>
+            <Field label="Support email"><input className={inputClass} defaultValue="info@lichnostno.bg" /></Field>
+            <Field label="Currency">
+              <select className={selectClass}>
                 <option>EUR (€)</option>
                 <option>BGN (лв)</option>
                 <option>USD ($)</option>
               </select>
-            </div>
+            </Field>
           </div>
         </GlassCard>
 
