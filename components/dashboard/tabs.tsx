@@ -3,6 +3,15 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Pencil, Plus, Trash2, Upload, X, Star, Package } from "lucide-react";
 import { GlassCard } from "./GlassCard";
+
+// Facebook icon (lucide doesn't have a brand icon)
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  );
+}
 import { Badge } from "@/components/ui/badge";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { Modal, Field, inputClass, selectClass, FormActions } from "./Modal";
@@ -529,13 +538,21 @@ export function EventsTab() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    titleBg: "", titleEn: "", slug: "", locationBg: "", locationEn: "",
+    title: "", slug: "", location: "",
     startsAt: "", endsAt: "", capacity: "0", status: "upcoming",
+    coverUrl: "", facebookUrl: "",
   });
+
+  // Facebook import state
+  const [fbModalOpen, setFbModalOpen] = useState(false);
+  const [fbUrl, setFbUrl] = useState("");
+  const [fbImporting, setFbImporting] = useState(false);
+  const [fbError, setFbError] = useState<string | null>(null);
+  const [fbResult, setFbResult] = useState<string | null>(null);
 
   function openCreate() {
     setEditing(null);
-    setForm({ titleBg: "", titleEn: "", slug: "", locationBg: "", locationEn: "", startsAt: "", endsAt: "", capacity: "0", status: "upcoming" });
+    setForm({ title: "", slug: "", location: "", startsAt: "", endsAt: "", capacity: "0", status: "upcoming", coverUrl: "", facebookUrl: "" });
     setFormError(null);
     setModalOpen(true);
   }
@@ -543,12 +560,15 @@ export function EventsTab() {
   function openEdit(e: any) {
     setEditing(e);
     setForm({
-      titleBg: "", titleEn: e.title || "", slug: e.slug || "",
-      locationBg: "", locationEn: e.location || "",
+      title: e.title || "",
+      slug: e.slug || "",
+      location: e.location || "",
       startsAt: e.startsAt ? e.startsAt.slice(0, 16) : "",
       endsAt: e.endsAt ? e.endsAt.slice(0, 16) : "",
       capacity: String(e.capacity ?? "0"),
       status: e.status || "upcoming",
+      coverUrl: e.coverUrl || "",
+      facebookUrl: e.facebookUrl || "",
     });
     setFormError(null);
     setModalOpen(true);
@@ -584,39 +604,106 @@ export function EventsTab() {
     }
   }
 
+  async function handleFacebookImport(e: React.FormEvent) {
+    e.preventDefault();
+    setFbImporting(true);
+    setFbError(null);
+    setFbResult(null);
+    try {
+      const res = await fetch("/api/dashboard/events/import-facebook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ facebookUrl: fbUrl }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setFbError(data.error || "Import failed");
+        return;
+      }
+      if (data.imported) {
+        setFbResult(`Imported "${data.event.title}" successfully!`);
+        reload();
+      } else {
+        setFbResult(data.message || "Event already exists");
+      }
+      setFbUrl("");
+    } catch (err) {
+      setFbError(String(err));
+    } finally {
+      setFbImporting(false);
+    }
+  }
+
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
 
   return (
     <div>
-      <PageHeader title="Events" subtitle="Seminars and workshops" count={data?.totalDocs} onCreate={openCreate} createLabel="New event" />
-      {data?.docs.length === 0 ? (
-        <EmptyState message="No events yet." onCreate={openCreate} createLabel="New event" />
-      ) : (
-        <div className="space-y-4">
-          {data?.docs.map((e) => (
-            <EventRow key={e.id} event={e} onEdit={() => openEdit(e)} onDelete={() => handleDelete(e)} />
-          ))}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-zinc-900" style={{ fontFamily: "var(--font-fraunces)" }}>Events</h2>
+          <p className="text-sm text-zinc-500">Seminars and workshops</p>
         </div>
-      )}
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setFbModalOpen(true); setFbError(null); setFbResult(null); }}
+            className="flex items-center gap-2 rounded-full border border-[#1877F2] bg-white px-4 py-2 text-sm font-medium text-[#1877F2] transition-colors hover:bg-blue-50"
+          >
+            <FacebookIcon className="h-4 w-4" />
+            Import from Facebook
+          </button>
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 rounded-full bg-indigo-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-800"
+          >
+            <Plus className="h-4 w-4" />
+            New event
+          </button>
+        </div>
+      </div>
+      <div className="mt-4">
+        {data?.docs.length === 0 ? (
+          <div className="rounded-2xl border border-white/60 bg-white/40 p-12 text-center backdrop-blur">
+            <p className="text-sm text-zinc-400">No events yet.</p>
+            <div className="mt-4 flex justify-center gap-3">
+              <button
+                onClick={() => { setFbModalOpen(true); setFbError(null); setFbResult(null); }}
+                className="flex items-center gap-2 rounded-full border border-[#1877F2] px-4 py-2 text-sm font-medium text-[#1877F2] hover:bg-blue-50"
+              >
+                <FacebookIcon className="h-4 w-4" />
+                Import from Facebook
+              </button>
+              <button
+                onClick={openCreate}
+                className="flex items-center gap-2 rounded-full bg-indigo-700 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-800"
+              >
+                <Plus className="h-4 w-4" />
+                New event
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {data?.docs.map((e) => (
+              <EventRow key={e.id} event={e} onEdit={() => openEdit(e)} onDelete={() => handleDelete(e)} />
+            ))}
+          </div>
+        )}
+      </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit event" : "New event"} className="max-w-2xl">
+      {/* Event edit/create modal */}
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit event" : "New event"} wide>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Title (BG)"><input className={inputClass} value={form.titleBg} onChange={(e) => setForm({ ...form, titleBg: e.target.value })} placeholder="Български" /></Field>
-            <Field label="Title (EN)"><input className={inputClass} value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} required placeholder="English" /></Field>
-          </div>
-          <Field label="Slug"><input className={inputClass} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required placeholder="my-event-2026" /></Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Location (BG)"><input className={inputClass} value={form.locationBg} onChange={(e) => setForm({ ...form, locationBg: e.target.value })} /></Field>
-            <Field label="Location (EN)"><input className={inputClass} value={form.locationEn} onChange={(e) => setForm({ ...form, locationEn: e.target.value })} /></Field>
-          </div>
+          <Field label="Title"><input className={inputClass} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required placeholder="Event title" /></Field>
+          <Field label="Slug"><input className={inputClass} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-generated if empty" /></Field>
+          <Field label="Location"><input className={inputClass} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Sofia, Bulgaria" /></Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Starts at"><input type="datetime-local" className={inputClass} value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })} required /></Field>
             <Field label="Ends at"><input type="datetime-local" className={inputClass} value={form.endsAt} onChange={(e) => setForm({ ...form, endsAt: e.target.value })} /></Field>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Capacity"><input type="number" className={inputClass} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} required /></Field>
+            <Field label="Capacity"><input type="number" className={inputClass} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="0 = unlimited" /></Field>
             <Field label="Status">
               <select className={selectClass} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                 <option value="upcoming">Upcoming</option>
@@ -625,8 +712,50 @@ export function EventsTab() {
               </select>
             </Field>
           </div>
+          <Field label="Cover image URL"><input className={inputClass} value={form.coverUrl} onChange={(e) => setForm({ ...form, coverUrl: e.target.value })} placeholder="https://..." /></Field>
+          {form.facebookUrl && (
+            <Field label="Facebook URL"><input className={inputClass} value={form.facebookUrl} onChange={(e) => setForm({ ...form, facebookUrl: e.target.value })} placeholder="https://facebook.com/events/..." /></Field>
+          )}
           {formError && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{formError}</p>}
-          <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update" : "Create"} />
+          <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update event" : "Create event"} />
+        </form>
+      </Modal>
+
+      {/* Facebook import modal */}
+      <Modal open={fbModalOpen} onClose={() => setFbModalOpen(false)} title="Import from Facebook">
+        <form onSubmit={handleFacebookImport} className="space-y-4">
+          <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            Paste a Facebook event URL and we&apos;ll import the title, date, location, and cover image automatically.
+          </div>
+          <Field label="Facebook event URL">
+            <input
+              className={inputClass}
+              value={fbUrl}
+              onChange={(e) => setFbUrl(e.target.value)}
+              required
+              placeholder="https://www.facebook.com/events/1234567890"
+              type="url"
+            />
+          </Field>
+          {fbError && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{fbError}</p>}
+          {fbResult && <p className="rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700">{fbResult}</p>}
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setFbModalOpen(false)}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100"
+            >
+              Close
+            </button>
+            <button
+              type="submit"
+              disabled={fbImporting}
+              className="flex items-center gap-2 rounded-lg bg-[#1877F2] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0d6cf2] disabled:opacity-60"
+            >
+              <FacebookIcon className="h-4 w-4" />
+              {fbImporting ? "Importing…" : "Import event"}
+            </button>
+          </div>
         </form>
       </Modal>
     </div>

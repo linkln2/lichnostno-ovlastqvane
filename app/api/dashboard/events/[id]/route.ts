@@ -10,19 +10,21 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const data: Record<string, unknown> = {
-      capacity: Number(body.capacity) || 0,
-      status: body.status,
-    };
-    if (body.titleBg !== undefined || body.titleEn !== undefined) {
-      data.title = locField(body.titleBg || "", body.titleEn || "");
+    const data: Record<string, unknown> = {};
+
+    if (body.title !== undefined) {
+      data.title = locField(body.title, body.title);
     }
-    if (body.slug) data.slug = body.slug;
-    if (body.locationBg !== undefined || body.locationEn !== undefined) {
-      data.location = locField(body.locationBg || "", body.locationEn || "");
+    if (body.slug !== undefined) data.slug = body.slug;
+    if (body.location !== undefined) {
+      data.location = locField(body.location, body.location);
     }
-    if (body.startsAt) data.startsAt = body.startsAt;
+    if (body.startsAt !== undefined) data.startsAt = body.startsAt;
     if (body.endsAt !== undefined) data.endsAt = body.endsAt || undefined;
+    if (body.capacity !== undefined) data.capacity = Number(body.capacity) || 0;
+    if (body.status !== undefined) data.status = body.status;
+    if (body.coverUrl !== undefined) data.coverUrl = body.coverUrl || undefined;
+    if (body.facebookUrl !== undefined) data.facebookUrl = body.facebookUrl || undefined;
 
     const record = await updateRecord("events", id, data);
     return Response.json({ success: true, id: record.id });

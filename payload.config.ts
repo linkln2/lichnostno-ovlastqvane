@@ -196,6 +196,21 @@ const Events: CollectionConfig = {
       defaultValue: 0,
       admin: { readOnly: true },
     },
+    {
+      name: "coverUrl",
+      type: "text",
+      admin: { description: "Cover image URL (e.g. from Facebook or uploaded)" },
+    },
+    {
+      name: "facebookUrl",
+      type: "text",
+      admin: { description: "Original Facebook event URL" },
+    },
+    {
+      name: "facebookEventId",
+      type: "text",
+      admin: { description: "Facebook event ID (for import tracking)" },
+    },
   ],
 };
 

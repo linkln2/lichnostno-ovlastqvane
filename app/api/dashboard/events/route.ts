@@ -20,6 +20,9 @@ export async function GET(request: Request) {
       endsAt: e.endsAt,
       capacity: e.capacity,
       status: e.status,
+      description: typeof e.description === "string" ? e.description : "",
+      coverUrl: e.coverUrl || "",
+      facebookUrl: e.facebookUrl || "",
     })),
   });
 }
@@ -30,14 +33,18 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
+    const title = body.title || "";
+    const location = body.location || "";
     const record = await createRecord("events", {
-      title: locField(body.titleBg || body.title || "", body.titleEn || body.title || ""),
-      slug: body.slug,
-      location: locField(body.locationBg || "", body.locationEn || ""),
+      title: locField(title, title),
+      slug: body.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+      location: locField(location, location),
       startsAt: body.startsAt,
       endsAt: body.endsAt || undefined,
       capacity: Number(body.capacity) || 0,
       status: body.status || "upcoming",
+      coverUrl: body.coverUrl || undefined,
+      facebookUrl: body.facebookUrl || undefined,
     });
     return Response.json({ success: true, id: record.id });
   } catch (err) {

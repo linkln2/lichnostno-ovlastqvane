@@ -46,6 +46,28 @@ export function DashboardShell() {
   const [active, setActive] = useState("Overview");
   const [userName, setUserName] = useState("Valeria");
 
+  // Sync active tab with URL hash (e.g. /dashboard#products)
+  useEffect(() => {
+    const sync = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash) {
+        const found = nav.find((n) => n.label.toLowerCase() === hash.toLowerCase());
+        if (found) setActive(found.label);
+      } else {
+        setActive("Overview");
+      }
+    };
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, []);
+
+  function handleChange(tab: string) {
+    setActive(tab);
+    const slug = tab.toLowerCase();
+    window.location.hash = slug;
+  }
+
   useEffect(() => {
     fetch("/api/auth/me", { credentials: "include" })
       .then((r) => r.json())
@@ -57,7 +79,7 @@ export function DashboardShell() {
 
   return (
     <div className="flex">
-      <Sidebar active={active} onChange={setActive} />
+      <Sidebar active={active} onChange={handleChange} />
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <Topbar name={userName} />
 
@@ -81,7 +103,7 @@ export function DashboardShell() {
               return (
                 <li key={item.label}>
                   <button
-                    onClick={() => setActive(item.label)}
+                    onClick={() => handleChange(item.label)}
                     className={`flex flex-col items-center gap-0.5 rounded-lg p-1 text-[10px] font-medium ${
                       isActive ? "text-indigo-700" : "text-zinc-500"
                     }`}
