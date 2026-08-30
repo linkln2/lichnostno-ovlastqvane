@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "@/components/LocaleProvider";
-import { site } from "@/lib/content";
+import { membershipTiers, site } from "@/lib/content";
 
 type Tier = {
   id: number;
@@ -39,8 +39,8 @@ export default function MembershipPage() {
     title: locale === "bg" ? "Членство" : "Membership",
     subtitle:
       locale === "bg"
-        ? "Стани част от общността. Избери плана, който работи за теб."
-        : "Become part of the community. Choose the plan that works for you.",
+        ? "Избери пътя, който звездите са прокарали пред теб."
+        : "Choose the path the stars have laid before you.",
     perMonth: locale === "bg" ? "/ месец" : "/ month",
     perYear: locale === "bg" ? "/ година" : "/ year",
     subscribe: locale === "bg" ? "Абонирай се" : "Subscribe",
@@ -64,6 +64,15 @@ export default function MembershipPage() {
     cancel: locale === "bg" ? "Отказ" : "Cancel",
     back: locale === "bg" ? "Обратно към сайта" : "Back to site",
   };
+
+  const tierIconMap: Record<number, string> = {};
+  const staticByPrice: Record<number, (typeof membershipTiers)[number]> = {};
+  for (const tier of membershipTiers) {
+    if (tier.icon) {
+      tierIconMap[tier.price * 100] = tier.icon;
+    }
+    staticByPrice[tier.price * 100] = tier;
+  }
 
   useEffect(() => {
     fetch("/api/subscription-tiers")
@@ -196,11 +205,17 @@ export default function MembershipPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {tiers.map((tier, idx) => {
-              const isPopular = idx === 1; // middle tier is "most popular"
+              const meta = staticByPrice[tier.priceCents];
+              const isPopular = meta?.mostPopular ?? idx === 1;
+              const displayName = meta ? meta.name[locale] : tier.name;
+              const icon = meta?.icon ?? tierIconMap[tier.priceCents];
+              const perks = meta
+                ? meta.perks.map((p) => p[locale])
+                : tier.perks.map((p) => p.perk);
               return (
                 <div
                   key={tier.id}
-                  className={`relative flex flex-col rounded-2xl border bg-white p-8 shadow-sm transition-shadow hover:shadow-md ${
+                  className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md sm:p-7 ${
                     isPopular
                       ? "border-amber-500 ring-2 ring-amber-500/20"
                       : "border-stone-200"
@@ -212,23 +227,34 @@ export default function MembershipPage() {
                     </span>
                   )}
 
-                  <h3 className="text-xl font-bold text-stone-900">
-                    {tier.name}
-                  </h3>
-
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-stone-900">
-                      {fmtPrice(tier.priceCents)}
-                    </span>
-                    <span className="text-sm text-stone-500">
-                      {tier.interval === "month" ? t.perMonth : t.perYear}
-                    </span>
+                  {/* Icon left, text right */}
+                  <div className="flex items-center gap-4">
+                    {icon && (
+                      <img
+                        src={icon}
+                        alt={displayName}
+                        className="h-16 w-16 shrink-0 object-contain"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg font-bold text-stone-900">
+                        {displayName}
+                      </h3>
+                      <div className="mt-1 flex items-baseline gap-1">
+                        <span className="text-3xl font-bold text-stone-900">
+                          {fmtPrice(tier.priceCents)}
+                        </span>
+                        <span className="text-sm text-stone-500">
+                          {tier.interval === "month" ? t.perMonth : t.perYear}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Perks */}
-                  {tier.perks?.length > 0 && (
-                    <ul className="mt-6 flex-1 space-y-3">
-                      {tier.perks.map((p, i) => (
+                  {perks.length > 0 && (
+                    <ul className="mt-5 flex-1 space-y-3">
+                      {perks.map((p, i) => (
                         <li
                           key={i}
                           className="flex items-start gap-2 text-sm text-stone-600"
@@ -246,7 +272,7 @@ export default function MembershipPage() {
                               strokeLinejoin="round"
                             />
                           </svg>
-                          {p.perk}
+                          {p}
                         </li>
                       ))}
                     </ul>

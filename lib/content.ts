@@ -32,8 +32,8 @@ export const hero: {
 };
 
 export const mission: Bi = {
-  bg: "Нашата мисия е да извадим разумите на хората от ръцете на културните инженери и да ги овластим до степен, до която сами да разберат, че те са единствените творци на своя живот. Ние вярваме, че всеки човек носи в себе си ресурса да се излекува, да намели своя път и да живее в съгласие със себе си.",
-  en: "Our mission is to take people's minds out of the hands of cultural engineers and empower them to the point where they themselves realize they are the sole creators of their lives. We believe every person carries within them the resource to heal, find their path, and live in harmony with themselves.",
+  bg: "Нашата мисия е да освободим съзнанията от ръцете на онези, които оформят културата без нашето съгласие, и да събудим хората за една проста истина: те са единствените творци на собствения си живот. Вярваме, че всеки човек вече носи в себе си всичко необходимо, за да се излекува, да намери своя път и да живее в хармония със себе си.",
+  en: "Our mission is to free minds from the hands of those who shape culture without our consent, and to awaken people to a simple truth: they are the sole creators of their own lives. We believe every person already carries what they need to heal, find their path, and live in harmony with themselves.",
 };
 
 export const values: { title: Bi; desc: Bi }[] = [
@@ -606,6 +606,7 @@ export function getProductsByCategory(category: "all" | ProductCategory): Produc
 
 export type MembershipTier = {
   name: Bi;
+  icon: string;
   price: number; // EUR per month
   perks: Bi[];
   mostPopular?: boolean;
@@ -613,33 +614,36 @@ export type MembershipTier = {
 
 export const membershipTiers: MembershipTier[] = [
   {
-    name: { bg: "Изследовател", en: "Explorer" },
+    name: { bg: "Търсещият", en: "Seeker" },
+    icon: "/pictures/seeker.png",
     price: 9,
     perks: [
-      { bg: "Достъп до затворената общност", en: "Access to the private community" },
-      { bg: "Месечен бюлетин с насоки", en: "Monthly guidance newsletter" },
-      { bg: "Отстъпка от събития 10%", en: "10% off events" },
+      { bg: "Достъп до вътрешното светилище", en: "Access to the inner sanctum" },
+      { bg: "Месечна лунна диспеш", en: "Monthly lunar dispatch" },
+      { bg: "10% отстъпка от ритуали и събирания", en: "10% off rituals & gatherings" },
     ],
   },
   {
-    name: { bg: "Създател", en: "Creator" },
+    name: { bg: "Алхимик", en: "Alchemist" },
+    icon: "/pictures/Alchemist.png",
     price: 19,
     mostPopular: true,
     perks: [
-      { bg: "Всичко от Изследовател", en: "Everything in Explorer" },
-      { bg: "Седмични коучинг сесии", en: "Weekly coaching sessions" },
-      { bg: "Отстъпка от продукти 15%", en: "15% off products" },
-      { bg: "Ресурси за медитация", en: "Meditation resources" },
+      { bg: "Всичко от Търсещият", en: "Everything in Seeker" },
+      { bg: "Седмични трансмутационни сесии", en: "Weekly transmutation sessions" },
+      { bg: "15% отстъпка от еликсири и артефакти", en: "15% off elixirs & artifacts" },
+      { bg: "Ресурси за гадаене и медитация", en: "Scrying & meditation resources" },
     ],
   },
   {
-    name: { bg: "Визионер", en: "Visionary" },
+    name: { bg: "Адепт", en: "Adept" },
+    icon: "/pictures/Adept.png",
     price: 39,
     perks: [
-      { bg: "Всичко от Създател", en: "Everything in Creator" },
-      { bg: "Месечна 1:1 сесия", en: "Monthly 1:1 session" },
-      { bg: "Приоритетен достъп до събития", en: "Priority event access" },
-      { bg: "Персонализиран план за растеж", en: "Personal growth plan" },
+      { bg: "Всичко от Алхимик", en: "Everything in Alchemist" },
+      { bg: "Месечна 1:1 сесия за гадаене", en: "Monthly 1:1 divination session" },
+      { bg: "Приоритетен достъп до събрания", en: "Priority access to convocations" },
+      { bg: "Персонализиран път на възхода", en: "Bespoke path of ascension" },
     ],
   },
 ];

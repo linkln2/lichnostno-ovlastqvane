@@ -4,6 +4,7 @@ import { useLocale } from "@/components/LocaleProvider";
 import { tr } from "@/lib/i18n";
 import { mission, values, team, localized } from "@/lib/content";
 import { ParticleBurst } from "@/components/ParticleBurst";
+import { SolarSystemOrbits } from "@/components/SolarSystemOrbits";
 
 export default function AboutPage() {
   const { locale } = useLocale();
@@ -66,15 +67,14 @@ export default function AboutPage() {
             {/* Center image */}
             <div className="flex justify-center">
               <div className="relative">
-                {/* Rotating ring */}
-                <div className="absolute inset-0 -m-6 animate-spin-slow rounded-full border border-amber-300/30" style={{ animationDuration: "40s" }} />
-                <div className="absolute inset-0 -m-12 animate-spin-slow rounded-full border border-amber-200/20" style={{ animationDuration: "60s", animationDirection: "reverse" }} />
+                {/* Solar system orbits behind image */}
+                <SolarSystemOrbits className="absolute inset-0 z-0 opacity-80" />
                 {/* Glow */}
                 <div className="absolute inset-0 -m-4 rounded-full bg-amber-300/20 blur-2xl" />
                 <img
                   src="/pictures/holy.png"
                   alt={locale === "bg" ? "Свещенно" : "Sacred"}
-                  className="relative z-10 h-64 w-auto rounded-2xl object-cover shadow-2xl ring-4 ring-white/60 sm:h-80 lg:h-96"
+                  className="relative z-10 h-96 w-auto rounded-2xl object-cover shadow-2xl sm:h-[32rem] lg:h-[40rem]"
                 />
               </div>
             </div>
@@ -94,10 +94,13 @@ export default function AboutPage() {
           </div>
 
           {/* Mobile: values below image in a grid */}
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:hidden">
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:hidden">
             {values.map((v, i) => (
-              <div key={v.title.en} className="rounded-2xl border border-amber-200/50 bg-white/70 p-5 backdrop-blur-sm">
-                <div className="mb-2 text-2xl">{valueIcons[i]}</div>
+              <div
+                key={v.title.en}
+                className="rounded-2xl border border-amber-200/50 bg-white/70 p-5 backdrop-blur-sm"
+              >
+                <div className="mb-2 text-2xl text-amber-600">{valueIcons[i]}</div>
                 <h3 className="font-semibold text-amber-800">{v.title[locale]}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
               </div>
@@ -210,7 +213,7 @@ function ValueCard({
 }) {
   return (
     <div
-      className={`group rounded-2xl border border-amber-200/50 bg-white/70 p-6 backdrop-blur-sm transition-all hover:border-amber-300/80 hover:bg-white/90 hover:shadow-lg ${
+      className={`rounded-2xl border border-amber-200/50 bg-white/70 p-6 backdrop-blur-sm transition-all hover:border-amber-300/80 hover:bg-white/90 hover:shadow-lg ${
         align === "right" ? "lg:text-right" : "lg:text-left"
       }`}
     >

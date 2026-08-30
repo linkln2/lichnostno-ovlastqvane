@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import CountdownTimer from "@/components/CountdownTimer";
 import { generate } from "useinkjet";
+import { ParticleBurst } from "@/components/ParticleBurst";
+import { SolarSystemOrbits } from "@/components/SolarSystemOrbits";
 import { tr } from "@/lib/i18n";
 import {
   hero,
@@ -209,13 +211,16 @@ export default function HomePage() {
           {/* Top row: logo left, title + text right */}
           <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:gap-14">
             <div className="shrink-0">
-              <div className="flex h-40 w-40 items-center justify-center rounded-full bg-amber-100 ring-4 ring-white/60 shadow-xl lg:h-48 lg:w-48">
-                <img
-                  src="/logo.png"
-                  alt={locale === "bg" ? "Личностно овластяване — лого" : "Personal Empowerment — logo"}
-                  className="h-36 w-36 rounded-full object-cover lg:h-44 lg:w-44"
-                />
-              </div>
+              <img
+                src="/logo.png"
+                alt={locale === "bg" ? "Личностно овластяване — лого" : "Personal Empowerment — logo"}
+                className="h-44 w-44 rounded-full object-cover shadow-xl dark:hidden lg:h-56 lg:w-56"
+              />
+              <img
+                src="/pictures/dark-mode-logo.png"
+                alt={locale === "bg" ? "Личностно овластяване — лого" : "Personal Empowerment — logo"}
+                className="hidden h-44 w-44 rounded-full object-cover shadow-xl dark:block lg:h-56 lg:w-56"
+              />
             </div>
             <div className="flex-1 text-center lg:text-left">
               <span className="inline-block rounded-full border border-amber-200 bg-amber-100/60 px-4 py-1 text-xs font-medium text-amber-800">
@@ -234,43 +239,28 @@ export default function HomePage() {
       </section>
 
       {/* Countdown with buy ticket */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 py-16 sm:py-20">
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: "radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)",
-          backgroundSize: "28px 28px",
-        }} />
-        <div
-          className="pointer-events-none absolute -right-12 -top-12 z-0 w-56 h-56 opacity-20 -rotate-6 sm:w-80 sm:h-80 [&_svg]:h-full [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: aztecPattern || "" }}
-        />
-        <div
-          className="pointer-events-none absolute -left-8 -top-4 z-0 w-28 h-28 text-amber-400 opacity-20 sm:-left-12 sm:w-40 sm:h-40 [&_svg]:h-full [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: ankhPattern }}
-        />
-        <div
-          className="pointer-events-none absolute -left-8 bottom-0 z-0 w-40 h-40 opacity-15 rotate-12 sm:w-60 sm:h-60 [&_svg]:h-full [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: flowerPattern || "" }}
-        />
-        <div
-          className="pointer-events-none absolute -right-6 bottom-0 z-0 w-28 h-28 text-amber-400 opacity-20 sm:-right-10 sm:w-40 sm:h-40 [&_svg]:h-full [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: merkabaPattern }}
-        />
-        <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6">
-          <h2 className="text-center text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+      <section className="bg-stone-100 py-8 sm:py-10">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
+          <h2 className="text-lg font-bold text-stone-800 sm:text-xl">
             {locale === "bg" ? "Голямото събитие идва скоро" : "The big event is coming soon"}
           </h2>
-          <p className="mt-3 text-center text-sm text-stone-300 sm:text-base">
+          <p className="mt-1.5 text-xs text-stone-500 sm:text-sm">
             {locale === "bg" ? "Бъди сред първите, които ще го преживеят" : "Be among the first to experience it"}
           </p>
-          <div className="mt-8">
+          <div className="mt-6">
             <CountdownTimer target={launchDate} />
           </div>
-          <div className="mt-8 text-center">
+          <div className="mt-6 text-center">
             <button
               onClick={() => setTicketOpen(true)}
-              className="inline-block rounded-full bg-amber-500 px-8 py-3 text-center font-semibold text-stone-900 transition-colors hover:bg-amber-400"
+              className="inline-flex items-center gap-2 rounded-full px-7 py-3 text-center text-sm font-bold transition-all hover:shadow-lg sm:text-base"
+              style={{ backgroundColor: "#fbbf24", color: "#000000" }}
             >
-              {locale === "bg" ? "Купи билет" : "Buy ticket"} →
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+                <path d="M13 5v2" /><path d="M13 17v2" /><path d="M13 11v2" />
+              </svg>
+              {locale === "bg" ? "Купи билет" : "Buy ticket"}
             </button>
           </div>
         </div>
@@ -468,54 +458,146 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Mission + Values */}
-      <section className="bg-amber-50/40 py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
-            {locale === "bg" ? "Нашата мисия и ценности" : "Our mission & values"}
-          </h2>
+      {/* Mission + Values — centered around holy.png with particles */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-amber-50/40 via-amber-50/20 to-stone-50 py-20 sm:py-28">
+        {/* Particle burst effect */}
+        <ParticleBurst />
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-2">
-            {/* Mission card */}
-            <div className="flex flex-col justify-center rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
-              <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M16.2 7.8 12 12" />
-                  <path d="m14 12-2 2" />
-                  <path d="M12 2v2" />
-                  <path d="M12 20v2" />
-                  <path d="m4.93 4.93 1.41 1.41" />
-                  <path d="M17.66 17.66 19.07 19.07" />
-                  <path d="M2 12h2" />
-                  <path d="M20 12h2" />
-                  <path d="M6.34 17.66 4.93 19.07" />
-                </svg>
+        {/* Radial glow behind the image */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full opacity-40"
+          style={{
+            background: "radial-gradient(circle, rgba(251,191,36,0.3) 0%, rgba(251,191,36,0) 70%)",
+          }}
+        />
+
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+          {/* Section title */}
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">
+              {locale === "bg" ? "Нашата мисия и ценности" : "Our mission & values"}
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-stone-600">
+              {mission[locale]}
+            </p>
+          </div>
+
+          {/* Center image with values orbiting */}
+          <div className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-12">
+            {/* Left values (2) */}
+            <div className="space-y-8 lg:space-y-12">
+              {values.slice(0, 2).map((v, i) => (
+                <div
+                  key={v.title.en}
+                  className="rounded-2xl border border-amber-200/50 bg-white/70 p-6 backdrop-blur-sm transition-all hover:border-amber-300/80 hover:bg-white/90 hover:shadow-lg lg:text-right"
+                >
+                  <div className="mb-3 text-amber-700">{valueIcons[i]}</div>
+                  <h4 className="text-lg font-semibold text-amber-800">{v.title[locale]}</h4>
+                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Center image */}
+            <div className="flex flex-col items-center">
+              <div className="relative">
+                {/* Solar system orbits behind image */}
+                <SolarSystemOrbits className="absolute inset-0 z-0 opacity-80" />
+                {/* Glow */}
+                <div className="absolute inset-0 -m-4 rounded-full bg-amber-300/20 blur-2xl" />
+                <img
+                  src="/pictures/holy.png"
+                  alt={locale === "bg" ? "Седем дни на творението и четирите велики посвещения" : "The Seven Days of Creation and the Four Great Initiations"}
+                  className="relative z-10 h-96 w-auto rounded-2xl object-cover shadow-2xl sm:h-[32rem] lg:h-[40rem]"
+                />
               </div>
-              <h3 className="text-2xl font-bold text-stone-900">
-                {tr("section_mission_title", locale)}
-              </h3>
-              <p className="mt-4 text-base leading-relaxed text-stone-600">
-                {mission[locale]}
+              {/* Image title */}
+              <p className="mt-6 max-w-xs text-center text-xs font-medium uppercase tracking-wide text-amber-700/80">
+                {locale === "bg"
+                  ? "Седем дни на творението и четирите велики посвещения"
+                  : "The Seven Days of Creation & the Four Great Initiations"}
               </p>
             </div>
 
-            {/* Values grid */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              {values.map((v, i) => (
+            {/* Right values (2) */}
+            <div className="space-y-8 lg:space-y-12">
+              {values.slice(2, 4).map((v, i) => (
                 <div
                   key={v.title.en}
-                  className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm"
+                  className="rounded-2xl border border-amber-200/50 bg-white/70 p-6 backdrop-blur-sm transition-all hover:border-amber-300/80 hover:bg-white/90 hover:shadow-lg"
                 >
-                  <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-amber-50 text-amber-700">
-                    {valueIcons[i]}
-                  </div>
-                  <h4 className="font-semibold text-amber-800">{v.title[locale]}</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                    {v.desc[locale]}
-                  </p>
+                  <div className="mb-3 text-amber-700">{valueIcons[i + 2]}</div>
+                  <h4 className="text-lg font-semibold text-amber-800">{v.title[locale]}</h4>
+                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Mobile: values below image in a grid */}
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:hidden">
+            {values.map((v, i) => (
+              <div
+                key={v.title.en}
+                className="rounded-2xl border border-amber-200/50 bg-white/70 p-5 backdrop-blur-sm"
+              >
+                <div className="mb-3 text-amber-700">{valueIcons[i]}</div>
+                <h4 className="text-lg font-semibold text-amber-800">{v.title[locale]}</h4>
+                <p className="mt-2 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Symbolism explanation */}
+          <div className="mx-auto mt-20 max-w-3xl space-y-6">
+            <h3 className="text-center text-lg font-semibold text-stone-900">
+              {locale === "bg" ? "Символизмът на кадуцея" : "The Symbolism of the Caduceus"}
+            </h3>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {/* Two serpents */}
+              <div className="rounded-2xl border border-amber-200/40 bg-white/50 p-5 backdrop-blur-sm">
+                <h4 className="text-sm font-semibold text-amber-800">
+                  {locale === "bg" ? "Двете змии" : "The Two Serpents"}
+                </h4>
+                <p className="mt-2 text-sm leading-relaxed text-stone-600">
+                  {locale === "bg"
+                    ? "Две противоположни сили — мъжко/женско, слънце/луна, дух/материя — се извиват около централната ос. Всеко пресичане е етап: опитност → конфликт → помирение → трансформация."
+                    : "Two opposing forces — masculine/feminine, sun/moon, spirit/matter — wind around the central axis. Each crossing is a stage: experience → conflict → reconciliation → transformation."}
+                </p>
+              </div>
+              {/* Central staff */}
+              <div className="rounded-2xl border border-amber-200/40 bg-white/50 p-5 backdrop-blur-sm">
+                <h4 className="text-sm font-semibold text-amber-800">
+                  {locale === "bg" ? "Централният жезъл" : "The Central Staff"}
+                </h4>
+                <p className="mt-2 text-sm leading-relaxed text-stone-600">
+                  {locale === "bg"
+                    ? "Жезълът е пътят нагоре — оста на възхода. Крилата на върха символизират трансценденция, духовно издигане и достигане на по-високо състояние на съзнание."
+                    : "The staff is the path upward — the axis of ascent. The wings at the top represent transcendence, spiritual elevation, and reaching a higher state of consciousness."}
+                </p>
+              </div>
+              {/* Seven stages */}
+              <div className="rounded-2xl border border-amber-200/40 bg-white/50 p-5 backdrop-blur-sm">
+                <h4 className="text-sm font-semibold text-amber-800">
+                  {locale === "bg" ? "Седемте планетарни етапа" : "The Seven Planetary Stages"}
+                </h4>
+                <p className="mt-2 text-sm leading-relaxed text-stone-600">
+                  {locale === "bg"
+                    ? "Седем нива на посвещение, свързани с класическите планети: Меркурий (трансформация), Марс (действие), Луна (интуиция), Венера (привличане), Сатурн (ограничение), Слънце (озарение), Юпитер (разширение)."
+                    : "Seven levels of initiation linked to the classical planets: Mercury (transformation), Mars (action), Moon (intuition), Venus (attraction), Saturn (limitation), Sun (illumination), Jupiter (expansion)."}
+                </p>
+              </div>
+              {/* The ascent */}
+              <div className="rounded-2xl border border-amber-200/40 bg-white/50 p-5 backdrop-blur-sm">
+                <h4 className="text-sm font-semibold text-amber-800">
+                  {locale === "bg" ? "Възходът" : "The Ascent"}
+                </h4>
+                <p className="mt-2 text-sm leading-relaxed text-stone-600">
+                  {locale === "bg"
+                    ? "От земята и материята, през планетарните етапи, към интеграция на противоположностите и духовно освобождение. Символът става все по-отворен и небесен към върха."
+                    : "From earth and matter, through the planetary stages, toward integration of opposites and spiritual liberation. The symbol becomes more open and celestial toward the top."}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -562,15 +644,15 @@ export default function HomePage() {
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-center text-stone-600">
             {locale === "bg"
-              ? "Избери плана, който работи за теб."
-              : "Choose the plan that works for you."}
+              ? "Избери пътя, който звездите са прокарали пред теб."
+              : "Choose the path the stars have laid before you."}
           </p>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {membershipTiers.map((tier) => (
               <div
                 key={tier.name.en}
-                className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm sm:p-8 ${
+                className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm sm:p-7 ${
                   tier.mostPopular
                     ? "border-amber-500 ring-2 ring-amber-500/20"
                     : "border-stone-200"
@@ -582,20 +664,29 @@ export default function HomePage() {
                   </span>
                 )}
 
-                <h3 className="text-xl font-bold text-stone-900">
-                  {tier.name[locale]}
-                </h3>
-
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-stone-900">
-                    €{tier.price}
-                  </span>
-                  <span className="text-sm text-stone-500">
-                    / {locale === "bg" ? "месец" : "month"}
-                  </span>
+                {/* Icon left, text right */}
+                <div className="flex items-center gap-4">
+                  <img
+                    src={tier.icon}
+                    alt={tier.name[locale]}
+                    className="h-16 w-16 shrink-0 object-contain"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-bold text-stone-900">
+                      {tier.name[locale]}
+                    </h3>
+                    <div className="mt-1 flex items-baseline gap-1">
+                      <span className="text-3xl font-bold text-stone-900">
+                        €{tier.price}
+                      </span>
+                      <span className="text-sm text-stone-500">
+                        / {locale === "bg" ? "месец" : "month"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                <ul className="mt-6 flex-1 space-y-3">
+                <ul className="mt-5 flex-1 space-y-3">
                   {tier.perks.map((perk, i) => (
                     <li
                       key={i}

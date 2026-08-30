@@ -35,7 +35,8 @@ export default function Footer() {
           {/* Brand — spans full width on mobile, 1 col on desktop */}
           <div className="col-span-2 sm:col-span-2 lg:col-span-1">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <img src="/logo.png" alt="Logo" className="h-16 w-16 rounded-full object-cover sm:h-20 sm:w-20" />
+              <img src="/logo.png" alt="Logo" className="h-16 w-16 rounded-full object-cover dark:hidden sm:h-20 sm:w-20" />
+              <img src="/pictures/dark-mode-logo.png" alt="Logo" className="hidden h-16 w-16 rounded-full object-cover dark:block sm:h-20 sm:w-20" />
               <span className="font-semibold text-stone-800">
                 {locale === "bg" ? site.name : site.nameEn}
               </span>

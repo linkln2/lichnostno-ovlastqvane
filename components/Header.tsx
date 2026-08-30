@@ -28,10 +28,17 @@ export default function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         {/* Logo + name */}
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
+          {/* Light mode logo */}
           <img
             src="/logo.png"
             alt={locale === "bg" ? site.name : site.nameEn}
-            className="h-10 w-10 rounded-full object-cover"
+            className="h-10 w-10 rounded-full object-cover dark:hidden"
+          />
+          {/* Dark mode logo */}
+          <img
+            src="/pictures/dark-mode-logo.png"
+            alt={locale === "bg" ? site.name : site.nameEn}
+            className="hidden h-10 w-10 rounded-full object-cover dark:block"
           />
           <span className="hidden text-sm font-semibold tracking-tight text-stone-800 sm:block">
             {locale === "bg" ? site.name : site.nameEn}

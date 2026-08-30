@@ -172,7 +172,12 @@ function AuthForms({ locale, onAuthed }: { locale: string; onAuthed: () => void 
           <img
             src="/logo.png"
             alt={locale === "bg" ? site.name : site.nameEn}
-            className="h-16 w-16 rounded-full object-cover shadow-md ring-4 ring-white/60"
+            className="h-16 w-16 rounded-full object-cover shadow-md ring-4 ring-white/60 dark:hidden"
+          />
+          <img
+            src="/pictures/dark-mode-logo.png"
+            alt={locale === "bg" ? site.name : site.nameEn}
+            className="hidden h-16 w-16 rounded-full object-cover shadow-md ring-4 ring-white/60 dark:block"
           />
         </div>
 

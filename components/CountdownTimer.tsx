@@ -56,29 +56,29 @@ export default function CountdownTimer({ target }: { target?: string }) {
   return (
     <div className="w-full">
       <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">
+        <p className="text-xs font-semibold uppercase tracking-widest text-amber-600">
           {tr("countdown_label", locale)}
         </p>
-        <p className="mt-1 text-lg font-bold text-white">
+        <p className="mt-1 text-base font-bold text-stone-800">
           {formatLaunchDate(activeTarget, locale)}
         </p>
       </div>
 
       {timeLeft.expired ? (
-        <p className="mt-6 text-center text-2xl font-bold text-amber-300">
+        <p className="mt-6 text-center text-2xl font-bold text-amber-600">
           {locale === "bg" ? "Стартирахме!" : "We're live!"}
         </p>
       ) : (
-        <div className="mt-6 grid grid-cols-4 gap-2 sm:gap-4">
+        <div className="mt-5 grid grid-cols-4 gap-2 sm:gap-4">
           {units.map((unit, i) => (
             <div
               key={i}
-              className="flex flex-col items-center rounded-xl bg-white/10 px-1 py-3 backdrop-blur-sm sm:px-5 sm:py-4"
+              className="flex flex-col items-center rounded-xl bg-white px-2 py-3 sm:px-5 sm:py-4"
             >
-              <span className="text-2xl font-bold tabular-nums text-white sm:text-4xl">
+              <span className="text-2xl font-bold tabular-nums text-stone-900 sm:text-4xl">
                 {mounted ? pad(unit.value) : "--"}
               </span>
-              <span className="mt-1 text-[9px] uppercase tracking-wider text-amber-200 sm:text-xs">
+              <span className="mt-1 text-[9px] uppercase tracking-wider text-stone-500 sm:text-xs">
                 {unit.label}
               </span>
             </div>
@@ -86,7 +86,7 @@ export default function CountdownTimer({ target }: { target?: string }) {
         </div>
       )}
 
-      <p className="mt-6 text-center text-sm text-amber-100/80">
+      <p className="mt-6 text-center text-sm text-stone-500">
         {tr("countdown_subtitle", locale)}
       </p>
     </div>

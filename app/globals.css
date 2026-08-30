@@ -17,34 +17,35 @@ html.dark {
   --foreground: #fafaf9;
 }
 
-/* Force light surfaces and text to almost black / off-white in dark mode */
-html.dark body,
-html.dark .bg-stone-50,
-html.dark .bg-stone-100,
-html.dark .bg-stone-200,
+/* Consistent black/white dark mode with amber accents */
+html.dark,
+html.dark [class*="bg-stone-"],
+html.dark [class*="bg-amber-"],
+html.dark .bg-black {
+  background-color: #000000 !important;
+}
+
 html.dark .bg-white,
-html.dark .bg-amber-50,
-html.dark .bg-amber-100,
-html.dark .bg-amber-50\/40,
-html.dark .bg-stone-50\/40 {
-  background-color: #0a0a0a !important;
+html.dark [class*="bg-white/"] {
+  background-color: #111111 !important;
 }
 
-html.dark .text-stone-900,
-html.dark .text-stone-800,
-html.dark .text-stone-700,
-html.dark .text-stone-600 {
-  color: #fafaf9 !important;
+html.dark [class*="bg-gradient-to-"] {
+  background-image: none !important;
 }
 
-html.dark .text-stone-500,
-html.dark .text-stone-400 {
-  color: #a8a29e !important;
+html.dark [class*="text-stone-"],
+html.dark .text-white,
+html.dark .text-black {
+  color: #ffffff !important;
 }
 
-html.dark .border-stone-200,
-html.dark .border-stone-300 {
-  border-color: #44403c !important;
+html.dark [class*="text-amber-"]:not(.text-transparent) {
+  color: #fbbf24 !important;
+}
+
+html.dark [class*="border-"] {
+  border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 @theme inline {
