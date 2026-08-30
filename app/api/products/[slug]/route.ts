@@ -1,4 +1,5 @@
 import { getPayloadInstance } from "@/lib/payload";
+import { products } from "@/lib/content";
 
 // Public endpoint: returns a single product by slug.
 export async function GET(

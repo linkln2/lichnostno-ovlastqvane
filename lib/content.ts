@@ -521,6 +521,7 @@ export type ProductItem = {
   category: ProductCategory;
   price: number; // EUR
   description: Bi;
+  image?: string;
 };
 
 export const productCategories: { key: ProductCategory; label: Bi }[] = [
@@ -539,6 +540,7 @@ export const products: ProductItem[] = [
       bg: "Натурални камъни, носещи фокус и вътрешна яснота.",
       en: "Natural stones bringing focus and inner clarity.",
     },
+    image: "https://images.unsplash.com/photo-1652340155016-e3c66dcba7f3?w=600&q=80&auto=format&fit=crop",
   },
   {
     slug: "bracelet-protection",
@@ -549,6 +551,7 @@ export const products: ProductItem[] = [
       bg: "Черен обсидиан и хематит за енергийна граница.",
       en: "Black obsidian and hematite for energetic boundaries.",
     },
+    image: "https://images.unsplash.com/photo-1766560359503-dc05c91109f2?w=600&q=80&auto=format&fit=crop",
   },
   {
     slug: "crystal-amethyst",
@@ -559,6 +562,7 @@ export const products: ProductItem[] = [
       bg: "Успокояваща енергия за медитация и сън.",
       en: "Calming energy for meditation and sleep.",
     },
+    image: "https://images.unsplash.com/photo-1758275872445-d07581768ab6?w=600&q=80&auto=format&fit=crop",
   },
   {
     slug: "crystal-rose-quartz",
@@ -569,6 +573,7 @@ export const products: ProductItem[] = [
       bg: "Нежна вибрация за любов и състрадание.",
       en: "Gentle vibration for love and compassion.",
     },
+    image: "https://images.unsplash.com/photo-1753522675563-0af42abf067d?w=600&q=80&auto=format&fit=crop",
   },
   {
     slug: "potion-meditation-oil",
@@ -579,6 +584,7 @@ export const products: ProductItem[] = [
       bg: "Ароматна смес за дълбоко съсредоточаване.",
       en: "Aromatic blend for deep concentration.",
     },
+    image: "https://images.unsplash.com/photo-1638273884247-fb99350209bf?w=600&q=80&auto=format&fit=crop",
   },
   {
     slug: "potion-moon-elixir",
@@ -589,6 +595,7 @@ export const products: ProductItem[] = [
       bg: "Енергийна вода за работа с лунните цикли.",
       en: "Energetic water for working with moon cycles.",
     },
+    image: "https://images.unsplash.com/photo-1753522033755-66a2f22d2784?w=600&q=80&auto=format&fit=crop",
   },
 ];
 

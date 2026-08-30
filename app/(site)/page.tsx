@@ -404,11 +404,20 @@ export default function HomePage() {
                   className="w-64 shrink-0 snap-start overflow-hidden rounded-2xl border border-stone-200 bg-stone-50 shadow-sm sm:w-72"
                 >
                   <div className="relative h-44 bg-gradient-to-br from-amber-100 via-stone-50 to-stone-200">
-                    <div className="absolute inset-0 flex items-center justify-center text-5xl">
-                      {p.category === "bracelets" && "📿"}
-                      {p.category === "crystals" && "💎"}
-                      {p.category === "potions" && "🧪"}
-                    </div>
+                    {p.image ? (
+                      <img
+                        src={p.image}
+                        alt={p.name[locale]}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-5xl">
+                        {p.category === "bracelets" && "📿"}
+                        {p.category === "crystals" && "💎"}
+                        {p.category === "potions" && "🧪"}
+                      </div>
+                    )}
                     <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-stone-700">
                       {productCategories.find((c) => c.key === p.category)?.label[locale]}
                     </span>
