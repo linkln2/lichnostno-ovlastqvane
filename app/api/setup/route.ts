@@ -17,6 +17,13 @@ export async function POST(request: Request) {
   try {
     const payload = await getPayloadInstance();
     const created = [];
+
+    // Map emails to display names
+    const staffNames: Record<string, string> = {
+      "elegiaood@gmail.com": "Valeria",
+      "junginu763@gmail.com": "Valeria",
+    };
+
     for (const email of WHITELISTED_EMAILS) {
       // Check if this specific email already exists
       const found = await payload.find({
@@ -26,11 +33,15 @@ export async function POST(request: Request) {
         overrideAccess: true,
       });
       if (found.docs.length > 0) {
-        // Sync password + role for existing whitelisted users
+        // Sync password + role + name for existing whitelisted users
         await payload.update({
           collection: "staff",
           id: found.docs[0].id,
-          data: { password: process.env.INITIAL_STAFF_PASSWORD || "", role: "owner" },
+          data: {
+            password: process.env.INITIAL_STAFF_PASSWORD || "",
+            role: "owner",
+            name: staffNames[email] || email.split("@")[0],
+          },
           overrideAccess: true,
         });
         console.log(`Synced staff user: ${email}`);
@@ -40,7 +51,7 @@ export async function POST(request: Request) {
       const user = await payload.create({
         collection: "staff",
         data: {
-          name: email.split("@")[0],
+          name: staffNames[email] || email.split("@")[0],
           email,
           role: "owner",
           password: process.env.INITIAL_STAFF_PASSWORD || "",

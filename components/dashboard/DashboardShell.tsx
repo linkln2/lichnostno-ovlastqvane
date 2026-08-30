@@ -44,12 +44,22 @@ function deltaPct(curr: number, prev: number): number {
 
 export function DashboardShell() {
   const [active, setActive] = useState("Overview");
+  const [userName, setUserName] = useState("Valeria");
+
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.user?.name) setUserName(d.user.name);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="flex">
       <Sidebar active={active} onChange={setActive} />
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <Topbar name="Maria" />
+        <Topbar name={userName} />
 
         <main className="flex flex-1 flex-col gap-6 px-6 pb-24 md:px-8 md:pb-10">
           {active === "Overview" && <OverviewTab />}
