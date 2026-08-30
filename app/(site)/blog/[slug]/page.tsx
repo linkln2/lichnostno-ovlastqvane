@@ -29,7 +29,19 @@ export default function BlogPostPage() {
 
   return (
     <article>
-      <section className="bg-gradient-to-b from-amber-50 to-stone-50 py-16 sm:py-20">
+      {/* Cover image */}
+      {post.cover && (
+        <div className="relative h-64 w-full overflow-hidden sm:h-80">
+          <img
+            src={post.cover}
+            alt={post.title[locale]}
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        </div>
+      )}
+
+      <section className={`bg-gradient-to-b from-amber-50 to-stone-50 py-16 sm:py-20 ${post.cover ? "pt-8" : ""}`}>
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <Link href="/blog" className="text-sm text-amber-700 hover:text-amber-800">
             ← {tr("nav_blog", locale)}

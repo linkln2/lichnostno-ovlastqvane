@@ -29,22 +29,35 @@ export default function BlogPage() {
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="group flex flex-col rounded-2xl border border-stone-200 bg-white p-6 transition-colors hover:border-amber-300 hover:bg-amber-50/40"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white transition-colors hover:border-amber-300 hover:shadow-lg"
             >
-              <time className="text-xs text-stone-400">
-                {formatDate(post.date, locale)}
-              </time>
-              <h2 className="mt-2 text-lg font-bold text-stone-900 group-hover:text-amber-800">
-                {post.title[locale]}
-              </h2>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">
-                {post.excerpt[locale]}
-              </p>
-              <div className="mt-4 flex items-center justify-between text-xs text-stone-400">
-                <span>{post.readTime[locale]}</span>
-                <span className="font-semibold text-amber-700 group-hover:text-amber-800">
-                  {tr("btn_read_more", locale)} →
-                </span>
+              {post.cover ? (
+                <div className="relative h-48 w-full overflow-hidden">
+                  <img
+                    src={post.cover}
+                    alt={post.title[locale]}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+              ) : (
+                <div className="h-2 w-full bg-gradient-to-r from-amber-400 to-amber-600" />
+              )}
+              <div className="flex flex-1 flex-col p-6">
+                <time className="text-xs text-stone-400">
+                  {formatDate(post.date, locale)}
+                </time>
+                <h2 className="mt-2 text-lg font-bold text-stone-900 group-hover:text-amber-800">
+                  {post.title[locale]}
+                </h2>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">
+                  {post.excerpt[locale]}
+                </p>
+                <div className="mt-4 flex items-center justify-between text-xs text-stone-400">
+                  <span>{post.readTime[locale]}</span>
+                  <span className="font-semibold text-amber-700 group-hover:text-amber-800">
+                    {tr("btn_read_more", locale)} →
+                  </span>
+                </div>
               </div>
             </Link>
           ))}
