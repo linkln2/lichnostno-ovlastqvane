@@ -169,7 +169,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         status: "paid",
         source: "event",
         totalCents: priceCents,
-        currency: session.currency || "bgn",
+        currency: session.currency || "eur",
         items: [
           {
             type: "event-ticket",
@@ -200,7 +200,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         status: "paid",
         source: "shop",
         totalCents: priceCents,
-        currency: session.currency || "bgn",
+        currency: session.currency || "eur",
         items: [
           {
             type: "product",

@@ -159,7 +159,7 @@ function fmtDate(iso: string) {
 }
 
 function fmtPrice(cents: number, currency = "eur") {
-  const symbols: Record<string, string> = { eur: "€", bgn: "лв", usd: "$" };
+  const symbols: Record<string, string> = { eur: "€", bgn: "€", usd: "$" };
   return `${symbols[currency] || "€"}${(cents / 100).toFixed(2)}`;
 }
 
@@ -1482,8 +1482,7 @@ export function SettingsTab() {
             <Field label="Support email"><input className={inputClass} defaultValue="info@lichnostno.bg" /></Field>
             <Field label="Currency">
               <select className={selectClass}>
-                <option>EUR (€)</option>
-                <option>BGN (лв)</option>
+                <option selected>EUR (€)</option>
                 <option>USD ($)</option>
               </select>
             </Field>

@@ -143,7 +143,7 @@ export const services: Service[] = [
     },
     format: { bg: "На живо, офлайн", en: "Live, in-person" },
     duration: { bg: "2 дни (уикенд)", en: "2 days (weekend)" },
-    price: { bg: "от 180 лв.", en: "from 180 BGN" },
+    price: { bg: "от 180 €", en: "from 180 EUR" },
   },
   {
     slug: "coaching",
@@ -173,7 +173,7 @@ export const services: Service[] = [
     },
     format: { bg: "Онлайн или на живо", en: "Online or in-person" },
     duration: { bg: "60–90 мин. на сесия", en: "60–90 min per session" },
-    price: { bg: "от 120 лв. / сесия", en: "from 120 BGN / session" },
+    price: { bg: "от 120 € / сесия", en: "from 120 EUR / session" },
   },
   {
     slug: "group-programs",
@@ -255,16 +255,16 @@ export const events: EventItem[] = [
         "Time for rest and integration in nature",
       ],
     },
-    price: { bg: "от 180 лв.", en: "from 180 BGN" },
+    price: { bg: "от 180 €", en: "from 180 EUR" },
     packages: [
       {
         name: { bg: "Стандартен", en: "Standard" },
-        price: { bg: "180 лв.", en: "180 BGN" },
+        price: { bg: "180 €", en: "180 EUR" },
         spots: { bg: "Достъп до всички сесии", en: "Access to all sessions" },
       },
       {
         name: { bg: "VIP", en: "VIP" },
-        price: { bg: "280 лв.", en: "280 BGN" },
+        price: { bg: "280 €", en: "280 EUR" },
         spots: {
           bg: "Първи ред + индивидуална сесия с Деница",
           en: "Front row + individual session with Denitsa",
@@ -519,7 +519,7 @@ export type ProductItem = {
   slug: string;
   name: Bi;
   category: ProductCategory;
-  price: number; // BGN
+  price: number; // EUR
   description: Bi;
 };
 

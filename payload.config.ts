@@ -429,7 +429,7 @@ const Orders: CollectionConfig = {
     {
       name: "currency",
       type: "text",
-      defaultValue: "bgn",
+      defaultValue: "eur",
     },
     {
       name: "items",

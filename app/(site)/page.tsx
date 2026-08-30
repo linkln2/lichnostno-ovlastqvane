@@ -420,7 +420,7 @@ export default function HomePage() {
                     </p>
                     <div className="mt-4 flex items-center justify-between">
                       <span className="font-bold text-amber-800">
-                        {p.price} {locale === "bg" ? "лв." : "BGN"}
+                        €{p.price}
                       </span>
                       <button
                         disabled
