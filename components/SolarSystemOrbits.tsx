@@ -47,8 +47,8 @@ export function SolarSystemOrbits({ className = "" }: { className?: string }) {
       cx = width / 2;
       cy = height / 2;
 
-      const maxR = Math.min(width, height) / 2 - 20;
-      orbitRadii = orbits.map((_, i) => 30 + (maxR - 30) * ((i + 1) / orbits.length));
+      const maxR = Math.max(Math.min(width, height) / 2 - 20, 10);
+      orbitRadii = orbits.map((_, i) => Math.max(30 + (maxR - 30) * ((i + 1) / orbits.length), 5));
 
       // Regenerate stars
       stars = [];
@@ -66,7 +66,7 @@ export function SolarSystemOrbits({ className = "" }: { className?: string }) {
     window.addEventListener("resize", resize);
 
     function drawDashedOrbit(r: number) {
-      if (!ctx) return;
+      if (!ctx || r <= 0) return;
       ctx.beginPath();
       ctx.setLineDash([3, 5]);
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -78,7 +78,7 @@ export function SolarSystemOrbits({ className = "" }: { className?: string }) {
 
     function drawCenterSun() {
       if (!ctx) return;
-      const sunR = Math.min(width, height) * 0.045;
+      const sunR = Math.max(Math.min(width, height) * 0.045, 2);
       // Outer glow
       const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, sunR * 3);
       gradient.addColorStop(0, "rgba(251, 191, 36, 0.5)");
@@ -114,7 +114,7 @@ export function SolarSystemOrbits({ className = "" }: { className?: string }) {
       color: string,
       trail: number,
     ) {
-      if (!ctx) return;
+      if (!ctx || r <= 0 || size <= 0) return;
       const x = cx + Math.cos(angle) * r;
       const y = cy + Math.sin(angle) * r;
 

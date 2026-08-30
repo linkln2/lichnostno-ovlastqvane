@@ -72,7 +72,7 @@ export default function AboutPage() {
                 {/* Glow */}
                 <div className="absolute inset-0 -m-4 rounded-full bg-amber-300/20 blur-2xl" />
                 <img
-                  src="/pictures/holy.png"
+                  src="/pictures/holy.webp"
                   alt={locale === "bg" ? "Свещенно" : "Sacred"}
                   className="relative z-10 h-96 w-auto rounded-2xl object-cover shadow-2xl sm:h-[32rem] lg:h-[40rem]"
                 />

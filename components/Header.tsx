@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocale } from "./LocaleProvider";
 import { tr, localeNames, type Locale } from "@/lib/i18n";
 import { site } from "@/lib/content";
@@ -19,6 +19,30 @@ export default function Header() {
   const { locale, setLocale } = useLocale();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string; isMember: boolean } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.user?.collection === "customers") {
+          // Check entitlements for membership status
+          fetch("/api/entitlements", { credentials: "include" })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((ent) => {
+              setUser({
+                name: data.user.name || data.user.email,
+                email: data.user.email,
+                isMember: ent?.hasActiveMembership || false,
+              });
+            })
+            .catch(() => {
+              setUser({ name: data.user.name || data.user.email, email: data.user.email, isMember: false });
+            });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -28,17 +52,11 @@ export default function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         {/* Logo + name */}
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-          {/* Light mode logo */}
+          {/* Logo — single img, CSS handles dark mode swap */}
           <img
             src="/logo.png"
             alt={locale === "bg" ? site.name : site.nameEn}
-            className="h-10 w-10 rounded-full object-cover dark:hidden"
-          />
-          {/* Dark mode logo */}
-          <img
-            src="/pictures/dark-mode-logo.png"
-            alt={locale === "bg" ? site.name : site.nameEn}
-            className="hidden h-10 w-10 rounded-full object-cover dark:block"
+            className="h-10 w-10 rounded-full object-cover"
           />
           <span className="hidden text-sm font-semibold tracking-tight text-stone-800 sm:block">
             {locale === "bg" ? site.name : site.nameEn}
@@ -60,9 +78,26 @@ export default function Header() {
               {tr(item.key, locale)}
             </Link>
           ))}
+          {/* Inner Circle — only for members */}
+          {user?.isMember && (
+            <Link
+              href="/inner-circle"
+              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-sm transition-colors ${
+                isActive("/inner-circle")
+                  ? "bg-amber-100 text-amber-900"
+                  : "text-amber-700 hover:bg-amber-50 hover:text-amber-800"
+              }`}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {locale === "bg" ? "Вътрешен кръг" : "Inner Circle"}
+            </Link>
+          )}
         </nav>
 
-        {/* Right: language + login + mobile toggle */}
+        {/* Right: language + auth + mobile toggle */}
         <div className="flex items-center gap-2">
           <div className="flex items-center rounded-full border border-stone-300 bg-white p-0.5">
             {(["bg", "en"] as Locale[]).map((l) => (
@@ -80,17 +115,37 @@ export default function Header() {
               </button>
             ))}
           </div>
-          <Link
-            href="/login"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-300 bg-white text-stone-600 transition-colors hover:bg-stone-800 hover:text-white"
-            aria-label={locale === "bg" ? "Вход" : "Login"}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-              <polyline points="10 17 15 12 10 7" />
-              <line x1="15" y1="12" x2="3" y2="12" />
-            </svg>
-          </Link>
+
+          {user ? (
+            /* Logged in — show Account button */
+            <Link
+              href="/account"
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all hover:shadow-md"
+              style={{ backgroundColor: "#fbbf24", color: "#000000" }}
+              aria-label={locale === "bg" ? "Профил" : "Account"}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span className="hidden sm:inline">{locale === "bg" ? "Профил" : "Account"}</span>
+            </Link>
+          ) : (
+            /* Not logged in — Enter Realm goes to membership tiers */
+            <Link
+              href="/membership"
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all hover:shadow-md"
+              style={{ backgroundColor: "#fbbf24", color: "#000000" }}
+              aria-label={locale === "bg" ? "Влез в царството" : "Enter Realm"}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <span className="hidden sm:inline">{locale === "bg" ? "Влез в царството" : "Enter Realm"}</span>
+            </Link>
+          )}
+
           {/* Mobile menu button */}
           <button
             className="flex h-9 w-9 items-center justify-center rounded-lg text-stone-700 hover:bg-stone-200 md:hidden"
@@ -126,12 +181,29 @@ export default function Header() {
                 {tr(item.key, locale)}
               </Link>
             ))}
+            {/* Inner Circle in mobile menu — only for members */}
+            {user?.isMember && (
+              <Link
+                href="/inner-circle"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-amber-700 hover:bg-amber-50"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                {locale === "bg" ? "Вътрешен кръг" : "Inner Circle"}
+              </Link>
+            )}
             <Link
-              href="/login"
+              href={user ? "/account" : "/membership"}
               onClick={() => setOpen(false)}
-              className="mt-1 rounded-lg border border-stone-300 px-3 py-2 text-center text-sm font-semibold text-stone-700"
+              className="mt-1 rounded-full px-4 py-2 text-center text-sm font-bold"
+              style={{ backgroundColor: "#fbbf24", color: "#000000" }}
             >
-              {locale === "bg" ? "Вход" : "Login"}
+              {user
+                ? (locale === "bg" ? "Профил" : "Account")
+                : (locale === "bg" ? "Влез в царството" : "Enter Realm")}
             </Link>
           </div>
         </nav>

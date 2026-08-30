@@ -31,13 +31,12 @@ export default function BlogPostPage() {
     <article>
       {/* Cover image */}
       {post.cover && (
-        <div className="relative h-64 w-full overflow-hidden sm:h-80">
+        <div className="relative w-full overflow-hidden">
           <img
             src={post.cover}
             alt={post.title[locale]}
-            className="h-full w-full object-cover"
+            className="max-h-[600px] w-full object-contain"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
       )}
 

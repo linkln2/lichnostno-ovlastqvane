@@ -19,21 +19,19 @@ export default function MembershipPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Portal form state
-  const [portalEmail, setPortalEmail] = useState("");
-  const [portalStatus, setPortalStatus] = useState<
-    "idle" | "loading" | "error" | "redirecting"
-  >("idle");
-  const [portalError, setPortalError] = useState("");
-
   // Checkout state
   const [checkoutTierId, setCheckoutTierId] = useState<number | null>(null);
   const [checkoutEmail, setCheckoutEmail] = useState("");
-  const [checkoutStatus, setCheckoutStatus] = useState<
-    "idle" | "loading" | "error"
-  >("idle");
+  const [checkoutStatus, setCheckoutStatus] = useState<"idle" | "loading" | "error">("idle");
   const [checkoutError, setCheckoutError] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
+
+  // Login state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [loginStatus, setLoginStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [loginError, setLoginError] = useState("");
 
   const t = {
     title: locale === "bg" ? "Членство" : "Membership",
@@ -45,32 +43,24 @@ export default function MembershipPage() {
     perYear: locale === "bg" ? "/ година" : "/ year",
     subscribe: locale === "bg" ? "Абонирай се" : "Subscribe",
     mostPopular: locale === "bg" ? "Най-популярен" : "Most popular",
-    choosePlan: locale === "bg" ? "Избери план" : "Choose a plan",
     noTiers:
       locale === "bg"
         ? "Все още няма планове за членство. Очаквайте скоро!"
         : "No membership plans available yet. Check back soon!",
-    manageTitle:
-      locale === "bg" ? "Управление на членството" : "Manage your membership",
-    manageBody:
-      locale === "bg"
-        ? "Въведи имейла си, за да достъпиш биллинг портала на Stripe, където можеш да промениш плана си, актуализираш карта или отмените абонамента."
-        : "Enter your email to access the Stripe billing portal, where you can change your plan, update your card, or cancel your subscription.",
-    emailLabel: locale === "bg" ? "Имейл" : "Email",
-    manageBtn: locale === "bg" ? "Отвори портала" : "Open portal",
-    enterEmail:
-      locale === "bg" ? "Въведи имейл за абонамент" : "Enter your email to subscribe",
+    enterEmail: locale === "bg" ? "Въведи имейл за абонамент" : "Enter your email to subscribe",
     continue: locale === "bg" ? "Продължи" : "Continue",
     cancel: locale === "bg" ? "Отказ" : "Cancel",
-    back: locale === "bg" ? "Обратно към сайта" : "Back to site",
+    // Login
+    memberLogin: locale === "bg" ? "Вече си член? Вход" : "Already a member? Log in",
+    email: locale === "bg" ? "Имейл" : "Email",
+    password: locale === "bg" ? "Парола" : "Password",
+    loading: locale === "bg" ? "Изчакайте…" : "Loading…",
   };
 
   const tierIconMap: Record<number, string> = {};
   const staticByPrice: Record<number, (typeof membershipTiers)[number]> = {};
   for (const tier of membershipTiers) {
-    if (tier.icon) {
-      tierIconMap[tier.price * 100] = tier.icon;
-    }
+    if (tier.icon) tierIconMap[tier.price * 100] = tier.icon;
     staticByPrice[tier.price * 100] = tier;
   }
 
@@ -99,29 +89,20 @@ export default function MembershipPage() {
   async function handleCheckoutSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!checkoutEmail || !checkoutTierId) return;
-
     setCheckoutStatus("loading");
     setCheckoutError("");
-
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode: "subscription",
-          tierId: checkoutTierId,
-          customerEmail: checkoutEmail,
-        }),
+        body: JSON.stringify({ mode: "subscription", tierId: checkoutTierId, customerEmail: checkoutEmail }),
       });
       const data = await res.json();
-
       if (!res.ok) {
         setCheckoutStatus("error");
         setCheckoutError(data.error || "Checkout failed");
         return;
       }
-
-      // Redirect to Stripe Checkout
       window.location.href = data.url;
     } catch {
       setCheckoutStatus("error");
@@ -129,73 +110,138 @@ export default function MembershipPage() {
     }
   }
 
-  async function handlePortalSubmit(e: React.FormEvent) {
+  async function handleLoginSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setPortalStatus("loading");
-    setPortalError("");
+    setLoginStatus("loading");
+    setLoginError("");
 
     try {
-      const res = await fetch("/api/portal", {
+      // Try staff first, then customer
+      const staffRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: portalEmail }),
+        credentials: "include",
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setPortalStatus("error");
-        setPortalError(
-          data.error ||
-            (locale === "bg"
-              ? "Не е намерен активен абонамент за този имейл."
-              : "No active subscription found for that email.")
-        );
+      if (staffRes.ok) {
+        window.location.href = "/dashboard";
         return;
       }
 
-      setPortalStatus("redirecting");
-      window.location.href = data.url;
+      const custRes = await fetch("/api/auth/customer-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+      });
+      if (custRes.ok) {
+        window.location.href = "/account";
+        return;
+      }
+
+      const custData = await custRes.json().catch(() => ({}));
+      setLoginStatus("error");
+      setLoginError(custData.error || (locale === "bg" ? "Невалидни данни" : "Invalid credentials"));
     } catch {
-      setPortalStatus("error");
-      setPortalError("Network error");
+      setLoginStatus("error");
+      setLoginError("Network error");
     }
   }
 
   return (
     <>
-      {/* Hero */}
-      <section className="bg-gradient-to-b from-amber-50 to-stone-50 py-16 sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
-          <h1 className="text-3xl font-bold text-stone-900 sm:text-4xl">
-            {t.title}
-          </h1>
-          <p className="mt-4 text-lg text-stone-600">{t.subtitle}</p>
+      {/* Hero + Login — two columns on desktop */}
+      <section className="bg-gradient-to-b from-amber-50 to-stone-50 py-12 sm:py-16">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 sm:px-6 md:flex-row md:items-stretch md:justify-between md:gap-12">
+          {/* Title — left */}
+          <div className="w-full text-center md:max-w-xl md:text-left">
+            <div className="rounded-2xl border-2 border-amber-500/30 bg-amber-50/50 px-6 py-6 shadow-sm sm:px-8 sm:py-8 md:flex md:h-full md:flex-col md:justify-center">
+              <h1 className="text-4xl font-black uppercase tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
+                {t.title}
+              </h1>
+              <p className="mt-4 text-lg text-stone-600">{t.subtitle}</p>
+            </div>
+          </div>
+
+          {/* Login box — right */}
+          <div className="w-full max-w-sm">
+            <p className="mb-3 text-center text-sm font-semibold text-stone-700 md:text-left">{t.memberLogin}</p>
+            <form
+              onSubmit={handleLoginSubmit}
+              className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm space-y-3"
+            >
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">{t.email}</label>
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  className="w-full rounded-lg border border-stone-300 bg-stone-50 px-4 py-2.5 text-sm text-stone-900 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">{t.password}</label>
+                <div className="relative">
+                  <input
+                    type={showLoginPassword ? "text" : "password"}
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    className="w-full rounded-lg border border-stone-300 bg-stone-50 px-4 py-2.5 pr-10 text-sm text-stone-900 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword((s) => !s)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-stone-400 hover:text-stone-600"
+                    aria-label={showLoginPassword ? "Hide" : "Show"}
+                  >
+                    {showLoginPassword ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                        <path d="M6.61 6.61A13.87 13.87 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                        <path d="M2 2l20 20" />
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {loginStatus === "error" && (
+                <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{loginError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loginStatus === "loading"}
+                className="w-full rounded-full bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-60"
+              >
+                {loginStatus === "loading" ? t.loading : t.continue}
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 
       {/* Tier cards */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 pt-4 pb-16 sm:px-6 sm:pt-5">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <svg
-              className="h-8 w-8 animate-spin text-amber-600"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="3"
-                opacity="0.2"
-              />
-              <path
-                d="M12 2a10 10 0 0 1 10 10"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
+            <svg className="h-8 w-8 animate-spin text-amber-600" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.2" />
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
             </svg>
           </div>
         ) : error ? (
@@ -209,16 +255,12 @@ export default function MembershipPage() {
               const isPopular = meta?.mostPopular ?? idx === 1;
               const displayName = meta ? meta.name[locale] : tier.name;
               const icon = meta?.icon ?? tierIconMap[tier.priceCents];
-              const perks = meta
-                ? meta.perks.map((p) => p[locale])
-                : tier.perks.map((p) => p.perk);
+              const perks = meta ? meta.perks.map((p) => p[locale]) : tier.perks.map((p) => p.perk);
               return (
                 <div
                   key={tier.id}
                   className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md sm:p-7 ${
-                    isPopular
-                      ? "border-amber-500 ring-2 ring-amber-500/20"
-                      : "border-stone-200"
+                    isPopular ? "border-amber-500 ring-2 ring-amber-500/20" : "border-stone-200"
                   }`}
                 >
                   {isPopular && (
@@ -226,71 +268,41 @@ export default function MembershipPage() {
                       {t.mostPopular}
                     </span>
                   )}
-
-                  {/* Icon left, text right */}
                   <div className="flex items-center gap-4">
                     {icon && (
-                      <img
-                        src={icon}
-                        alt={displayName}
-                        className="h-16 w-16 shrink-0 object-contain"
-                      />
+                      <img src={icon} alt={displayName} className="h-16 w-16 shrink-0 object-contain" />
                     )}
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-lg font-bold text-stone-900">
-                        {displayName}
-                      </h3>
+                      <h3 className="text-lg font-bold text-stone-900">{displayName}</h3>
                       <div className="mt-1 flex items-baseline gap-1">
-                        <span className="text-3xl font-bold text-stone-900">
-                          {fmtPrice(tier.priceCents)}
-                        </span>
+                        <span className="text-3xl font-bold text-stone-900">{fmtPrice(tier.priceCents)}</span>
                         <span className="text-sm text-stone-500">
                           {tier.interval === "month" ? t.perMonth : t.perYear}
                         </span>
                       </div>
                     </div>
                   </div>
-
-                  {/* Perks */}
                   {perks.length > 0 && (
                     <ul className="mt-5 flex-1 space-y-3">
                       {perks.map((p, i) => (
-                        <li
-                          key={i}
-                          className="flex items-start gap-2 text-sm text-stone-600"
-                        >
-                          <svg
-                            className="mt-0.5 h-4 w-4 shrink-0 text-amber-600"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                          >
-                            <path
-                              d="M20 6L9 17l-5-5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
+                        <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
+                          <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                           {p}
                         </li>
                       ))}
                     </ul>
                   )}
-
                   <button
                     onClick={() => handleSubscribe(tier.id)}
                     disabled={!tier.stripePriceId}
                     className={`mt-8 w-full rounded-full px-5 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                      isPopular
-                        ? "bg-amber-600 text-white hover:bg-amber-700"
-                        : "bg-stone-800 text-white hover:bg-stone-900"
+                      isPopular ? "bg-amber-600 text-white hover:bg-amber-700" : "bg-stone-800 text-white hover:bg-stone-900"
                     }`}
                   >
                     {!tier.stripePriceId
-                      ? locale === "bg"
-                        ? "Очаквайте скоро"
-                        : "Coming soon"
+                      ? locale === "bg" ? "Очаквайте скоро" : "Coming soon"
                       : t.subscribe}
                   </button>
                 </div>
@@ -300,71 +312,16 @@ export default function MembershipPage() {
         )}
       </section>
 
-      {/* Manage membership */}
-      <section className="bg-stone-100 py-16 sm:py-20">
-        <div className="mx-auto max-w-md px-4 sm:px-6">
-          <div className="rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
-            <h2 className="text-xl font-bold text-stone-900">
-              {t.manageTitle}
-            </h2>
-            <p className="mt-2 text-sm text-stone-600">{t.manageBody}</p>
-
-            <form onSubmit={handlePortalSubmit} className="mt-6 space-y-4">
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  {t.emailLabel}
-                </label>
-                <input
-                  type="email"
-                  value={portalEmail}
-                  onChange={(e) => setPortalEmail(e.target.value)}
-                  required
-                  className="w-full rounded-lg border border-stone-300 bg-stone-50 px-4 py-2.5 text-sm text-stone-900 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-                  placeholder="you@example.com"
-                />
-              </div>
-
-              {portalStatus === "error" && (
-                <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">
-                  {portalError}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={portalStatus === "loading" || portalStatus === "redirecting"}
-                className="w-full rounded-full bg-stone-800 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-stone-900 disabled:opacity-60"
-              >
-                {portalStatus === "loading"
-                  ? locale === "bg"
-                    ? "Отваряне…"
-                    : "Opening…"
-                  : portalStatus === "redirecting"
-                    ? locale === "bg"
-                      ? "Пренасочване…"
-                      : "Redirecting…"
-                    : t.manageBtn}
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-
       {/* Email modal for checkout */}
       {showEmailModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm"
-            onClick={() => setShowEmailModal(false)}
-          />
+          <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm" onClick={() => setShowEmailModal(false)} />
           <div className="relative z-10 w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-xl">
-            <h2 className="text-lg font-bold text-stone-900">
-              {t.enterEmail}
-            </h2>
+            <h2 className="text-lg font-bold text-stone-900">{t.enterEmail}</h2>
             <form onSubmit={handleCheckoutSubmit} className="mt-6 space-y-4">
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  {t.emailLabel}
+                  {locale === "bg" ? "Имейл" : "Email"}
                 </label>
                 <input
                   type="email"
@@ -376,13 +333,9 @@ export default function MembershipPage() {
                   placeholder="you@example.com"
                 />
               </div>
-
               {checkoutStatus === "error" && (
-                <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">
-                  {checkoutError}
-                </p>
+                <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{checkoutError}</p>
               )}
-
               <div className="flex items-center justify-end gap-3">
                 <button
                   type="button"
@@ -397,9 +350,7 @@ export default function MembershipPage() {
                   className="rounded-full bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-60"
                 >
                   {checkoutStatus === "loading"
-                    ? locale === "bg"
-                      ? "Отваряне…"
-                      : "Opening…"
+                    ? locale === "bg" ? "Отваряне…" : "Opening…"
                     : t.continue}
                 </button>
               </div>

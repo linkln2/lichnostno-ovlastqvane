@@ -95,7 +95,7 @@ export default function SiteLayout({
         <ThemeProvider>
           <LocaleProvider>
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="relative z-10 flex-1">{children}</main>
             <Footer />
             <CookieConsent />
           </LocaleProvider>

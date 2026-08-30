@@ -1,13 +1,14 @@
 import { generatePayloadCookie } from "payload";
 import { getPayloadInstance } from "@/lib/payload";
 
-// POST /api/auth/customer-login — customer login
-// Only allows login if the email has an active membership (subscription)
+// POST /api/auth/activate — set password for a member who subscribed via Stripe
+// but doesn't have a customer account yet. Verifies they have an active subscription.
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const email = String(body.email || "").trim().toLowerCase();
     const password = String(body.password || "");
+    const name = String(body.name || "").trim();
 
     if (!email || !password) {
       return Response.json(
@@ -16,9 +17,16 @@ export async function POST(request: Request) {
       );
     }
 
+    if (password.length < 6) {
+      return Response.json(
+        { error: "Password must be at least 6 characters" },
+        { status: 400 },
+      );
+    }
+
     const payload = await getPayloadInstance();
 
-    // Check if this email has an active subscription
+    // Verify this email has an active subscription
     const subsRes = await payload.find({
       collection: "subscriptions",
       where: { email: { equals: email } },
@@ -42,23 +50,42 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if a customer account exists for this email
-    const customerRes = await payload.find({
+    // Check if account already exists
+    const existing = await payload.find({
       collection: "customers",
       where: { email: { equals: email } },
       limit: 1,
       overrideAccess: true,
     });
 
-    if (customerRes.totalDocs === 0) {
-      // Subscription exists but no customer account — they need to set a password
+    if (existing.totalDocs > 0) {
       return Response.json(
-        { error: "Account not activated. Please set your password to activate your account.", needActivation: true },
-        { status: 403 },
+        { error: "Account already exists. Please log in instead." },
+        { status: 409 },
       );
     }
 
-    // Account exists — try login
+    // Create the customer account
+    const customer = await payload.create({
+      collection: "customers",
+      data: {
+        email,
+        password,
+        name: name || email.split("@")[0],
+        stripeCustomerId: sub.stripeCustomerId || undefined,
+      },
+      overrideAccess: true,
+    });
+
+    // Link the subscription to this customer
+    await payload.update({
+      collection: "subscriptions",
+      id: sub.id,
+      data: { customer: customer.id },
+      overrideAccess: true,
+    }).catch(() => {});
+
+    // Log them in
     const result = await payload.login({
       collection: "customers",
       data: { email, password },
@@ -67,8 +94,8 @@ export async function POST(request: Request) {
 
     if (!result.token) {
       return Response.json(
-        { error: "Invalid password" },
-        { status: 401 },
+        { error: "Account created but login failed. Please log in." },
+        { status: 500 },
       );
     }
 
@@ -79,17 +106,17 @@ export async function POST(request: Request) {
       token: result.token,
     });
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, customerId: customer.id }), {
       headers: {
         "Content-Type": "application/json",
         "Set-Cookie": cookieString,
       },
     });
   } catch (err) {
-    console.error("Customer login error:", err);
+    console.error("Activation error:", err);
     return Response.json(
-      { error: "Invalid credentials" },
-      { status: 401 },
+      { error: err instanceof Error ? err.message : "Activation failed" },
+      { status: 500 },
     );
   }
 }

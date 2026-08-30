@@ -7,6 +7,7 @@ import CountdownTimer from "@/components/CountdownTimer";
 import { generate } from "useinkjet";
 import { ParticleBurst } from "@/components/ParticleBurst";
 import { SolarSystemOrbits } from "@/components/SolarSystemOrbits";
+import { StarfieldBackground } from "@/components/StarfieldBackground";
 import { tr } from "@/lib/i18n";
 import {
   hero,
@@ -201,23 +202,28 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Dark space background + starfield — fixed, behind all content */}
+      <div className="fixed inset-0 z-0 bg-[#0a0a14]" />
+      <StarfieldBackground className="z-0 opacity-70" />
+
+      <div className="relative z-10">
       {/* Hero + countdown to next event */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-amber-50 via-stone-50 to-stone-50">
+      <section className="relative overflow-hidden bg-gradient-to-b from-amber-50/95 via-stone-50/90 to-stone-50/85">
         <div className="absolute inset-0 opacity-[0.04]" style={{
           backgroundImage: "radial-gradient(circle at 1px 1px, #292524 1px, transparent 0)",
           backgroundSize: "32px 32px",
         }} />
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+        <div className="relative mx-auto max-w-6xl px-4 py-20 bg-transparent sm:px-6 sm:py-28">
           {/* Top row: logo left, title + text right */}
           <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:gap-14">
             <div className="shrink-0">
               <img
-                src="/logo.png"
+                src="/logo.webp"
                 alt={locale === "bg" ? "Личностно овластяване — лого" : "Personal Empowerment — logo"}
                 className="h-44 w-44 rounded-full object-cover shadow-xl dark:hidden lg:h-56 lg:w-56"
               />
               <img
-                src="/pictures/dark-mode-logo.png"
+                src="/pictures/dark-mode-logo.webp"
                 alt={locale === "bg" ? "Личностно овластяване — лого" : "Personal Empowerment — logo"}
                 className="hidden h-44 w-44 rounded-full object-cover shadow-xl dark:block lg:h-56 lg:w-56"
               />
@@ -239,7 +245,7 @@ export default function HomePage() {
       </section>
 
       {/* Countdown with buy ticket */}
-      <section className="bg-stone-100 py-8 sm:py-10">
+      <section className="bg-stone-100/85 py-8 sm:py-10">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
           <h2 className="text-lg font-bold text-stone-800 sm:text-xl">
             {locale === "bg" ? "Голямото събитие идва скоро" : "The big event is coming soon"}
@@ -267,7 +273,7 @@ export default function HomePage() {
       </section>
 
       {/* Video feed */}
-      <section className="bg-stone-50 py-16 sm:py-20">
+      <section className="bg-stone-50/85 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
             {tr("feed_title", locale)}
@@ -356,7 +362,7 @@ export default function HomePage() {
       </section>
 
       {/* Shop */}
-      <section className="bg-white py-16 sm:py-20">
+      <section className="bg-white/85 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
             {tr("section_shop_title", locale)}
@@ -459,7 +465,7 @@ export default function HomePage() {
       </section>
 
       {/* Mission + Values — centered around holy.png with particles */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-amber-50/40 via-amber-50/20 to-stone-50 py-20 sm:py-28">
+      <section className="relative overflow-hidden bg-gradient-to-b from-amber-50/30 via-amber-50/15 to-stone-50/80 py-20 sm:py-28">
         {/* Particle burst effect */}
         <ParticleBurst />
 
@@ -506,7 +512,7 @@ export default function HomePage() {
                 {/* Glow */}
                 <div className="absolute inset-0 -m-4 rounded-full bg-amber-300/20 blur-2xl" />
                 <img
-                  src="/pictures/holy.png"
+                  src="/pictures/holy.webp"
                   alt={locale === "bg" ? "Седем дни на творението и четирите велики посвещения" : "The Seven Days of Creation and the Four Great Initiations"}
                   className="relative z-10 h-96 w-auto rounded-2xl object-cover shadow-2xl sm:h-[32rem] lg:h-[40rem]"
                 />
@@ -604,7 +610,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials preview */}
-      <section className="bg-white py-16 sm:py-20">
+      <section className="bg-white/85 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
             {tr("section_testimonials_title", locale)}
@@ -637,7 +643,7 @@ export default function HomePage() {
       </section>
 
       {/* Membership tiers */}
-      <section className="bg-stone-50 py-16 sm:py-20">
+      <section className="bg-stone-50/85 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
             {locale === "bg" ? "Членство" : "Membership"}
@@ -670,6 +676,7 @@ export default function HomePage() {
                     src={tier.icon}
                     alt={tier.name[locale]}
                     className="h-16 w-16 shrink-0 object-contain"
+                    loading="lazy"
                   />
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg font-bold text-stone-900">
@@ -727,7 +734,7 @@ export default function HomePage() {
       </section>
 
       {/* Recent posts */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <section className="mx-auto max-w-6xl px-4 py-16 bg-transparent sm:px-6 sm:py-20">
         <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
           {tr("section_recent_posts", locale)}
         </h2>
@@ -736,18 +743,30 @@ export default function HomePage() {
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="group rounded-2xl border border-stone-200 bg-white p-6 transition-colors hover:border-amber-300 hover:bg-amber-50/40"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white transition-colors hover:border-amber-300 hover:bg-amber-50/40"
             >
-              <time className="text-xs text-stone-400">{post.date}</time>
-              <h3 className="mt-2 font-semibold text-stone-900 group-hover:text-amber-800">
-                {post.title[locale]}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                {post.excerpt[locale]}
-              </p>
-              <span className="mt-3 inline-block text-xs text-stone-400">
-                {post.readTime[locale]}
-              </span>
+              {post.cover && (
+                <div className="aspect-video w-full overflow-hidden bg-stone-100">
+                  <img
+                    src={post.cover}
+                    alt={post.title[locale]}
+                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              <div className="flex flex-1 flex-col p-6">
+                <time className="text-xs text-stone-400">{post.date}</time>
+                <h3 className="mt-2 font-semibold text-stone-900 group-hover:text-amber-800">
+                  {post.title[locale]}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-stone-600">
+                  {post.excerpt[locale]}
+                </p>
+                <span className="mt-3 inline-block text-xs text-stone-400">
+                  {post.readTime[locale]}
+                </span>
+              </div>
             </Link>
           ))}
         </div>
@@ -831,6 +850,7 @@ export default function HomePage() {
           </div>
         </div>
       )}
+      </div>
     </>
   );
 }

@@ -46,7 +46,7 @@ export function Sidebar({
           className="h-9 w-9 rounded-full object-cover ring-2 ring-white/60 dark:hidden"
         />
         <img
-          src="/pictures/dark-mode-logo.png"
+          src="/pictures/dark-mode-logo.webp"
           alt="Logo"
           className="hidden h-9 w-9 rounded-full object-cover ring-2 ring-white/20 dark:block"
         />
