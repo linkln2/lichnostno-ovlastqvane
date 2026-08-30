@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { getPayloadInstance } from "@/lib/payload";
+import { generateQrToken } from "@/lib/qr";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -97,8 +98,17 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         phone: "",
         package: pkg.name,
         status: "confirmed",
+        qrToken: generateQrToken(0), // placeholder, updated after create
       } as any,
       overrideAccess: true,
+    }).then(async (reg: any) => {
+      // Update with the real QR token containing the registration ID
+      await payload.update({
+        collection: "registrations",
+        id: reg.id,
+        data: { qrToken: generateQrToken(reg.id) } as any,
+        overrideAccess: true,
+      });
     });
 
     await payload.create({
@@ -107,6 +117,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         stripeSessionId: session.id,
         stripePaymentIntentId: (session.payment_intent as string) || "",
         status: "paid",
+        source: "event",
         totalCents: priceCents,
         currency: session.currency || "bgn",
         items: [
@@ -137,6 +148,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         stripeSessionId: session.id,
         stripePaymentIntentId: (session.payment_intent as string) || "",
         status: "paid",
+        source: "shop",
         totalCents: priceCents,
         currency: session.currency || "bgn",
         items: [
@@ -150,6 +162,17 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       } as any,
       overrideAccess: true,
     });
+
+    // Decrement inventory for physical products
+    if (product.productType === "physical" && typeof product.inventory === "number") {
+      const newInventory = Math.max(0, product.inventory - 1);
+      await payload.update({
+        collection: "products",
+        id: product.id,
+        data: { inventory: newInventory },
+        overrideAccess: true,
+      });
+    }
   }
 }
 

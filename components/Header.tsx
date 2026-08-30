@@ -12,6 +12,8 @@ const navItems: { href: string; key: string }[] = [
   { href: "/about", key: "nav_about" },
   { href: "/services", key: "nav_services" },
   { href: "/events", key: "nav_events" },
+  { href: "/membership", key: "nav_membership" },
+  { href: "/shop", key: "nav_shop" },
   { href: "/testimonials", key: "nav_testimonials" },
   { href: "/feed", key: "nav_feed" },
   { href: "/blog", key: "nav_blog" },

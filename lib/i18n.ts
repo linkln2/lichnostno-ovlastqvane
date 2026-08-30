@@ -20,6 +20,8 @@ export const t: Dict = {
   nav_testimonials: { bg: "Отзиви", en: "Testimonials" },
   nav_blog: { bg: "Блог", en: "Blog" },
   nav_feed: { bg: "Видеа", en: "Videos" },
+  nav_membership: { bg: "Членство", en: "Membership" },
+  nav_shop: { bg: "Магазин", en: "Shop" },
   nav_contact: { bg: "Контакти", en: "Contact" },
   nav_register: { bg: "Запиши се", en: "Register" },
 

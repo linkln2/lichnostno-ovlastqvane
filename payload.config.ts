@@ -384,6 +384,14 @@ const Orders: CollectionConfig = {
       hasMany: false,
     },
     {
+      name: "source",
+      type: "select",
+      options: ["shop", "event", "subscription"],
+      admin: {
+        description: "Where this order originated — used for revenue breakdown",
+      },
+    },
+    {
       name: "stripeSessionId",
       type: "text",
       unique: true,

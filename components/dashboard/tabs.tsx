@@ -405,32 +405,11 @@ export function EventsTab() {
       {data?.docs.length === 0 ? (
         <EmptyState message="No events yet." onCreate={openCreate} createLabel="New event" />
       ) : (
-        <GlassCard>
-          <Table>
-            <THead>
-              <TR className="hover:bg-transparent">
-                <TH>Title</TH>
-                <TH>Location</TH>
-                <TH>Starts</TH>
-                <TH>Capacity</TH>
-                <TH>Status</TH>
-                <TH></TH>
-              </TR>
-            </THead>
-            <TBody>
-              {data?.docs.map((e) => (
-                <TR key={e.id}>
-                  <TD className="font-medium text-zinc-900">{e.title}</TD>
-                  <TD className="text-zinc-600">{e.location}</TD>
-                  <TD className="font-mono text-xs text-zinc-500">{fmtDate(e.startsAt)}</TD>
-                  <TD className="font-mono text-zinc-700">{e.capacity}</TD>
-                  <TD><Badge variant={eventStatusVariant[e.status] || "default"}>{e.status}</Badge></TD>
-                  <TD><RowActions onEdit={() => openEdit(e)} onDelete={() => handleDelete(e)} /></TD>
-                </TR>
-              ))}
-            </TBody>
-          </Table>
-        </GlassCard>
+        <div className="space-y-4">
+          {data?.docs.map((e) => (
+            <EventRow key={e.id} event={e} onEdit={() => openEdit(e)} onDelete={() => handleDelete(e)} />
+          ))}
+        </div>
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit event" : "New event"} className="max-w-2xl">
@@ -457,6 +436,167 @@ export function EventsTab() {
                 <option value="cancelled">Cancelled</option>
               </select>
             </Field>
+          </div>
+          {formError && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{formError}</p>}
+          <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update" : "Create"} />
+        </form>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── Event row with expandable ticket packages ───────────────────
+
+function EventRow({ event, onEdit, onDelete }: { event: any; onEdit: () => void; onDelete: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <GlassCard>
+      {/* Event header row */}
+      <div className="flex items-center gap-3 p-4">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex flex-1 items-center gap-3 text-left outline-none"
+        >
+          <svg
+            className={`h-4 w-4 shrink-0 text-zinc-400 transition-transform ${expanded ? "rotate-90" : ""}`}
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+          >
+            <path d="m9 18 6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium text-zinc-900">{event.title}</p>
+            <p className="truncate text-xs text-zinc-500">{event.location} · {fmtDate(event.startsAt)}</p>
+          </div>
+        </button>
+        <Badge variant={eventStatusVariant[event.status] || "default"}>{event.status}</Badge>
+        <span className="hidden font-mono text-xs text-zinc-500 sm:inline">cap: {event.capacity}</span>
+        <RowActions onEdit={onEdit} onDelete={onDelete} />
+      </div>
+
+      {/* Expanded: ticket packages */}
+      {expanded && <EventPackages eventId={event.id} />}
+    </GlassCard>
+  );
+}
+
+function EventPackages({ eventId }: { eventId: number }) {
+  const { data, loading, error, reload } = useFetch<{ docs: any[]; totalDocs: number }>(
+    `/api/dashboard/event-packages?eventId=${eventId}`
+  );
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    nameBg: "", nameEn: "", priceCents: "", priceDisplayBg: "", priceDisplayEn: "",
+    spotsBg: "", spotsEn: "", stripePriceId: "", capacity: "0",
+  });
+
+  function openCreate() {
+    setEditing(null);
+    setForm({ nameBg: "", nameEn: "", priceCents: "", priceDisplayBg: "", priceDisplayEn: "", spotsBg: "", spotsEn: "", stripePriceId: "", capacity: "0" });
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  function openEdit(p: any) {
+    setEditing(p);
+    setForm({
+      nameBg: "", nameEn: p.name || "",
+      priceCents: String(p.priceCents ?? ""),
+      priceDisplayBg: "", priceDisplayEn: p.priceDisplay || "",
+      spotsBg: "", spotsEn: p.spots || "",
+      stripePriceId: p.stripePriceId || "",
+      capacity: String(p.capacity ?? "0"),
+    });
+    setFormError(null);
+    setModalOpen(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setFormError(null);
+    try {
+      const payload = { ...form, eventId };
+      if (editing) {
+        await apiCall(`/api/dashboard/event-packages/${editing.id}`, "PATCH", payload);
+      } else {
+        await apiCall("/api/dashboard/event-packages", "POST", payload);
+      }
+      setModalOpen(false);
+      reload();
+    } catch (err) {
+      setFormError(String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(p: any) {
+    if (!confirm(`Delete package "${p.name}"?`)) return;
+    try {
+      await apiCall(`/api/dashboard/event-packages/${p.id}`, "DELETE");
+      reload();
+    } catch (err) {
+      alert(`Delete failed: ${err}`);
+    }
+  }
+
+  return (
+    <div className="border-t border-white/60 px-4 py-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h4 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Ticket packages</h4>
+        <button
+          onClick={openCreate}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-700 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-800"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Add tier
+        </button>
+      </div>
+
+      {loading ? (
+        <p className="py-4 text-center text-sm text-zinc-400">Loading…</p>
+      ) : error ? (
+        <p className="py-4 text-center text-sm text-rose-500">Error: {error}</p>
+      ) : data?.docs.length === 0 ? (
+        <p className="py-4 text-center text-sm text-zinc-400">No ticket packages yet. Add one to start selling.</p>
+      ) : (
+        <div className="space-y-2">
+          {data?.docs.map((p) => (
+            <div key={p.id} className="flex items-center gap-3 rounded-xl border border-white/60 bg-white/40 p-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-zinc-900">{p.name}</p>
+                <p className="text-xs text-zinc-500">
+                  {fmtPrice(p.priceCents)} · cap: {p.capacity || "∞"} · {p.stripePriceId ? "Stripe ✓" : "No Stripe ID"}
+                </p>
+              </div>
+              <RowActions onEdit={() => openEdit(p)} onDelete={() => handleDelete(p)} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit package" : "New ticket package"} className="max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Name (BG)"><input className={inputClass} value={form.nameBg} onChange={(e) => setForm({ ...form, nameBg: e.target.value })} placeholder="Български" /></Field>
+            <Field label="Name (EN)"><input className={inputClass} value={form.nameEn} onChange={(e) => setForm({ ...form, nameEn: e.target.value })} required placeholder="English" /></Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Price (cents)"><input type="number" className={inputClass} value={form.priceCents} onChange={(e) => setForm({ ...form, priceCents: e.target.value })} required placeholder="e.g. 8900 = €89.00" /></Field>
+            <Field label="Capacity"><input type="number" className={inputClass} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="0 = unlimited" /></Field>
+          </div>
+          <Field label="Stripe Price ID"><input className={inputClass} value={form.stripePriceId} onChange={(e) => setForm({ ...form, stripePriceId: e.target.value })} required placeholder="price_..." /></Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Price display (BG)"><input className={inputClass} value={form.priceDisplayBg} onChange={(e) => setForm({ ...form, priceDisplayBg: e.target.value })} placeholder="8900 лв" /></Field>
+            <Field label="Price display (EN)"><input className={inputClass} value={form.priceDisplayEn} onChange={(e) => setForm({ ...form, priceDisplayEn: e.target.value })} placeholder="€89" /></Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Spots included (BG)"><textarea className={inputClass} rows={2} value={form.spotsBg} onChange={(e) => setForm({ ...form, spotsBg: e.target.value })} placeholder="Какво включва..." /></Field>
+            <Field label="Spots included (EN)"><textarea className={inputClass} rows={2} value={form.spotsEn} onChange={(e) => setForm({ ...form, spotsEn: e.target.value })} placeholder="What's included..." /></Field>
           </div>
           {formError && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{formError}</p>}
           <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update" : "Create"} />
