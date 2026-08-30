@@ -1,7 +1,9 @@
-import { getPayloadInstance } from "@/lib/payload";
+import { getPayload } from "payload";
+import config from "@payload-config";
 
-// POST /api/migrate?key=SETUP_KEY — initializes Payload schema (creates tables)
-// Forces schema push even in production by temporarily setting NODE_ENV
+// POST /api/migrate?key=SETUP_KEY — creates all database tables by forcing
+// Drizzle schema push. Works in production by temporarily switching NODE_ENV
+// and auto-accepting any drizzle prompts.
 export async function POST(request: Request) {
   const url = new URL(request.url);
   const key = url.searchParams.get("key");
@@ -11,16 +13,17 @@ export async function POST(request: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  // Save original NODE_ENV and temporarily set to development
-  // so Payload's postgres adapter runs pushDevSchema
-  const originalNodeEnv = process.env.NODE_ENV;
+  // Force drizzle push and auto-accept prompts
   (process.env as any).NODE_ENV = "development";
+  (process.env as any).PAYLOAD_FORCE_DRIZZLE_PUSH = "true";
+
+  // Auto-accept prompts by patching stdin
+  const originalIsTTY = process.stdin.isTTY;
+  (process.stdin as any).isTTY = false;
 
   try {
-    // Clear any cached payload instance so it re-initializes
-    const payloadMod = await import("payload");
-    const configMod = await import("@payload-config");
-    const payload = await payloadMod.getPayload({ config: configMod.default });
+    // Get a fresh payload instance — this triggers connect() which calls pushDevSchema
+    const payload = await getPayload({ config });
 
     const collections = [
       "staff",
@@ -53,11 +56,10 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("Migration error:", err);
     return Response.json(
-      { error: "Migration failed", detail: err.message },
+      { error: "Migration failed", detail: err.message?.slice(0, 500) },
       { status: 500 },
     );
   } finally {
-    // Restore original NODE_ENV
-    (process.env as any).NODE_ENV = originalNodeEnv;
+    (process.stdin as any).isTTY = originalIsTTY;
   }
 }
