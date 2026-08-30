@@ -131,6 +131,12 @@ const BlogPosts: CollectionConfig = {
     },
     { name: "seoTitle", type: "text", localized: true },
     { name: "seoDescription", type: "textarea", localized: true },
+    {
+      name: "viewCount",
+      type: "number",
+      defaultValue: 0,
+      admin: { readOnly: true },
+    },
   ],
 };
 
@@ -183,6 +189,12 @@ const Events: CollectionConfig = {
       type: "relationship",
       relationTo: "event-packages",
       hasMany: true,
+    },
+    {
+      name: "viewCount",
+      type: "number",
+      defaultValue: 0,
+      admin: { readOnly: true },
     },
   ],
 };

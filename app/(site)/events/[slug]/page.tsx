@@ -63,6 +63,13 @@ export default function EventDetailPage() {
       })
       .catch(() => setNotFoundFlag(true))
       .finally(() => setLoading(false));
+
+    // Track page view (fire and forget)
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ collection: "events", slug: params.slug }),
+    }).catch(() => {});
   }, [params.slug]);
 
   if (notFoundFlag) return notFound();

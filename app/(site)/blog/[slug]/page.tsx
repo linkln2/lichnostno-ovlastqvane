@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useParams, notFound } from "next/navigation";
 import { useLocale } from "@/components/LocaleProvider";
@@ -10,6 +11,16 @@ export default function BlogPostPage() {
   const { locale } = useLocale();
   const params = useParams<{ slug: string }>();
   const post = getPostBySlug(params.slug);
+
+  useEffect(() => {
+    if (params.slug) {
+      fetch("/api/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ collection: "blog-posts", slug: params.slug }),
+      }).catch(() => {});
+    }
+  }, [params.slug]);
 
   if (!post) return notFound();
 

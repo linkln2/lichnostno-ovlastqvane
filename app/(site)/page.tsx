@@ -13,7 +13,6 @@ import {
   testimonials,
   blogPosts,
   site,
-  formatDate,
   formatDateRange,
   products,
   productCategories,

@@ -131,7 +131,7 @@ export default function Footer() {
             </Link>
           </div>
           <p className="mt-3 text-center text-xs text-stone-400">
-            © {year} {locale === "bg" ? site.name : site.nameEn}. {tr("footer_rights", locale)}
+            © {year} {locale === "bg" ? site.name : site.nameEn}. {tr("footer_rights", locale)}. Made with ❤️ by Georgi
           </p>
         </div>
       </div>
