@@ -84,6 +84,10 @@ body {
   animation: glowPulse 5s ease-in-out infinite;
 }
 
+.animate-spin-slow {
+  animation: spin 40s linear infinite;
+}
+
 /* Staggered delays for hero elements */
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }

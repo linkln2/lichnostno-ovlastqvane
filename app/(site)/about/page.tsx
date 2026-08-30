@@ -3,6 +3,7 @@
 import { useLocale } from "@/components/LocaleProvider";
 import { tr } from "@/lib/i18n";
 import { mission, values, team, localized } from "@/lib/content";
+import { ParticleBurst } from "@/components/ParticleBurst";
 
 export default function AboutPage() {
   const { locale } = useLocale();
@@ -23,14 +24,86 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Mission */}
-      <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-        <h2 className="text-2xl font-bold text-stone-900">
-          {tr("section_mission_title", locale)}
-        </h2>
-        <p className="mt-6 text-lg leading-relaxed text-stone-600">
-          {mission[locale]}
-        </p>
+      {/* Mission + Values — centered around holy.png */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-stone-50 via-amber-50/30 to-stone-50 py-20 sm:py-28">
+        {/* Particle burst effect */}
+        <ParticleBurst />
+
+        {/* Radial glow behind the image */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full opacity-40"
+          style={{
+            background: "radial-gradient(circle, rgba(251,191,36,0.3) 0%, rgba(251,191,36,0) 70%)",
+          }}
+        />
+
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+          {/* Section title */}
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-stone-900 sm:text-4xl">
+              {tr("section_mission_title", locale)}
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-stone-600">
+              {mission[locale]}
+            </p>
+          </div>
+
+          {/* Center image with values orbiting */}
+          <div className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-12">
+            {/* Left values (2) */}
+            <div className="space-y-6 lg:space-y-8">
+              {values.slice(0, 2).map((v, i) => (
+                <ValueCard
+                  key={v.title.en}
+                  title={v.title[locale]}
+                  desc={v.desc[locale]}
+                  icon={valueIcons[i]}
+                  align="right"
+                />
+              ))}
+            </div>
+
+            {/* Center image */}
+            <div className="flex justify-center">
+              <div className="relative">
+                {/* Rotating ring */}
+                <div className="absolute inset-0 -m-6 animate-spin-slow rounded-full border border-amber-300/30" style={{ animationDuration: "40s" }} />
+                <div className="absolute inset-0 -m-12 animate-spin-slow rounded-full border border-amber-200/20" style={{ animationDuration: "60s", animationDirection: "reverse" }} />
+                {/* Glow */}
+                <div className="absolute inset-0 -m-4 rounded-full bg-amber-300/20 blur-2xl" />
+                <img
+                  src="/pictures/holy.png"
+                  alt={locale === "bg" ? "Свещенно" : "Sacred"}
+                  className="relative z-10 h-64 w-auto rounded-2xl object-cover shadow-2xl ring-4 ring-white/60 sm:h-80 lg:h-96"
+                />
+              </div>
+            </div>
+
+            {/* Right values (2) */}
+            <div className="space-y-6 lg:space-y-8">
+              {values.slice(2, 4).map((v, i) => (
+                <ValueCard
+                  key={v.title.en}
+                  title={v.title[locale]}
+                  desc={v.desc[locale]}
+                  icon={valueIcons[i + 2]}
+                  align="left"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile: values below image in a grid */}
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:hidden">
+            {values.map((v, i) => (
+              <div key={v.title.en} className="rounded-2xl border border-amber-200/50 bg-white/70 p-5 backdrop-blur-sm">
+                <div className="mb-2 text-2xl">{valueIcons[i]}</div>
+                <h3 className="font-semibold text-amber-800">{v.title[locale]}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Story */}
@@ -72,21 +145,6 @@ export default function AboutPage() {
               </>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* Values */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="text-center text-2xl font-bold text-stone-900">
-          {tr("section_values_title", locale)}
-        </h2>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {values.map((v) => (
-            <div key={v.title.en} className="rounded-2xl border border-stone-200 bg-white p-6">
-              <h3 className="font-semibold text-amber-800">{v.title[locale]}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -132,5 +190,35 @@ export default function AboutPage() {
         </div>
       </section>
     </>
+  );
+}
+
+// ─── Value card component ────────────────────────────────────────
+
+const valueIcons = ["✦", "◉", "❋", "◈"];
+
+function ValueCard({
+  title,
+  desc,
+  icon,
+  align,
+}: {
+  title: string;
+  desc: string;
+  icon: string;
+  align: "left" | "right";
+}) {
+  return (
+    <div
+      className={`group rounded-2xl border border-amber-200/50 bg-white/70 p-6 backdrop-blur-sm transition-all hover:border-amber-300/80 hover:bg-white/90 hover:shadow-lg ${
+        align === "right" ? "lg:text-right" : "lg:text-left"
+      }`}
+    >
+      <div className={`mb-2 text-2xl text-amber-600 ${align === "right" ? "lg:text-right" : "lg:text-left"}`}>
+        {icon}
+      </div>
+      <h3 className="font-semibold text-amber-800">{title}</h3>
+      <p className="mt-1 text-sm leading-relaxed text-stone-600">{desc}</p>
+    </div>
   );
 }
