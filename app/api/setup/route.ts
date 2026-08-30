@@ -1,5 +1,6 @@
 import { getPayloadInstance } from "@/lib/payload";
 import { WHITELISTED_EMAILS } from "@/lib/auth";
+import { products } from "@/lib/content";
 
 // One-time setup endpoint: creates/syncs the whitelisted staff users.
 // Requires ?key=SETUP_KEY env var to prevent unauthorized password resets.
@@ -50,7 +51,34 @@ export async function POST(request: Request) {
       console.log(`Created staff user: ${email}`);
     }
 
-    return Response.json({ success: true, created });
+    const seededProducts = [];
+    for (const product of products) {
+      const found = await payload.find({
+        collection: "products",
+        where: { slug: { equals: product.slug } },
+        limit: 1,
+        overrideAccess: true,
+      });
+      if (found.docs.length > 0) {
+        continue;
+      }
+      const p = await payload.create({
+        collection: "products",
+        data: {
+          name: product.name.en,
+          slug: product.slug,
+          priceCents: product.price * 100,
+          category: product.category === "potions" ? "physical" : "merchandise",
+          productType: "physical",
+          inventory: 100,
+          status: "published",
+        } as any,
+        overrideAccess: true,
+      });
+      seededProducts.push({ id: p.id, slug: product.slug, name: product.name.en });
+    }
+
+    return Response.json({ success: true, created, products: seededProducts });
   } catch (err) {
     console.error("Setup error:", err);
     return Response.json(

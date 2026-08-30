@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import CountdownTimer from "@/components/CountdownTimer";
@@ -82,7 +82,8 @@ export default function HomePage() {
   const videoScrollRef = useRef<HTMLDivElement>(null);
   const productScrollRef = useRef<HTMLDivElement>(null);
 
-  const tribalPattern = useMemo(() => {
+  const [tribalPattern, setTribalPattern] = useState<string | null>(null);
+  useEffect(() => {
     const { svg } = generate({
       pattern: "tribal",
       color: "#f59e0b",
@@ -90,7 +91,7 @@ export default function HomePage() {
       scale: 1.8,
       seed: 7,
     });
-    return svg;
+    setTribalPattern(svg);
   }, []);
 
   const upcoming = events.filter((e) => e.status === "upcoming");
@@ -219,11 +220,11 @@ export default function HomePage() {
         }} />
         <div
           className="pointer-events-none absolute -right-12 -top-12 z-0 w-56 h-56 opacity-20 -rotate-6 sm:w-80 sm:h-80 [&_svg]:h-full [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: tribalPattern }}
+          dangerouslySetInnerHTML={{ __html: tribalPattern || "" }}
         />
         <div
           className="pointer-events-none absolute -left-8 bottom-0 z-0 w-40 h-40 opacity-15 rotate-12 sm:w-60 sm:h-60 [&_svg]:h-full [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: tribalPattern }}
+          dangerouslySetInnerHTML={{ __html: tribalPattern || "" }}
         />
         <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6">
           <h2 className="text-center text-3xl font-bold text-white sm:text-4xl lg:text-5xl">

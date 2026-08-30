@@ -1,6 +1,6 @@
 import { getPayload } from "payload";
 import config from "../payload.config";
-import { events, blogPosts } from "../lib/content";
+import { events, blogPosts, products } from "../lib/content";
 import { WHITELISTED_EMAILS } from "../lib/auth";
 
 async function seed() {
@@ -147,6 +147,37 @@ async function seed() {
       console.log(`Created blog post ${post.slug}`);
     } else {
       console.log(`Blog post ${post.slug} already exists`);
+    }
+  }
+
+  for (const product of products) {
+    const existing = await payload.find({
+      collection: "products",
+      where: { slug: { equals: product.slug } },
+      limit: 1,
+      overrideAccess: true,
+    });
+
+    if (existing.docs.length === 0) {
+      const category = product.category === "potions" ? "physical" : "merchandise";
+      const productType = "physical";
+      await payload.create({
+        collection: "products",
+        data: {
+          name: product.name.en,
+          slug: product.slug,
+          description: toLexical(product.description.bg),
+          priceCents: product.price * 100,
+          category,
+          productType,
+          inventory: 100,
+          status: "published",
+        } as any,
+        overrideAccess: true,
+      });
+      console.log(`Created product ${product.slug}`);
+    } else {
+      console.log(`Product ${product.slug} already exists`);
     }
   }
 
