@@ -24,6 +24,27 @@ export async function POST(request: Request) {
     }
 
     const payload = await getPayloadInstance();
+
+    // Auto-provision whitelisted staff user if they don't exist yet
+    const existing = await payload.find({
+      collection: "staff",
+      where: { email: { equals: email } },
+      limit: 1,
+      overrideAccess: true,
+    });
+    if (existing.docs.length === 0) {
+      await payload.create({
+        collection: "staff",
+        data: {
+          name: email.split("@")[0],
+          email,
+          role: "owner",
+          password,
+        } as any,
+        overrideAccess: true,
+      });
+    }
+
     const result = await payload.login({
       collection: "staff",
       data: { email, password },
