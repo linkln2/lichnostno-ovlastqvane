@@ -679,6 +679,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI,
     },
+    push: true,
   }),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "dev-secret-change-me",
