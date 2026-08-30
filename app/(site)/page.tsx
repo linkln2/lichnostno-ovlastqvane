@@ -114,7 +114,15 @@ export default function HomePage() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!data?.packages?.length) {
-          setTicketData(null);
+          setTicketData({
+            event: data,
+            pkg: {
+              id: "demo",
+              name: locale === "bg" ? "Демо билет" : "Demo ticket",
+              priceCents: 12500,
+              isDemo: true,
+            },
+          });
           return;
         }
         const pkg =
@@ -134,6 +142,10 @@ export default function HomePage() {
   async function handleBuyTicket(e: React.FormEvent) {
     e.preventDefault();
     if (!ticketData?.pkg) return;
+    if (ticketData.pkg.isDemo) {
+      setBuyError(locale === "bg" ? "Демо режим — плащането е изключено." : "Demo mode — payment is disabled.");
+      return;
+    }
     setBuyLoading(true);
     setBuyError(null);
     try {
