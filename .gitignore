@@ -45,3 +45,6 @@ next-env.d.ts
 
 # User-generated data (registrations, messages)
 /data/*.json
+
+# Generated video downloads — keep local
+/public/videos/

@@ -11,9 +11,39 @@
 | **Launch date** | **10 November 2026 (10.11.2026)** |
 | **Roadmap authored** | 29 August 2026 |
 | **Days remaining** | **73 days** (10 weeks + 3 days) |
-| **Status** | 🟡 In progress — scaffolding complete, pages pending |
+| **Status** | 🟡 In progress — Phase 0 complete (Payload + Postgres + dashboard UI), content migration next |
 
 The roadmap is organized into **4 phases** that fit within the 73-day window to launch. Each phase ends with a reviewable milestone. Dates are working targets and may shift — see [`docs/COUNTDOWN.md`](./docs/COUNTDOWN.md) for live tracking.
+
+> **Architecture pivot (30 Aug 2026):** The data layer moved from a local JSON
+> store to **Payload CMS + Postgres** per [`docs/ARCHITECTURE_v2.md`](./docs/ARCHITECTURE_v2.md).
+> Phase 0 (foundation) is complete: Payload is integrated with 14 collections,
+> the app is restructured into route groups `(site)` / `(payload)` /
+> `(dashboard)` to avoid nested `<html>`, and a Coaching Studio admin dashboard
+> UI is live at `/dashboard` with mock data (glassmorphism cards, momentum ring,
+> revenue trend chart, recent orders table, subscriber-tier donut). The
+> dashboard components take typed props (`RevenuePoint`, `TierSlice`, `Order`,
+> `EventRow` in `lib/dashboard-data.ts`) and are ready to wire to Payload
+> queries. The original Phase 1–4 plan below still applies for the public
+> marketing site; commerce phases follow the v2 architecture's Phase 1–6.
+
+---
+
+## Phase 0 — Platform Foundation  _(Complete · 30 Aug 2026)_
+
+> Goal: CMS + database in place, app structured for multiple surfaces.
+
+- [x] Integrate Payload CMS with Postgres adapter (`payload.config.ts`, 14 collections)
+- [x] Configure Next.js with `withPayload`, update importMap for Lexical editor
+- [x] Stand up Postgres via Docker Compose (`docker-compose.yml`, `postgres:16-alpine`)
+- [x] Restructure `app/` into route groups: `(site)`, `(payload)`, `(dashboard)` — each with its own root layout
+- [x] Build Coaching Studio dashboard UI at `/dashboard` (mock data, glassmorphism design system)
+- [x] Add dashboard primitives: `GlassCard`, `MomentumRing`, `StatCard`, `RevenueChart`, `UpcomingEventsList`, `RecentOrdersTable`, `SubscriberTierDonut`, `Sidebar`, `Topbar`
+- [x] Add UI primitives (`Card`, `Button`, `Input`, `Badge`, `Table`) + `cn` util
+- [x] Load Fraunces / Inter / JetBrains Mono via `next/font`; wire into Tailwind theme
+- [x] Production build passes; `/`, `/admin`, `/dashboard` all return 200
+
+**Milestone 0 — 30 Aug:** Payload + Postgres running, dashboard shell live, build green.
 
 ---
 

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import "./globals.css";
+import "../globals.css";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -16,9 +16,11 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default function SiteLayout({
   children,
-}: LayoutProps<"/">) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="bg" className="h-full antialiased">
       <body className="flex min-h-full flex-col bg-stone-50 text-stone-800">

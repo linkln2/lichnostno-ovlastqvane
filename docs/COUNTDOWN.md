@@ -11,7 +11,7 @@
 | **Target date** | 10 November 2026 |
 | **Roadmap start** | 29 August 2026 |
 | **Total duration** | 73 days (10 weeks + 3 days) |
-| **Current status** | 🟡 Phase 1 — Foundation & Layout |
+| **Current status** | 🟡 Phase 1 — Content migration & data wiring (Phase 0 complete) |
 
 > **Update this file weekly** with the current day count and phase status.
 
@@ -120,5 +120,7 @@ Record significant status changes here (most recent first):
 
 | Date | Update | By |
 | --- | --- | --- |
+| 30 Aug 2026 | Coaching Studio dashboard UI built at `/dashboard` (glassmorphism, momentum ring, revenue chart, orders table, subscriber donut) with mock data — ready to wire to Payload collections. | Devin |
+| 30 Aug 2026 | Phase 0 complete: Payload CMS + Postgres integrated, app restructured into route groups `(site)` / `(payload)` / `(dashboard)`, build passes. | Devin |
 | 29 Aug 2026 | Roadmap created. 73 days to launch. Phase 1 starting. | — |
 | | | |

@@ -46,6 +46,7 @@ export const t: Dict = {
   },
   feed_tiktok: { bg: "TikTok", en: "TikTok" },
   feed_facebook: { bg: "Facebook", en: "Facebook" },
+  feed_instagram: { bg: "Instagram", en: "Instagram" },
   feed_all: { bg: "Всички", en: "All" },
   feed_empty: {
     bg: "Все още няма добавени видеа. Очаквайте скоро!",
@@ -55,6 +56,19 @@ export const t: Dict = {
     bg: "Последвай ни в TikTok за още видеа",
     en: "Follow us on TikTok for more videos",
   },
+
+  // Shop
+  section_shop_title: { bg: "Магазин", en: "Shop" },
+  section_shop_subtitle: {
+    bg: "Продукти, които носят съзнателна енергия в ежедневието.",
+    en: "Products that bring conscious energy into everyday life.",
+  },
+  shop_all: { bg: "Всички", en: "All" },
+  shop_cat_bracelets: { bg: "Гривни", en: "Bracelets" },
+  shop_cat_crystals: { bg: "Кристали", en: "Crystals" },
+  shop_cat_potions: { bg: "Елексири", en: "Potions" },
+  shop_buy: { bg: "Купи", en: "Buy" },
+  shop_soon: { bg: "Очаквайте скоро", en: "Coming soon" },
 
   // Buttons / common
   btn_register: { bg: "Запиши се за събитието", en: "Register for event" },

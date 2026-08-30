@@ -445,9 +445,11 @@ export const launchDate = "2026-11-10T10:00:00";
 
 export type VideoItem = {
   id: string; // unique internal id
-  platform: "tiktok" | "facebook";
-  url: string; // full URL to the video/post
+  platform: "tiktok" | "instagram" | "facebook";
+  url?: string; // full URL to the video/post
   videoId?: string; // TikTok numeric video ID (extracted from URL)
+  src?: string; // local video path after fetching
+  poster?: string; // local poster/thumbnail path
   caption: Bi;
   date: string; // ISO date for sorting
 };
@@ -507,4 +509,90 @@ export function getVideosByPlatform(platform: "all" | "tiktok" | "facebook"): Vi
   const sorted = [...videos].sort((a, b) => b.date.localeCompare(a.date));
   if (platform === "all") return sorted;
   return sorted.filter((v) => v.platform === platform);
+}
+
+// ─── Demo shop products ─────────────────────────────────────────────────────
+
+export type ProductCategory = "bracelets" | "crystals" | "potions";
+
+export type ProductItem = {
+  slug: string;
+  name: Bi;
+  category: ProductCategory;
+  price: number; // BGN
+  description: Bi;
+};
+
+export const productCategories: { key: ProductCategory; label: Bi }[] = [
+  { key: "bracelets", label: { bg: "Гривни", en: "Bracelets" } },
+  { key: "crystals", label: { bg: "Кристали", en: "Crystals" } },
+  { key: "potions", label: { bg: "Елексири", en: "Potions" } },
+];
+
+export const products: ProductItem[] = [
+  {
+    slug: "bracelet-clarity",
+    name: { bg: "Гривна за яснота", en: "Clarity bracelet" },
+    category: "bracelets",
+    price: 28,
+    description: {
+      bg: "Натурални камъни, носещи фокус и вътрешна яснота.",
+      en: "Natural stones bringing focus and inner clarity.",
+    },
+  },
+  {
+    slug: "bracelet-protection",
+    name: { bg: "Гривна за защита", en: "Protection bracelet" },
+    category: "bracelets",
+    price: 32,
+    description: {
+      bg: "Черен обсидиан и хематит за енергийна граница.",
+      en: "Black obsidian and hematite for energetic boundaries.",
+    },
+  },
+  {
+    slug: "crystal-amethyst",
+    name: { bg: "Кристал Аметист", en: "Amethyst crystal" },
+    category: "crystals",
+    price: 24,
+    description: {
+      bg: "Успокояваща енергия за медитация и сън.",
+      en: "Calming energy for meditation and sleep.",
+    },
+  },
+  {
+    slug: "crystal-rose-quartz",
+    name: { bg: "Розов кварц", en: "Rose quartz" },
+    category: "crystals",
+    price: 22,
+    description: {
+      bg: "Нежна вибрация за любов и състрадание.",
+      en: "Gentle vibration for love and compassion.",
+    },
+  },
+  {
+    slug: "potion-meditation-oil",
+    name: { bg: "Масло за медитация", en: "Meditation oil" },
+    category: "potions",
+    price: 35,
+    description: {
+      bg: "Ароматна смес за дълбоко съсредоточаване.",
+      en: "Aromatic blend for deep concentration.",
+    },
+  },
+  {
+    slug: "potion-moon-elixir",
+    name: { bg: "Лунен еликсир", en: "Moon elixir" },
+    category: "potions",
+    price: 42,
+    description: {
+      bg: "Енергийна вода за работа с лунните цикли.",
+      en: "Energetic water for working with moon cycles.",
+    },
+  },
+];
+
+export function getProductsByCategory(category: "all" | ProductCategory): ProductItem[] {
+  if (category === "all") return products;
+  return products.filter((p) => p.category === category);
 }

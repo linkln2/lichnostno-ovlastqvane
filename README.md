@@ -31,9 +31,11 @@ This web app serves as the public face of **Личностно овластяв�
 | Area | Description |
 | --- | --- |
 | **Marketing pages** | Home, About, Services, Events, Testimonials, Blog, Contact |
-| **Event registration** | Form-based registration saved to a local JSON store (no payments yet) |
+| **Event registration** | Form-based registration (being migrated to Payload/Postgres) |
 | **Bilingual content** | Full Bulgarian + English support with a language toggle |
 | **Newsletter & contact** | Lead-capture forms for newsletter sign-ups and general inquiries |
+| **Admin dashboard** | Coaching Studio dashboard at `/dashboard` — glassmorphism UI with revenue trend, orders, subscriber tiers, and upcoming events (mock data, ready to wire to Payload) |
+| **CMS** | Payload CMS at `/admin` — manages blog, events, products, media, and staff auth (Postgres-backed) |
 
 The site is content-driven and designed to be easy to maintain, with placeholder content based on publicly available information from the initiative's Facebook presence.
 
@@ -41,39 +43,58 @@ The site is content-driven and designed to be easy to maintain, with placeholder
 
 | Layer | Technology |
 | --- | --- |
-| Framework | [Next.js 16](https://nextjs.org) (App Router) |
+| Framework | [Next.js 16](https://nextjs.org) (App Router, Turbopack) |
 | Language | [TypeScript 5](https://www.typescriptlang.org) |
 | UI | [React 19](https://react.dev) |
 | Styling | [Tailwind CSS 4](https://tailwindcss.com) |
-| Fonts | `next/font` (Geist) |
+| Fonts | `next/font` — Fraunces (serif), Inter (UI), JetBrains Mono (data) |
+| CMS + Admin | [Payload CMS 3](https://payloadcms.com) (self-hosted, embedded in the app) |
+| Database | [Postgres 16](https://www.postgresql.org) (via Payload's Postgres adapter, Docker Compose for dev) |
+| Charts | [Recharts](https://recharts.org) (dashboard) |
+| Icons | [lucide-react](https://lucide.dev) |
 | Hosting | [Netlify](https://www.netlify.com) (OpenNext adapter, auto-detected) |
-| Data store | Local JSON file (`data/registrations.json`) — see [Roadmap](./ROADMAP.md) for upgrade plan |
 
 > **Note on Next.js 16:** This version introduces breaking changes versus earlier releases. Before writing framework code, consult the bundled guides in `node_modules/next/dist/docs/` (see `AGENTS.md`).
+>
+> **Architecture:** The data layer uses Payload CMS + Postgres (see [`docs/ARCHITECTURE_v2.md`](./docs/ARCHITECTURE_v2.md)). The app is split into three route groups, each with its own root layout: `(site)` for public pages, `(payload)` for the CMS admin, and `(dashboard)` for the Coaching Studio dashboard.
 
 ## Project Structure
 
 ```
 webapp/
-├── app/                    # Next.js App Router (pages, layouts, routes)
-│   ├── layout.tsx          # Root layout (fonts, metadata, shell)
-│   ├── page.tsx            # Home page
-│   ├── globals.css         # Global styles + Tailwind directives
-│   └── favicon.ico
+├── app/                        # Next.js App Router — route groups
+│   ├── (site)/                 #   Public marketing site (own root layout)
+│   │   ├── layout.tsx          #     html/body, Header/Footer/LocaleProvider
+│   │   ├── page.tsx            #     Home page
+│   │   ├── about|services|…    #     Marketing pages
+│   │   └── not-found.tsx
+│   ├── (payload)/              #   Payload CMS admin (own root layout)
+│   │   ├── admin/              #     /admin — generated admin UI
+│   │   ├── api/[…slug]/        #     Payload REST/GraphQL API
+│   │   └── layout.tsx
+│   ├── (dashboard)/            #   Coaching Studio dashboard (own root layout)
+│   │   ├── layout.tsx          #     fonts + background blobs
+│   │   └── dashboard/page.tsx  #     /dashboard
+│   ├── api/                    #   App API routes (register, contact)
+│   └── globals.css             #   Tailwind + design tokens + animations
+├── components/
+│   ├── ui/                     #   shadcn-style primitives (card, button, …)
+│   ├── dashboard/              #   Dashboard components (GlassCard, charts, …)
+│   └── Header|Footer|…         #   Site components
 ├── lib/
-│   └── i18n.ts             # Translation dictionary + helpers (BG / EN)
-├── data/                   # Local JSON data store (registrations, etc.)
-├── public/                 # Static assets (logo, images)
-├── docs/                   # Project documentation
-├── AGENTS.md               # AI-agent rules (Next.js 16 guidance)
-├── CLAUDE.md               # Agent rules pointer
-├── CONTRIBUTING.md         # Contribution guidelines
-├── ROADMAP.md              # Project roadmap & launch countdown
-├── netlify.toml            # Netlify build configuration
-├── next.config.ts          # Next.js configuration
-├── tsconfig.json           # TypeScript configuration
-├── postcss.config.mjs      # PostCSS / Tailwind configuration
-└── package.json            # Dependencies & scripts
+│   ├── i18n.ts                 #   Translation dictionary + helpers (BG / EN)
+│   ├── content.ts              #   Static bilingual content (migrating to Payload)
+│   ├── dashboard-data.ts       #   Typed mock data + shapes for the dashboard
+│   └── utils.ts                #   cn() class merge helper
+├── data/                       #   Legacy JSON store (being phased out)
+├── docs/                       #   Project documentation
+├── payload.config.ts           #   Payload CMS config (14 collections)
+├── docker-compose.yml          #   Postgres for local dev
+├── AGENTS.md                   #   AI-agent rules (Next.js 16 guidance)
+├── ROADMAP.md                  #   Project roadmap & launch countdown
+├── netlify.toml                #   Netlify build configuration
+├── next.config.ts              #   Next.js config (withPayload)
+└── package.json                #   Dependencies & scripts
 ```
 
 ## Getting Started
@@ -82,16 +103,26 @@ webapp/
 
 - [Node.js](https://nodejs.org) **20+**
 - npm (bundled with Node.js)
+- [Docker](https://www.docker.com) (for local Postgres via `docker-compose.yml`)
 
 ### Install & run
 
 ```bash
+# Start local Postgres
+docker compose up -d
+
 # Install dependencies
 npm install
 
-# Start the dev server (http://localhost:3000)
+# Start the dev server (http://localhost:3001 if 3000 is taken)
 npm run dev
 ```
+
+| Surface | URL | Description |
+| --- | --- | --- |
+| Public site | `/` | Marketing pages (BG/EN) |
+| CMS admin | `/admin` | Payload admin UI (create first staff user on first visit) |
+| Studio dashboard | `/dashboard` | Coaching dashboard (mock data) |
 
 ### Production build
 
@@ -116,7 +147,15 @@ See [`docs/I18N.md`](./docs/I18N.md) for the full guide on adding and using tran
 
 ## Environment Variables
 
-No environment variables are required for local development. Production secrets (email service, analytics, etc.) will be added as the project grows — see the [Roadmap](./ROADMAP.md).
+Local dev requires a `.env` file (see `.env.example`) with:
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URI` | Postgres connection string for Payload |
+| `PAYLOAD_SECRET` | Payload session/token signing secret |
+| `NEXT_PUBLIC_SERVER_URL` | Public base URL of the app |
+
+Production secrets (Stripe, Resend, analytics) will be added as commerce phases land — see the [Roadmap](./ROADMAP.md).
 
 ## Deployment
 
@@ -129,7 +168,8 @@ See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) for the complete deployment gui
 | Document | Description |
 | --- | --- |
 | [ROADMAP.md](./ROADMAP.md) | Phased project plan with launch countdown to **10.11.2026** |
-| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Architecture, tech decisions, and code conventions |
+| [docs/ARCHITECTURE_v2.md](./docs/ARCHITECTURE_v2.md) | Current architecture: Payload CMS + Postgres + Stripe + Resend (replaces v1) |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Original v1 architecture (JSON store — superseded, kept for reference) |
 | [docs/CONTENT_GUIDELINES.md](./docs/CONTENT_GUIDELINES.md) | Bilingual content strategy and tone of voice |
 | [docs/I18N.md](./docs/I18N.md) | Internationalization system guide |
 | [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) | Deployment & hosting guide |
