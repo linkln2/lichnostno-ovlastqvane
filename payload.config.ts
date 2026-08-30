@@ -535,6 +535,13 @@ const Subscriptions: CollectionConfig = {
       hasMany: false,
     },
     {
+      name: "email",
+      type: "text",
+      admin: {
+        description: "Used for portal lookup without customer login",
+      },
+    },
+    {
       name: "tier",
       type: "relationship",
       relationTo: "subscription-tiers",
@@ -544,6 +551,10 @@ const Subscriptions: CollectionConfig = {
       name: "stripeSubscriptionId",
       type: "text",
       unique: true,
+    },
+    {
+      name: "stripeCustomerId",
+      type: "text",
     },
     {
       name: "status",

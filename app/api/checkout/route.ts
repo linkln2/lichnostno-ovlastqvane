@@ -1,13 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, createSubscriptionCheckoutSession } from "@/lib/stripe";
 import { getPayloadInstance } from "@/lib/payload";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { eventPackageId, productId, customerEmail, mode = "payment" } = body;
+    const { eventPackageId, productId, tierId, customerEmail, mode = "payment" } = body;
 
+    const origin =
+      process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
+
+    // ─── Subscription checkout ──────────────────────────────────
+    if (mode === "subscription" || tierId) {
+      if (!tierId) {
+        return NextResponse.json(
+          { error: "Tier ID is required for subscription checkout" },
+          { status: 400 }
+        );
+      }
+
+      const payload = await getPayloadInstance();
+      const tier = await payload.findByID({
+        collection: "subscription-tiers",
+        id: tierId,
+      });
+
+      if (!tier || !tier.stripePriceId) {
+        return NextResponse.json(
+          { error: "Tier not configured for Stripe" },
+          { status: 400 }
+        );
+      }
+
+      const session = await createSubscriptionCheckoutSession({
+        priceId: tier.stripePriceId as string,
+        customerEmail: customerEmail || "",
+        successUrl: `${origin}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${origin}/membership`,
+      });
+
+      return NextResponse.json({ url: session.url });
+    }
+
+    // ─── One-time payment checkout (products + event tickets) ───
     if (!eventPackageId && !productId) {
       return NextResponse.json(
         { error: "No item selected" },
@@ -52,9 +88,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    const origin =
-      process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
 
     const session = await getStripe().checkout.sessions.create({
       mode: mode as Stripe.Checkout.SessionCreateParams.Mode,

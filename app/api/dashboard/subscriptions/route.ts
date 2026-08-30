@@ -14,9 +14,11 @@ export async function GET(request: Request) {
     docs: docs.map((s) => ({
       id: s.id,
       status: s.status,
+      email: s.email,
       customer: s.customer,
       tier: s.tier,
       stripeSubscriptionId: s.stripeSubscriptionId,
+      stripeCustomerId: s.stripeCustomerId,
       currentPeriodStart: s.currentPeriodStart,
       currentPeriodEnd: s.currentPeriodEnd,
       cancelAtPeriodEnd: s.cancelAtPeriodEnd,

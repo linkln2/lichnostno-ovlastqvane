@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sidebar, Topbar } from "./Sidebar";
+import { Sidebar, Topbar, nav } from "./Sidebar";
 import { StatCard } from "./StatCard";
 import { MomentumRing } from "./MomentumRing";
 import { RevenueChart } from "./RevenueChart";
@@ -32,7 +32,7 @@ export function DashboardShell() {
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <Topbar name="Maria" />
 
-        <main className="flex flex-1 flex-col gap-6 px-6 pb-10 md:px-8">
+        <main className="flex flex-1 flex-col gap-6 px-6 pb-24 md:px-8 md:pb-10">
           {active === "Overview" && <OverviewTab />}
           {active === "Events" && <EventsTab />}
           {active === "Blog" && <BlogTab />}
@@ -41,6 +41,28 @@ export function DashboardShell() {
           {active === "Subscribers" && <SubscribersTab />}
           {active === "Settings" && <SettingsTab />}
         </main>
+
+        {/* Mobile bottom navigation */}
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/60 bg-white/80 px-2 py-2 backdrop-blur-xl md:hidden">
+          <ul className="flex justify-around">
+            {nav.map((item) => {
+              const isActive = active === item.label;
+              return (
+                <li key={item.label}>
+                  <button
+                    onClick={() => setActive(item.label)}
+                    className={`flex flex-col items-center gap-0.5 rounded-lg p-1 text-[10px] font-medium ${
+                      isActive ? "text-indigo-700" : "text-zinc-500"
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
       </div>
     </div>
   );

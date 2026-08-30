@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; icon: LucideIcon; active?: boolean };
 
-const nav: NavItem[] = [
+export const nav: NavItem[] = [
   { label: "Overview", icon: LayoutDashboard },
   { label: "Events", icon: CalendarDays },
   { label: "Blog", icon: FileText },
