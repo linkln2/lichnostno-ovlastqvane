@@ -23,6 +23,12 @@ export async function GET(
     }
 
     const p = docs[0] as any;
+    const staticProduct = products.find((sp) => sp.slug === p.slug);
+    const firstImage = p.images?.[0];
+    const imageUrl =
+      (firstImage?.sizes?.thumbnail?.url || firstImage?.url) ??
+      staticProduct?.image ??
+      null;
     return Response.json({
       id: p.id,
       name: p.name,
@@ -35,6 +41,7 @@ export async function GET(
       images: p.images || [],
       description: p.description,
       downloadFile: p.downloadFile,
+      image: imageUrl,
     });
   } catch (err) {
     console.error("Error fetching product:", err);

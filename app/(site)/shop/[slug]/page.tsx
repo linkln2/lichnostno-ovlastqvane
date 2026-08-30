@@ -14,6 +14,7 @@ type Product = {
   productType: string;
   inventory: number;
   images: any[];
+  image?: string;
   description: any;
 };
 
@@ -152,7 +153,7 @@ export default function ProductDetailPage() {
 
   const soldOut = isSoldOut();
   const mainImg = product.images?.[0];
-  const mainImgUrl = imageUrl(mainImg);
+  const mainImgUrl = imageUrl(mainImg) || product.image;
 
   return (
     <>

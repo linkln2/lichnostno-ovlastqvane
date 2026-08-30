@@ -13,6 +13,7 @@ type Product = {
   productType: string;
   inventory: number;
   images: any[];
+  image?: string;
 };
 
 export default function ShopPage() {
@@ -86,7 +87,7 @@ export default function ShopPage() {
           <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
             {products.map((p) => {
               const img = p.images?.[0];
-              const url = imageUrl(img);
+              const url = imageUrl(img) || p.image;
               const soldOut = isSoldOut(p);
               return (
                 <Link
