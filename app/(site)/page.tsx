@@ -76,6 +76,10 @@ const valueIcons = [
   <svg key="3" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
 ];
 
+const ankhPattern = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M50 12 C30 12 18 24 18 40 C18 52 28 60 40 62 L40 92 L60 92 L60 62 C72 60 82 52 82 40 C82 24 70 12 50 12 Z" /><path d="M50 62 L50 92" stroke-width="5" /><path d="M25 78 L75 78" stroke-width="5" /></svg>`;
+
+const merkabaPattern = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2"><path d="M50 8 L88 78 L12 78 Z" /><path d="M50 92 L88 22 L12 22 Z" /><circle cx="50" cy="50" r="28" stroke-width="1.5" opacity="0.4" /></svg>`;
+
 export default function HomePage() {
   const { locale } = useLocale();
   const [videoTab, setVideoTab] = useState<"all" | "tiktok" | "instagram">("all");
@@ -90,16 +94,25 @@ export default function HomePage() {
   const videoScrollRef = useRef<HTMLDivElement>(null);
   const productScrollRef = useRef<HTMLDivElement>(null);
 
-  const [tribalPattern, setTribalPattern] = useState<string | null>(null);
+  const [aztecPattern, setAztecPattern] = useState<string | null>(null);
+  const [flowerPattern, setFlowerPattern] = useState<string | null>(null);
   useEffect(() => {
-    const { svg } = generate({
-      pattern: "tribal",
+    const { svg: aztecSvg } = generate({
+      pattern: "aztec",
       color: "#f59e0b",
       background: "none",
-      scale: 1.8,
+      scale: 1.6,
       seed: 7,
     });
-    setTribalPattern(svg);
+    const { svg: flowerSvg } = generate({
+      pattern: "flower-of-life",
+      color: "#f59e0b",
+      background: "none",
+      scale: 1.4,
+      seed: 11,
+    });
+    setAztecPattern(aztecSvg);
+    setFlowerPattern(flowerSvg);
   }, []);
 
   const upcoming = events.filter((e) => e.status === "upcoming");
@@ -228,11 +241,19 @@ export default function HomePage() {
         }} />
         <div
           className="pointer-events-none absolute -right-12 -top-12 z-0 w-56 h-56 opacity-20 -rotate-6 sm:w-80 sm:h-80 [&_svg]:h-full [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: tribalPattern || "" }}
+          dangerouslySetInnerHTML={{ __html: aztecPattern || "" }}
+        />
+        <div
+          className="pointer-events-none absolute -left-8 -top-4 z-0 w-28 h-28 text-amber-400 opacity-20 sm:-left-12 sm:w-40 sm:h-40 [&_svg]:h-full [&_svg]:w-full"
+          dangerouslySetInnerHTML={{ __html: ankhPattern }}
         />
         <div
           className="pointer-events-none absolute -left-8 bottom-0 z-0 w-40 h-40 opacity-15 rotate-12 sm:w-60 sm:h-60 [&_svg]:h-full [&_svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: tribalPattern || "" }}
+          dangerouslySetInnerHTML={{ __html: flowerPattern || "" }}
+        />
+        <div
+          className="pointer-events-none absolute -right-6 bottom-0 z-0 w-28 h-28 text-amber-400 opacity-20 sm:-right-10 sm:w-40 sm:h-40 [&_svg]:h-full [&_svg]:w-full"
+          dangerouslySetInnerHTML={{ __html: merkabaPattern }}
         />
         <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6">
           <h2 className="text-center text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
