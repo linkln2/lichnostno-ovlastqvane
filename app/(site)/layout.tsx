@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "../globals.css";
 import { LocaleProvider } from "@/components/LocaleProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -24,13 +25,15 @@ export default function SiteLayout({
 }) {
   return (
     <html lang="bg" className="h-full antialiased">
-      <body className="flex min-h-full flex-col bg-stone-50 text-stone-800">
-        <LocaleProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <CookieConsent />
-        </LocaleProvider>
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        <ThemeProvider>
+          <LocaleProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <CookieConsent />
+          </LocaleProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

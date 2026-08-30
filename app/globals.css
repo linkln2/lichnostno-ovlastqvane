@@ -1,8 +1,50 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #fafaf9;
   --foreground: #292524;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+  --background: #000000;
+  --foreground: #fafaf9;
+}
+
+/* Force light surfaces and text to almost black / off-white in dark mode */
+html.dark body,
+html.dark .bg-stone-50,
+html.dark .bg-stone-100,
+html.dark .bg-stone-200,
+html.dark .bg-white,
+html.dark .bg-amber-50,
+html.dark .bg-amber-100,
+html.dark .bg-amber-50\/40,
+html.dark .bg-stone-50\/40 {
+  background-color: #0a0a0a !important;
+}
+
+html.dark .text-stone-900,
+html.dark .text-stone-800,
+html.dark .text-stone-700,
+html.dark .text-stone-600 {
+  color: #fafaf9 !important;
+}
+
+html.dark .text-stone-500,
+html.dark .text-stone-400 {
+  color: #a8a29e !important;
+}
+
+html.dark .border-stone-200,
+html.dark .border-stone-300 {
+  border-color: #44403c !important;
 }
 
 @theme inline {
