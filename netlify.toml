@@ -1,6 +1,0 @@
-[build]
-  command = "next build"
-  publish = ".next"
-
-# Next.js 16 is auto-detected by Netlify's OpenNext adapter.
-# No plugin configuration needed — the adapter is applied automatically.
