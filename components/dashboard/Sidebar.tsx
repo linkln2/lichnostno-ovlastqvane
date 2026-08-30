@@ -11,6 +11,7 @@ import {
   Users,
   TicketCheck,
   BarChart3,
+  LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -85,6 +86,19 @@ export function Sidebar({
         </div>
         <p className="mt-1 text-[11px] text-zinc-400">Last sync 2 min ago</p>
       </div>
+
+      <div className="px-3 pb-4">
+        <button
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+            window.location.href = "/login";
+          }}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-rose-50 hover:text-rose-600"
+        >
+          <LogOut className="h-4 w-4" />
+          Log out
+        </button>
+      </div>
     </aside>
   );
 }
@@ -126,6 +140,17 @@ export function Topbar({ name = "Maria" }: { name?: string }) {
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
+        </button>
+        <button
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+            window.location.href = "/login";
+          }}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 text-zinc-600 backdrop-blur-xl transition-colors hover:bg-rose-50 hover:text-rose-600 outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+          aria-label="Log out"
+          title="Log out"
+        >
+          <LogOut className="h-5 w-5" />
         </button>
         <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-indigo-400 to-teal-400 ring-2 ring-white/60" />
       </div>
