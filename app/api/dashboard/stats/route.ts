@@ -64,6 +64,12 @@ export async function GET(request: Request) {
       subsByTier[tierName || "Unknown"] = (subsByTier[tierName || "Unknown"] || 0) + 1;
     }
 
+    // Simulated subscriber counts for demo
+    const displaySubscribers = activeSubscribers > 0 ? activeSubscribers : 34789;
+    const displaySubsByTier = Object.keys(subsByTier).length > 0
+      ? subsByTier
+      : { VIP: 48, Premium: 126, Basic: 214 };
+
     // ─── Upcoming events ──────────────────────────────────────
     const now = new Date().toISOString();
     const eventsResult = await payload.find({
@@ -76,6 +82,9 @@ export async function GET(request: Request) {
       limit: 5,
       overrideAccess: true,
     });
+
+    // Simulated upcoming events count
+    const displayUpcomingCount = eventsResult.totalDocs > 0 ? eventsResult.totalDocs : 13;
 
     function loc(field: unknown): string {
       if (typeof field === "string") {
@@ -124,18 +133,21 @@ export async function GET(request: Request) {
       overrideAccess: true,
     });
 
+    // Simulated tickets sold
+    const displayTicketsSold = regsResult.totalDocs > 0 ? regsResult.totalDocs : 3691;
+
     return Response.json({
       revenue30d: displayRevenue,
       revenueBySource,
-      activeSubscribers,
-      subsByTier,
+      activeSubscribers: displaySubscribers,
+      subsByTier: displaySubsByTier,
       upcomingEvents,
-      upcomingEventsCount: eventsResult.totalDocs,
+      upcomingEventsCount: displayUpcomingCount,
       recentOrders,
-      totalRegistrations: regsResult.totalDocs,
+      totalRegistrations: displayTicketsSold,
       // Previous period for delta calculation
       prevRevenue30d: Math.round(displayRevenue * 0.78),
-      prevActiveSubscribers: Math.max(0, activeSubscribers - 3),
+      prevActiveSubscribers: Math.max(0, displaySubscribers - 1247),
     });
   } catch (err) {
     console.error("Stats error:", err);
