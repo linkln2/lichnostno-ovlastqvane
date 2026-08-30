@@ -603,3 +603,43 @@ export function getProductsByCategory(category: "all" | ProductCategory): Produc
   if (category === "all") return products;
   return products.filter((p) => p.category === category);
 }
+
+export type MembershipTier = {
+  name: Bi;
+  price: number; // EUR per month
+  perks: Bi[];
+  mostPopular?: boolean;
+};
+
+export const membershipTiers: MembershipTier[] = [
+  {
+    name: { bg: "Изследовател", en: "Explorer" },
+    price: 9,
+    perks: [
+      { bg: "Достъп до затворената общност", en: "Access to the private community" },
+      { bg: "Месечен бюлетин с насоки", en: "Monthly guidance newsletter" },
+      { bg: "Отстъпка от събития 10%", en: "10% off events" },
+    ],
+  },
+  {
+    name: { bg: "Създател", en: "Creator" },
+    price: 19,
+    mostPopular: true,
+    perks: [
+      { bg: "Всичко от Изследовател", en: "Everything in Explorer" },
+      { bg: "Седмични коучинг сесии", en: "Weekly coaching sessions" },
+      { bg: "Отстъпка от продукти 15%", en: "15% off products" },
+      { bg: "Ресурси за медитация", en: "Meditation resources" },
+    ],
+  },
+  {
+    name: { bg: "Визионер", en: "Visionary" },
+    price: 39,
+    perks: [
+      { bg: "Всичко от Създател", en: "Everything in Creator" },
+      { bg: "Месечна 1:1 сесия", en: "Monthly 1:1 session" },
+      { bg: "Приоритетен достъп до събития", en: "Priority event access" },
+      { bg: "Персонализиран план за растеж", en: "Personal growth plan" },
+    ],
+  },
+];

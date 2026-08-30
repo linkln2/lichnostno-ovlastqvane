@@ -18,6 +18,7 @@ import {
   formatDateRange,
   products,
   productCategories,
+  membershipTiers,
   type ProductCategory,
   type VideoItem,
 } from "@/lib/content";
@@ -528,6 +529,87 @@ export default function HomePage() {
             >
               {tr("btn_all_testimonials", locale)} →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Membership tiers */}
+      <section className="bg-stone-50 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
+            {locale === "bg" ? "Членство" : "Membership"}
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-center text-stone-600">
+            {locale === "bg"
+              ? "Избери плана, който работи за теб."
+              : "Choose the plan that works for you."}
+          </p>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {membershipTiers.map((tier) => (
+              <div
+                key={tier.name.en}
+                className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm sm:p-8 ${
+                  tier.mostPopular
+                    ? "border-amber-500 ring-2 ring-amber-500/20"
+                    : "border-stone-200"
+                }`}
+              >
+                {tier.mostPopular && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-600 px-3 py-1 text-xs font-semibold text-white">
+                    {locale === "bg" ? "Най-популярен" : "Most popular"}
+                  </span>
+                )}
+
+                <h3 className="text-xl font-bold text-stone-900">
+                  {tier.name[locale]}
+                </h3>
+
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-stone-900">
+                    €{tier.price}
+                  </span>
+                  <span className="text-sm text-stone-500">
+                    / {locale === "bg" ? "месец" : "month"}
+                  </span>
+                </div>
+
+                <ul className="mt-6 flex-1 space-y-3">
+                  {tier.perks.map((perk, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-sm text-stone-600"
+                    >
+                      <svg
+                        className="mt-0.5 h-4 w-4 shrink-0 text-amber-600"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                      >
+                        <path
+                          d="M20 6L9 17l-5-5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      {perk[locale]}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/membership"
+                  className={`mt-8 w-full rounded-full px-5 py-2.5 text-center text-sm font-semibold transition-colors ${
+                    tier.mostPopular
+                      ? "bg-amber-600 text-white hover:bg-amber-700"
+                      : "bg-stone-800 text-white hover:bg-stone-900"
+                  }`}
+                >
+                  {locale === "bg" ? "Виж повече" : "View plans"}
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       </section>
