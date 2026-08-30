@@ -1220,6 +1220,241 @@ export function AnalyticsTab() {
           </div>
         </div>
       )}
+
+      {/* Social stats */}
+      <SocialStatsSection />
+    </div>
+  );
+}
+
+// ─── Social Stats section (inside Analytics tab) ────────────────
+
+const platformIcons: Record<string, string> = {
+  facebook: "f",
+  instagram: "IG",
+  tiktok: "TT",
+  youtube: "YT",
+};
+
+const platformColors: Record<string, string> = {
+  facebook: "text-blue-600",
+  instagram: "text-pink-600",
+  tiktok: "text-zinc-900",
+  youtube: "text-red-600",
+};
+
+function SocialStatsSection() {
+  const { data, loading, reload } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/social-stats");
+  const [editing, setEditing] = useState<number | null>(null);
+  const [editValues, setEditValues] = useState<any>({});
+  const [adding, setAdding] = useState(false);
+  const [newPlatform, setNewPlatform] = useState("facebook");
+
+  async function handleSave(id: number) {
+    try {
+      await apiCall(`/api/dashboard/social-stats/${id}`, "PATCH", editValues);
+      setEditing(null);
+      reload();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleAdd() {
+    try {
+      await apiCall("/api/dashboard/social-stats", "POST", {
+        platform: newPlatform,
+        handle: "",
+        followers: 0,
+        posts: 0,
+        engagementRate: 0,
+      });
+      setAdding(false);
+      reload();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm("Delete this social stat entry?")) return;
+    try {
+      await apiCall(`/api/dashboard/social-stats/${id}`, "DELETE");
+      reload();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function startEdit(s: any) {
+    setEditing(s.id);
+    setEditValues({
+      handle: s.handle || "",
+      followers: s.followers || 0,
+      posts: s.posts || 0,
+      engagementRate: s.engagementRate || 0,
+    });
+  }
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+          Social media stats
+        </h3>
+        <button
+          onClick={() => setAdding(true)}
+          className="rounded-lg bg-indigo-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-800"
+        >
+          + Add platform
+        </button>
+      </div>
+
+      {loading ? (
+        <p className="text-sm text-zinc-400">Loading…</p>
+      ) : data?.docs.length === 0 && !adding ? (
+        <p className="text-sm text-zinc-400">
+          No social stats yet. Add a platform to start tracking followers and engagement.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {adding && (
+            <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4">
+              <div className="flex items-center gap-3">
+                <select
+                  value={newPlatform}
+                  onChange={(e) => setNewPlatform(e.target.value)}
+                  className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm"
+                >
+                  <option value="facebook">Facebook</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="tiktok">TikTok</option>
+                  <option value="youtube">YouTube</option>
+                </select>
+                <button
+                  onClick={handleAdd}
+                  className="rounded-lg bg-indigo-700 px-4 py-2 text-xs font-medium text-white"
+                >
+                  Add
+                </button>
+                <button
+                  onClick={() => setAdding(false)}
+                  className="rounded-lg px-3 py-2 text-xs text-zinc-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+          {data?.docs.map((s) => (
+            <div key={s.id} className="rounded-xl border border-white/60 bg-white/40 p-4 backdrop-blur">
+              {editing === s.id ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <div>
+                      <label className="text-xs text-zinc-500">Handle</label>
+                      <input
+                        type="text"
+                        value={editValues.handle}
+                        onChange={(e) => setEditValues({ ...editValues, handle: e.target.value })}
+                        className="w-full rounded-lg border border-stone-300 px-3 py-1.5 text-sm"
+                        placeholder="@username"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-zinc-500">Followers</label>
+                      <input
+                        type="number"
+                        value={editValues.followers}
+                        onChange={(e) => setEditValues({ ...editValues, followers: e.target.value })}
+                        className="w-full rounded-lg border border-stone-300 px-3 py-1.5 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-zinc-500">Posts</label>
+                      <input
+                        type="number"
+                        value={editValues.posts}
+                        onChange={(e) => setEditValues({ ...editValues, posts: e.target.value })}
+                        className="w-full rounded-lg border border-stone-300 px-3 py-1.5 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-zinc-500">Engagement %</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={editValues.engagementRate}
+                        onChange={(e) => setEditValues({ ...editValues, engagementRate: e.target.value })}
+                        className="w-full rounded-lg border border-stone-300 px-3 py-1.5 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleSave(s.id)}
+                      className="rounded-lg bg-indigo-700 px-4 py-1.5 text-xs font-medium text-white"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditing(null)}
+                      className="rounded-lg px-3 py-1.5 text-xs text-zinc-500"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className={`flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-sm font-bold ${platformColors[s.platform] || "text-zinc-600"}`}>
+                      {platformIcons[s.platform] || s.platform[0]?.toUpperCase()}
+                    </span>
+                    <div>
+                      <p className="text-sm font-medium capitalize text-zinc-900">{s.platform}</p>
+                      {s.handle && <p className="text-xs text-zinc-500">{s.handle}</p>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-zinc-900">{(s.followers || 0).toLocaleString()}</p>
+                      <p className="text-xs text-zinc-400">followers</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-zinc-900">{(s.posts || 0).toLocaleString()}</p>
+                      <p className="text-xs text-zinc-400">posts</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-zinc-900">{s.engagementRate || 0}%</p>
+                      <p className="text-xs text-zinc-400">engagement</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => startEdit(s)}
+                        className="rounded-lg px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(s.id)}
+                        className="rounded-lg px-2 py-1 text-xs text-rose-600 hover:bg-rose-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {s.lastUpdated && editing !== s.id && (
+                <p className="mt-2 text-xs text-zinc-400">
+                  Last updated: {new Date(s.lastUpdated).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

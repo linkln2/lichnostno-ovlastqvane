@@ -641,6 +641,37 @@ const CheckIns: CollectionConfig = {
   ],
 };
 
+const SocialStats: CollectionConfig = {
+  slug: "social-stats",
+  admin: {
+    useAsTitle: "platform",
+  },
+  access: {
+    read: () => true,
+    create: isStaff,
+    update: isStaff,
+    delete: isStaff,
+  },
+  fields: [
+    {
+      name: "platform",
+      type: "select",
+      options: ["facebook", "instagram", "tiktok", "youtube"],
+      required: true,
+      unique: true,
+    },
+    { name: "handle", type: "text" },
+    { name: "followers", type: "number", defaultValue: 0 },
+    { name: "posts", type: "number", defaultValue: 0 },
+    { name: "engagementRate", type: "number", admin: { description: "As percentage, e.g. 5.2" } },
+    {
+      name: "lastUpdated",
+      type: "date",
+      admin: { date: { pickerAppearance: "dayAndTime" } },
+    },
+  ],
+};
+
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000",
   db: postgresAdapter({
@@ -679,6 +710,7 @@ export default buildConfig({
     Registrations,
     Subscriptions,
     CheckIns,
+    SocialStats,
   ],
   typescript: {
     outputFile: path.resolve("payload-types.ts"),
