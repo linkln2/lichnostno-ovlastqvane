@@ -32,6 +32,7 @@ export async function POST(request: Request) {
         package: body.package ? String(body.package) : undefined,
         notes: body.notes ? String(body.notes) : undefined,
         locale: body.locale || "bg",
+        status: body.status || "pending",
       },
       overrideAccess: true,
     });

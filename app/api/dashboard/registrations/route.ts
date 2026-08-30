@@ -18,8 +18,11 @@ export async function GET(request: Request) {
       phone: r.phone,
       city: r.city,
       event: r.event,
+      eventPackage: r.eventPackage,
+      package: r.package,
       status: r.status,
       locale: r.locale,
+      hasQr: !!r.qrToken,
       createdAt: r.createdAt,
     })),
   });

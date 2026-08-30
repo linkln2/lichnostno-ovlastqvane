@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar, Topbar, nav } from "./Sidebar";
 import { StatCard } from "./StatCard";
 import { MomentumRing } from "./MomentumRing";
@@ -13,15 +13,33 @@ import {
   BlogTab,
   ProductsTab,
   OrdersTab,
+  RegistrationsTab,
   SubscribersTab,
   SettingsTab,
 } from "./tabs";
-import {
-  recentOrders,
-  tierSlices,
-  upcomingEvents,
-} from "@/lib/dashboard-data";
-import { CalendarClock, CircleDollarSign, Users } from "lucide-react";
+import { CalendarClock, CircleDollarSign, Users, Ticket } from "lucide-react";
+
+type Stats = {
+  revenue30d: number;
+  revenueBySource: Record<string, number>;
+  activeSubscribers: number;
+  subsByTier: Record<string, number>;
+  upcomingEvents: { id: number; title: string; startsAt: string; location: string }[];
+  upcomingEventsCount: number;
+  recentOrders: { id: number; status: string; totalCents: number; source: string; createdAt: string }[];
+  totalRegistrations: number;
+  prevRevenue30d: number;
+  prevActiveSubscribers: number;
+};
+
+function fmtEur(cents: number) {
+  return `€${(cents / 100).toFixed(0)}`;
+}
+
+function deltaPct(curr: number, prev: number): number {
+  if (prev === 0) return curr > 0 ? 100 : 0;
+  return Math.round(((curr - prev) / prev) * 100);
+}
 
 export function DashboardShell() {
   const [active, setActive] = useState("Overview");
@@ -38,6 +56,7 @@ export function DashboardShell() {
           {active === "Blog" && <BlogTab />}
           {active === "Products" && <ProductsTab />}
           {active === "Orders" && <OrdersTab />}
+          {active === "Registrations" && <RegistrationsTab />}
           {active === "Subscribers" && <SubscribersTab />}
           {active === "Settings" && <SettingsTab />}
         </main>
@@ -69,43 +88,124 @@ export function DashboardShell() {
 }
 
 function OverviewTab() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/dashboard/stats")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) setError(d.error);
+        else setStats(d);
+      })
+      .catch(() => setError("Failed to load"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <svg className="h-8 w-8 animate-spin text-indigo-600" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.2" />
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center text-rose-600">
+        {error || "No data available"}
+      </div>
+    );
+  }
+
+  const revenueDelta = deltaPct(stats.revenue30d, stats.prevRevenue30d);
+  const subsDelta = deltaPct(stats.activeSubscribers, stats.prevActiveSubscribers);
+
+  // Build tier slices for donut
+  const tierSlices = Object.entries(stats.subsByTier).map(([name, count], i) => ({
+    name,
+    value: count,
+    color: ["#6366f1", "#14b8a6", "#f59e0b", "#ec4899"][i % 4],
+  }));
+
+  // Build upcoming events in the format the component expects
+  const upcomingEventsAdapted = stats.upcomingEvents.map((e) => {
+    const d = new Date(e.startsAt);
+    return {
+      day: String(d.getDate()),
+      mon: d.toLocaleDateString("en", { month: "short" }),
+      title: e.title,
+      meta: e.location,
+    };
+  });
+
+  // Build recent orders in the format the component expects
+  const recentOrdersAdapted = stats.recentOrders.map((o) => ({
+    id: String(o.id),
+    customer: o.source || "—",
+    item: o.source || "—",
+    amount: fmtEur(o.totalCents),
+    status: o.status === "paid" ? "Paid" : o.status === "refunded" ? "Refunded" : "Pending" as "Paid" | "Pending" | "Refunded",
+  }));
+
   return (
     <>
       {/* Stat row */}
       <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           icon={CircleDollarSign}
-          label="Monthly goal"
-          value="€18,420"
-          deltaPct={12}
-          accent="indigo"
-        >
-          <div className="mt-4 flex items-center justify-center">
-            <MomentumRing value={68} />
-          </div>
-        </StatCard>
-
-        <StatCard
-          icon={CircleDollarSign}
           label="Revenue (30d)"
-          value="€12,840"
-          deltaPct={8}
+          value={fmtEur(stats.revenue30d)}
+          deltaPct={revenueDelta}
           accent="teal"
         />
         <StatCard
           icon={Users}
-          label="Subscribers"
-          value="388"
-          deltaPct={5}
+          label="Active subscribers"
+          value={String(stats.activeSubscribers)}
+          deltaPct={subsDelta}
           accent="indigo"
         />
         <StatCard
           icon={CalendarClock}
           label="Upcoming events"
-          value="4"
-          deltaPct={-2}
+          value={String(stats.upcomingEventsCount)}
           accent="amber"
         />
+        <StatCard
+          icon={Ticket}
+          label="Registrations"
+          value={String(stats.totalRegistrations)}
+          accent="indigo"
+        />
+      </section>
+
+      {/* Revenue breakdown by source */}
+      <section className="rounded-2xl border border-white/60 bg-white/40 p-6 backdrop-blur">
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">
+          Revenue by source (30d)
+        </h3>
+        <div className="grid grid-cols-3 gap-4">
+          <RevenueSourceCard
+            label="Shop"
+            cents={stats.revenueBySource.shop || 0}
+            color="bg-teal-500"
+          />
+          <RevenueSourceCard
+            label="Events"
+            cents={stats.revenueBySource.event || 0}
+            color="bg-amber-500"
+          />
+          <RevenueSourceCard
+            label="Subscriptions"
+            cents={stats.revenueBySource.subscription || 0}
+            color="bg-indigo-500"
+          />
+        </div>
       </section>
 
       {/* Revenue chart + upcoming events */}
@@ -114,19 +214,37 @@ function OverviewTab() {
           <RevenueChart />
         </div>
         <div className="lg:col-span-1">
-          <UpcomingEventsList events={upcomingEvents} />
+          <UpcomingEventsList events={upcomingEventsAdapted} />
         </div>
       </section>
 
       {/* Recent orders + subscriber donut */}
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <RecentOrdersTable orders={recentOrders} />
+          <RecentOrdersTable orders={recentOrdersAdapted} />
         </div>
         <div className="lg:col-span-1">
-          <SubscriberTierDonut slices={tierSlices} />
+          {tierSlices.length > 0 ? (
+            <SubscriberTierDonut slices={tierSlices} />
+          ) : (
+            <div className="rounded-2xl border border-white/60 bg-white/40 p-6 text-center text-sm text-zinc-400">
+              No active subscribers yet
+            </div>
+          )}
         </div>
       </section>
     </>
+  );
+}
+
+function RevenueSourceCard({ label, cents, color }: { label: string; cents: number; color: string }) {
+  return (
+    <div className="rounded-xl border border-white/60 bg-white/40 p-4">
+      <div className="flex items-center gap-2">
+        <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
+        <span className="text-xs font-medium text-zinc-500">{label}</span>
+      </div>
+      <p className="mt-2 text-2xl font-bold text-zinc-900">{fmtEur(cents)}</p>
+    </div>
   );
 }

@@ -9,6 +9,7 @@ import {
   Receipt,
   Settings,
   Users,
+  TicketCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ export const nav: NavItem[] = [
   { label: "Blog", icon: FileText },
   { label: "Products", icon: Package },
   { label: "Orders", icon: Receipt },
+  { label: "Registrations", icon: TicketCheck },
   { label: "Subscribers", icon: Users },
   { label: "Settings", icon: Settings },
 ];

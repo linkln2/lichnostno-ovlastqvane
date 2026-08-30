@@ -755,7 +755,23 @@ const orderStatusVariant: Record<string, "paid" | "pending" | "refunded"> = {
 };
 
 export function OrdersTab() {
-  const { data, loading, error } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/orders");
+  const { data, loading, error, reload } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/orders");
+  const [refunding, setRefunding] = useState<number | null>(null);
+  const [refundError, setRefundError] = useState<string | null>(null);
+
+  async function handleRefund(orderId: number) {
+    if (!confirm(`Refund order #${orderId}? This will issue a full refund via Stripe.`)) return;
+    setRefunding(orderId);
+    setRefundError(null);
+    try {
+      const res = await apiCall(`/api/dashboard/orders/${orderId}/refund`, "POST");
+      reload();
+    } catch (err) {
+      setRefundError(String(err));
+    } finally {
+      setRefunding(null);
+    }
+  }
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
@@ -763,6 +779,9 @@ export function OrdersTab() {
   return (
     <div>
       <PageHeader title="Orders" subtitle="All transactions" count={data?.totalDocs} />
+      {refundError && (
+        <p className="mb-4 rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{refundError}</p>
+      )}
       {data?.docs.length === 0 ? (
         <EmptyState message="No orders yet. They'll appear here after Stripe checkout." />
       ) : (
@@ -771,20 +790,40 @@ export function OrdersTab() {
             <THead>
               <TR className="hover:bg-transparent">
                 <TH>Order ID</TH>
+                <TH>Source</TH>
                 <TH>Items</TH>
                 <TH className="text-right">Total</TH>
                 <TH>Date</TH>
                 <TH>Status</TH>
+                <TH></TH>
               </TR>
             </THead>
             <TBody>
               {data?.docs.map((o) => (
                 <TR key={o.id}>
                   <TD className="font-mono text-xs text-zinc-500">#{o.id}</TD>
+                  <TD>
+                    {o.source && (
+                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
+                        {o.source}
+                      </span>
+                    )}
+                  </TD>
                   <TD className="text-zinc-600">{o.items?.length || 0} item{(o.items?.length || 0) !== 1 ? "s" : ""}</TD>
                   <TD className="text-right font-mono font-medium text-zinc-900">{fmtPrice(o.totalCents, o.currency)}</TD>
                   <TD className="font-mono text-xs text-zinc-500">{fmtDate(o.createdAt)}</TD>
                   <TD><Badge variant={orderStatusVariant[o.status] || "default"}>{o.status}</Badge></TD>
+                  <TD>
+                    {o.status === "paid" && (
+                      <button
+                        onClick={() => handleRefund(o.id)}
+                        disabled={refunding === o.id}
+                        className="rounded-lg px-2.5 py-1 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-50"
+                      >
+                        {refunding === o.id ? "Refunding…" : "Refund"}
+                      </button>
+                    )}
+                  </TD>
                 </TR>
               ))}
             </TBody>
@@ -962,6 +1001,101 @@ export function SubscribersTab() {
           <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update" : "Create"} />
         </form>
       </Modal>
+    </div>
+  );
+}
+
+// ─── Registrations tab ──────────────────────────────────────────
+
+const regStatusVariant: Record<string, "paid" | "pending" | "refunded"> = {
+  confirmed: "paid",
+  checked_in: "paid",
+  pending: "pending",
+  waitlisted: "pending",
+  cancelled: "refunded",
+};
+
+export function RegistrationsTab() {
+  const { data, loading, error } = useFetch<{ docs: any[]; totalDocs: number }>("/api/dashboard/registrations");
+
+  function handleExportCsv() {
+    if (!data?.docs?.length) return;
+    const headers = ["ID", "Name", "Email", "Phone", "Event", "Package", "Status", "QR", "Created"];
+    const rows = data.docs.map((r) => [
+      r.id,
+      `"${r.name || ""}"`,
+      `"${r.email || ""}"`,
+      `"${r.phone || ""}"`,
+      `"${typeof r.event === "object" ? r.event?.title : r.event || ""}"`,
+      `"${r.package || ""}"`,
+      r.status,
+      r.hasQr ? "Yes" : "No",
+      r.createdAt,
+    ]);
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `registrations-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between">
+        <PageHeader title="Registrations" subtitle="Event attendees and check-in status" count={data?.totalDocs} />
+        {data?.docs && data.docs.length > 0 && (
+          <button
+            onClick={handleExportCsv}
+            className="rounded-lg border border-white/60 bg-white/40 px-4 py-2 text-sm font-medium text-zinc-700 backdrop-blur-xl transition-colors hover:bg-white/60"
+          >
+            Export CSV
+          </button>
+        )}
+      </div>
+      {data?.docs && data.docs.length === 0 ? (
+        <EmptyState message="No registrations yet." />
+      ) : (
+        <GlassCard>
+          <Table>
+            <THead>
+              <TR className="hover:bg-transparent">
+                <TH>Name</TH>
+                <TH>Email</TH>
+                <TH>Package</TH>
+                <TH>Status</TH>
+                <TH>QR</TH>
+                <TH>Date</TH>
+              </TR>
+            </THead>
+            <TBody>
+              {data?.docs.map((r) => (
+                <TR key={r.id}>
+                  <TD className="font-medium text-zinc-900">{r.name}</TD>
+                  <TD className="text-zinc-600">{r.email}</TD>
+                  <TD className="text-zinc-600">{r.package || "—"}</TD>
+                  <TD><Badge variant={regStatusVariant[r.status] || "default"}>{r.status}</Badge></TD>
+                  <TD>
+                    {r.hasQr ? (
+                      <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                    ) : "—"}
+                  </TD>
+                  <TD className="font-mono text-xs text-zinc-500">{fmtDate(r.createdAt)}</TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        </GlassCard>
+      )}
     </div>
   );
 }

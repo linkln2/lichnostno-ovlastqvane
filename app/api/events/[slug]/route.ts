@@ -33,6 +33,27 @@ export async function GET(
       overrideAccess: true,
     });
 
+    // Count confirmed registrations per package (for sold-out / waitlist logic)
+    const registrationsResult = await payload.find({
+      collection: "registrations",
+      where: {
+        event: { equals: event.id },
+        status: { in: ["confirmed", "checked_in"] },
+      },
+      limit: 0, // just need the count per package
+      overrideAccess: true,
+    });
+
+    // Build a count map: packageId → count
+    const regCountByPackage: Record<number, number> = {};
+    for (const reg of registrationsResult.docs as any[]) {
+      const pkgId = reg.eventPackage;
+      if (pkgId) {
+        const id = typeof pkgId === "object" ? pkgId.id : pkgId;
+        regCountByPackage[id] = (regCountByPackage[id] || 0) + 1;
+      }
+    }
+
     function loc(field: unknown): string {
       if (typeof field === "string") {
         try {
@@ -66,6 +87,8 @@ export async function GET(
         spots: loc(p.spots),
         stripePriceId: p.stripePriceId,
         capacity: p.capacity,
+        spotsLeft: p.capacity > 0 ? Math.max(0, p.capacity - (regCountByPackage[p.id] || 0)) : null,
+        isSoldOut: p.capacity > 0 && (regCountByPackage[p.id] || 0) >= p.capacity,
       })),
     });
   } catch (err) {

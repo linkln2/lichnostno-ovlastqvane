@@ -14,6 +14,8 @@ type Package = {
   spots: string;
   stripePriceId: string;
   capacity: number;
+  spotsLeft: number | null;
+  isSoldOut: boolean;
 };
 
 type EventData = {
@@ -38,9 +40,14 @@ export default function EventDetailPage() {
   // Ticket selection state
   const [selectedPkg, setSelectedPkg] = useState<Package | null>(null);
   const [email, setEmail] = useState("");
-  const [checkoutStatus, setCheckoutStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [checkoutStatus, setCheckoutStatus] = useState<"idle" | "loading" | "error" | "success">("idle");
   const [checkoutError, setCheckoutError] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "error" | "success">("idle");
+  const [waitlistError, setWaitlistError] = useState("");
 
   useEffect(() => {
     fetch(`/api/events/${params.slug}`)
@@ -89,6 +96,48 @@ export default function EventDetailPage() {
     setCheckoutError("");
   }
 
+  async function handleJoinWaitlist(pkg: Package) {
+    setSelectedPkg(pkg);
+    setShowWaitlistModal(true);
+    setWaitlistStatus("idle");
+    setWaitlistError("");
+  }
+
+  async function handleWaitlistSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedPkg || !event) return;
+
+    setWaitlistStatus("loading");
+    setWaitlistError("");
+
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          eventSlug: event.slug,
+          package: selectedPkg.name,
+          status: "waitlisted",
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setWaitlistStatus("error");
+        setWaitlistError(data.error || "Failed to join waitlist");
+        return;
+      }
+
+      setWaitlistStatus("success");
+    } catch {
+      setWaitlistStatus("error");
+      setWaitlistError("Network error");
+    }
+  }
+
   async function handleCheckoutSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedPkg) return;
@@ -127,12 +176,19 @@ export default function EventDetailPage() {
     buy: locale === "bg" ? "Купи" : "Buy",
     soldOut: locale === "bg" ? "Изчерпани" : "Sold out",
     comingSoon: locale === "bg" ? "Очаквайте скоро" : "Coming soon",
+    joinWaitlist: locale === "bg" ? "Запиши се в списъка" : "Join waitlist",
+    spotsLeft: locale === "bg" ? "свободни места" : "spots left",
     emailLabel: locale === "bg" ? "Имейл" : "Email",
+    nameLabel: locale === "bg" ? "Име" : "Name",
+    phoneLabel: locale === "bg" ? "Телефон" : "Phone",
     continue: locale === "bg" ? "Продължи" : "Continue",
     cancel: locale === "bg" ? "Отказ" : "Cancel",
     enterEmail: locale === "bg" ? "Въведи имейл за билет" : "Enter your email to buy tickets",
     noTickets: locale === "bg" ? "Все още няма билети за това събитие." : "No tickets available for this event yet.",
     spots: locale === "bg" ? "места" : "spots",
+    waitlistTitle: locale === "bg" ? "Запиши се в списъка за чакащи" : "Join the waitlist",
+    waitlistBody: locale === "bg" ? "Ще те уведомим, ако се освободи място." : "We'll notify you if a spot opens up.",
+    waitlistSuccess: locale === "bg" ? "Записан си в списъка! Ще се свържем с теб." : "You're on the waitlist! We'll contact you.",
   };
 
   return (
@@ -164,7 +220,7 @@ export default function EventDetailPage() {
         ) : (
           <div className="mt-6 space-y-4">
             {event.packages.map((pkg, idx) => {
-              const soldOut = pkg.capacity > 0 && pkg.capacity <= 0; // TODO: check registrations count
+              const soldOut = pkg.isSoldOut;
               const noStripe = !pkg.stripePriceId;
               return (
                 <div
@@ -181,11 +237,15 @@ export default function EventDetailPage() {
                       {pkg.spots && (
                         <p className="mt-1 text-sm text-stone-600">{pkg.spots}</p>
                       )}
-                      {pkg.capacity > 0 && (
-                        <p className="mt-2 text-xs text-stone-400">
-                          {pkg.capacity} {t.spots}
-                        </p>
-                      )}
+                      <div className="mt-2 flex items-center gap-3 text-xs">
+                        {pkg.capacity > 0 && (
+                          <span className={soldOut ? "text-rose-500" : "text-stone-400"}>
+                            {soldOut
+                              ? t.soldOut
+                              : `${pkg.spotsLeft} ${t.spotsLeft}`}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-amber-700">
@@ -194,19 +254,26 @@ export default function EventDetailPage() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleBuy(pkg)}
-                    disabled={soldOut || noStripe}
-                    className={`mt-4 w-full rounded-full px-5 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                      soldOut
-                        ? "bg-stone-200 text-stone-500"
-                        : noStripe
+                  {soldOut ? (
+                    <button
+                      onClick={() => handleJoinWaitlist(pkg)}
+                      className="mt-4 w-full rounded-full border-2 border-amber-600 px-5 py-3 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-50"
+                    >
+                      {t.joinWaitlist} →
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleBuy(pkg)}
+                      disabled={noStripe}
+                      className={`mt-4 w-full rounded-full px-5 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                        noStripe
                           ? "bg-stone-200 text-stone-500"
                           : "bg-amber-600 text-white hover:bg-amber-700"
-                    }`}
-                  >
-                    {soldOut ? t.soldOut : noStripe ? t.comingSoon : `${t.buy} → ${fmtPrice(pkg.priceCents)}`}
-                  </button>
+                      }`}
+                    >
+                      {noStripe ? t.comingSoon : `${t.buy} → ${fmtPrice(pkg.priceCents)}`}
+                    </button>
+                  )}
                 </div>
               );
             })}
@@ -269,6 +336,113 @@ export default function EventDetailPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Waitlist modal */}
+      {showWaitlistModal && selectedPkg && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
+          <div
+            className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm"
+            onClick={() => setShowWaitlistModal(false)}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-t-2xl border border-stone-200 bg-white p-6 shadow-xl sm:rounded-2xl">
+            {waitlistStatus === "success" ? (
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-green-600">
+                    <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <h2 className="text-lg font-bold text-stone-900">{t.waitlistSuccess}</h2>
+                <button
+                  onClick={() => setShowWaitlistModal(false)}
+                  className="mt-6 rounded-full bg-stone-800 px-6 py-2.5 text-sm font-semibold text-white"
+                >
+                  {t.cancel}
+                </button>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-lg font-bold text-stone-900">{t.waitlistTitle}</h2>
+                <p className="mt-1 text-sm text-stone-500">{t.waitlistBody}</p>
+                <p className="mt-2 text-sm font-medium text-stone-700">
+                  {selectedPkg.name} · {fmtPrice(selectedPkg.priceCents)}
+                </p>
+                <form onSubmit={handleWaitlistSubmit} className="mt-6 space-y-4">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                      {t.nameLabel}
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      autoFocus
+                      autoComplete="name"
+                      className="w-full rounded-lg border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                      placeholder={locale === "bg" ? "Твоето име" : "Your name"}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                      {t.emailLabel}
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                      inputMode="email"
+                      className="w-full rounded-lg border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                      placeholder="you@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                      {t.phoneLabel}
+                    </label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      autoComplete="tel"
+                      inputMode="tel"
+                      className="w-full rounded-lg border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                      placeholder="+359..."
+                    />
+                  </div>
+
+                  {waitlistStatus === "error" && (
+                    <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">
+                      {waitlistError}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowWaitlistModal(false)}
+                      className="rounded-lg px-4 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-100"
+                    >
+                      {t.cancel}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={waitlistStatus === "loading"}
+                      className="rounded-full bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-60"
+                    >
+                      {waitlistStatus === "loading"
+                        ? locale === "bg" ? "Записване…" : "Saving…"
+                        : t.joinWaitlist}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}
