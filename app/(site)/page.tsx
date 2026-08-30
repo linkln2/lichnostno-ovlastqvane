@@ -68,6 +68,13 @@ function VideoCard({ video }: { video: VideoItem }) {
   );
 }
 
+const valueIcons = [
+  <svg key="0" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>,
+  <svg key="1" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" /></svg>,
+  <svg key="2" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>,
+  <svg key="3" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
+];
+
 export default function HomePage() {
   const { locale } = useLocale();
   const [videoTab, setVideoTab] = useState<"all" | "tiktok" | "instagram">("all");
@@ -433,26 +440,46 @@ export default function HomePage() {
       {/* Mission + Values */}
       <section className="bg-amber-50/40 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">
-              {tr("section_mission_title", locale)}
-            </h2>
-            <p className="mt-6 text-lg leading-relaxed text-stone-600">
-              {mission[locale]}
-            </p>
-          </div>
+          <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
+            {locale === "bg" ? "Нашата мисия и ценности" : "Our mission & values"}
+          </h2>
 
-          <div className="mt-16">
-            <h3 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
-              {tr("section_values_title", locale)}
-            </h3>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {values.map((v) => (
+          <div className="mt-10 grid gap-8 lg:grid-cols-2">
+            {/* Mission card */}
+            <div className="flex flex-col justify-center rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+              <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M16.2 7.8 12 12" />
+                  <path d="m14 12-2 2" />
+                  <path d="M12 2v2" />
+                  <path d="M12 20v2" />
+                  <path d="m4.93 4.93 1.41 1.41" />
+                  <path d="M17.66 17.66 19.07 19.07" />
+                  <path d="M2 12h2" />
+                  <path d="M20 12h2" />
+                  <path d="M6.34 17.66 4.93 19.07" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-stone-900">
+                {tr("section_mission_title", locale)}
+              </h3>
+              <p className="mt-4 text-base leading-relaxed text-stone-600">
+                {mission[locale]}
+              </p>
+            </div>
+
+            {/* Values grid */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {values.map((v, i) => (
                 <div
                   key={v.title.en}
                   className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm"
                 >
-                  <h3 className="font-semibold text-amber-800">{v.title[locale]}</h3>
+                  <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+                    {valueIcons[i]}
+                  </div>
+                  <h4 className="font-semibold text-amber-800">{v.title[locale]}</h4>
                   <p className="mt-2 text-sm leading-relaxed text-stone-600">
                     {v.desc[locale]}
                   </p>
