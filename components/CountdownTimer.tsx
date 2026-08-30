@@ -32,18 +32,19 @@ function formatLaunchDate(target: string, locale: "bg" | "en") {
   });
 }
 
-export default function CountdownTimer() {
+export default function CountdownTimer({ target }: { target?: string }) {
   const { locale } = useLocale();
   const [mounted, setMounted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(launchDate));
+  const activeTarget = target ?? launchDate;
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(activeTarget));
 
   useEffect(() => {
     setMounted(true);
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(launchDate));
+      setTimeLeft(calculateTimeLeft(activeTarget));
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeTarget]);
 
   const units = [
     { value: timeLeft.days, label: tr("countdown_days", locale) },
@@ -59,7 +60,7 @@ export default function CountdownTimer() {
           {tr("countdown_label", locale)}
         </p>
         <p className="mt-1 text-lg font-bold text-white">
-          {formatLaunchDate(launchDate, locale)}
+          {formatLaunchDate(activeTarget, locale)}
         </p>
       </div>
 
