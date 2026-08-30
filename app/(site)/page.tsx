@@ -73,6 +73,12 @@ export default function HomePage() {
   const [videoTab, setVideoTab] = useState<"all" | "tiktok" | "instagram">("all");
   const [productTab, setProductTab] = useState<"all" | ProductCategory>("all");
   const [videos, setVideos] = useState<VideoItem[] | null>(null);
+  const [ticketOpen, setTicketOpen] = useState(false);
+  const [ticketData, setTicketData] = useState<{ event: any; pkg: any } | null>(null);
+  const [ticketLoading, setTicketLoading] = useState(false);
+  const [ticketEmail, setTicketEmail] = useState("");
+  const [buyLoading, setBuyLoading] = useState(false);
+  const [buyError, setBuyError] = useState<string | null>(null);
   const videoScrollRef = useRef<HTMLDivElement>(null);
   const productScrollRef = useRef<HTMLDivElement>(null);
 
@@ -87,6 +93,9 @@ export default function HomePage() {
     return svg;
   }, []);
 
+  const upcoming = events.filter((e) => e.status === "upcoming");
+  const nextEvent = upcoming[0];
+
   useEffect(() => {
     fetch("/videos/manifest.json")
       .then((res) => (res.ok ? res.json() : []))
@@ -94,13 +103,65 @@ export default function HomePage() {
       .catch(() => setVideos([]));
   }, []);
 
-  const upcoming = events.filter((e) => e.status === "upcoming");
-  const nextEvent = upcoming[0];
+  useEffect(() => {
+    if (!ticketOpen || !nextEvent) {
+      setTicketData(null);
+      return;
+    }
+    setTicketLoading(true);
+    setBuyError(null);
+    fetch(`/api/events/${nextEvent.slug}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data?.packages?.length) {
+          setTicketData(null);
+          return;
+        }
+        const pkg =
+          data.packages.find((p: any) => p.priceCents === 12500) ||
+          data.packages[0];
+        setTicketData({ event: data, pkg });
+      })
+      .catch(() => setTicketData(null))
+      .finally(() => setTicketLoading(false));
+  }, [ticketOpen, nextEvent]);
 
   const filteredVideos =
     videos && videoTab !== "all" ? videos.filter((v) => v.platform === videoTab) : (videos ?? []);
   const filteredProducts =
     productTab === "all" ? products : products.filter((p) => p.category === productTab);
+
+  async function handleBuyTicket(e: React.FormEvent) {
+    e.preventDefault();
+    if (!ticketData?.pkg) return;
+    setBuyLoading(true);
+    setBuyError(null);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventPackageId: ticketData.pkg.id,
+          customerEmail: ticketEmail,
+          mode: "payment",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setBuyError(data.error || "Checkout failed");
+      } else {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      setBuyError("Network error");
+    } finally {
+      setBuyLoading(false);
+    }
+  }
+
+  function ticketPriceCents() {
+    return 12500;
+  }
 
   return (
     <>
@@ -159,12 +220,12 @@ export default function HomePage() {
             <CountdownTimer target={launchDate} />
           </div>
           <div className="mt-8 text-center">
-            <Link
-              href={nextEvent ? `/events/${nextEvent.slug}` : "/events"}
+            <button
+              onClick={() => setTicketOpen(true)}
               className="inline-block rounded-full bg-amber-500 px-8 py-3 text-center font-semibold text-stone-900 transition-colors hover:bg-amber-400"
             >
               {locale === "bg" ? "Купи билет" : "Buy ticket"} →
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -452,6 +513,77 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* Buy ticket modal */}
+      {ticketOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => setTicketOpen(false)}
+        >
+          <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm" />
+          <div
+            className="relative z-10 w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl sm:p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setTicketOpen(false)}
+              className="absolute right-4 top-4 text-stone-400 hover:text-stone-600"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            <h3 className="text-center text-2xl font-bold text-stone-900">
+              {locale === "bg" ? "Запази своето място" : "Reserve your spot"}
+            </h3>
+            <p className="mt-2 text-center text-sm text-stone-500">
+              {ticketData?.event?.title || (locale === "bg" ? "Голямото събитие" : "The big event")}
+            </p>
+
+            {ticketLoading ? (
+              <p className="mt-6 text-center text-stone-500">{locale === "bg" ? "Зареждане…" : "Loading…"}</p>
+            ) : !ticketData?.pkg ? (
+              <p className="mt-6 text-center text-stone-500">
+                {locale === "bg" ? "Все още няма активни билети." : "Tickets are not available yet."}
+              </p>
+            ) : (
+              <form onSubmit={handleBuyTicket} className="mt-6 space-y-5">
+                <div className="rounded-2xl bg-amber-50 p-4 text-center">
+                  <p className="text-sm text-stone-600">{locale === "bg" ? "Избран билет" : "Selected ticket"}</p>
+                  <p className="text-lg font-semibold text-stone-900">{ticketData.pkg.name}</p>
+                  <p className="mt-1 text-3xl font-bold text-amber-700">
+                    €{(ticketPriceCents() / 100).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-stone-700">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={ticketEmail}
+                    onChange={(e) => setTicketEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full rounded-lg border border-stone-300 bg-stone-50 px-4 py-2.5 text-sm text-stone-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                  />
+                </div>
+                {buyError && (
+                  <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{buyError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={buyLoading}
+                  className="w-full rounded-full bg-amber-600 px-6 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-amber-700 disabled:opacity-50"
+                >
+                  {buyLoading
+                    ? (locale === "bg" ? "Обработка…" : "Processing…")
+                    : (locale === "bg" ? "Плати с карта" : "Pay by card")}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
