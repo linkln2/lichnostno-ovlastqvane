@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale } from "@/components/LocaleProvider";
 import { site } from "@/lib/content";
 
 export default function LoginPage() {
   const { locale } = useLocale();
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<
@@ -62,7 +60,9 @@ export default function LoginPage() {
       }
 
       // Success — redirect to dashboard
-      router.push("/dashboard");
+      // Use full page navigation (not client-side) so the proxy sees the
+      // freshly-set payload-token cookie on the server request
+      window.location.href = "/dashboard";
     } catch {
       setStatus("error");
       setErrorMsg(t.invalid);
