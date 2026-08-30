@@ -46,5 +46,8 @@ next-env.d.ts
 # User-generated data (registrations, messages)
 /data/*.json
 
+# Netlify CLI / Deno lock file
+deno.lock
+
 # Downloaded social videos — too large for git, serve from CDN/object storage
 /public/videos/
