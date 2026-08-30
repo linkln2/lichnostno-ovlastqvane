@@ -10,12 +10,14 @@ export function Modal({
   title,
   children,
   className,
+  wide,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
   className?: string;
+  wide?: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -44,6 +46,7 @@ export function Modal({
       <div
         className={cn(
           "relative z-10 my-auto w-full max-w-lg rounded-2xl border border-white/60 bg-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-xl",
+          wide && "max-w-2xl",
           className,
         )}
       >

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { Pencil, Plus, Trash2, Upload, X, Star, Package } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 import { Badge } from "@/components/ui/badge";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
@@ -190,18 +190,39 @@ export function ProductsTab() {
   const [editing, setEditing] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     name: "",
+    slug: "",
+    excerpt: "",
     priceCents: "",
+    compareAtCents: "",
+    currency: "eur",
+    sku: "",
     category: "digital",
     productType: "digital",
-    status: "draft",
+    tags: "",
     inventory: "0",
+    lowStockThreshold: "5",
+    weightGrams: "",
+    status: "draft",
+    featured: false,
+    stripePriceId: "",
+    seoTitle: "",
+    seoDescription: "",
   });
 
   function openCreate() {
     setEditing(null);
-    setForm({ name: "", priceCents: "", category: "digital", productType: "digital", status: "draft", inventory: "0" });
+    setForm({
+      name: "", slug: "", excerpt: "", priceCents: "", compareAtCents: "",
+      currency: "eur", sku: "", category: "digital", productType: "digital",
+      tags: "", inventory: "0", lowStockThreshold: "5", weightGrams: "",
+      status: "draft", featured: false, stripePriceId: "", seoTitle: "", seoDescription: "",
+    });
+    setImageUrls([]);
     setFormError(null);
     setModalOpen(true);
   }
@@ -210,14 +231,58 @@ export function ProductsTab() {
     setEditing(p);
     setForm({
       name: p.name || "",
+      slug: p.slug || "",
+      excerpt: p.excerpt || "",
       priceCents: String(p.priceCents ?? ""),
+      compareAtCents: String(p.compareAtCents ?? ""),
+      currency: p.currency || "eur",
+      sku: p.sku || "",
       category: p.category || "digital",
       productType: p.productType || "digital",
-      status: p.status || "draft",
+      tags: p.tags || "",
       inventory: String(p.inventory ?? "0"),
+      lowStockThreshold: String(p.lowStockThreshold ?? "5"),
+      weightGrams: String(p.weightGrams ?? ""),
+      status: p.status || "draft",
+      featured: p.featured || false,
+      stripePriceId: p.stripePriceId || "",
+      seoTitle: p.seoTitle || "",
+      seoDescription: p.seoDescription || "",
     });
+    setImageUrls(p.images || []);
     setFormError(null);
     setModalOpen(true);
+  }
+
+  async function handleUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("alt", file.name);
+        const res = await fetch("/api/dashboard/upload", {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        });
+        if (!res.ok) throw new Error("Upload failed");
+        const data = await res.json();
+        if (data.url) {
+          setImageUrls((prev) => [...prev, data.url]);
+        }
+      }
+    } catch (err) {
+      setFormError(`Image upload failed: ${err}`);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function removeImage(idx: number) {
+    setImageUrls((prev) => prev.filter((_, i) => i !== idx));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -225,10 +290,11 @@ export function ProductsTab() {
     setSaving(true);
     setFormError(null);
     try {
+      const payload = { ...form, images: imageUrls };
       if (editing) {
-        await apiCall(`/api/dashboard/products/${editing.id}`, "PATCH", form);
+        await apiCall(`/api/dashboard/products/${editing.id}`, "PATCH", payload);
       } else {
-        await apiCall("/api/dashboard/products", "POST", form);
+        await apiCall("/api/dashboard/products", "POST", payload);
       }
       setModalOpen(false);
       reload();
@@ -262,9 +328,9 @@ export function ProductsTab() {
           <Table>
             <THead>
               <TR className="hover:bg-transparent">
+                <TH>Image</TH>
                 <TH>Name</TH>
                 <TH>Category</TH>
-                <TH>Type</TH>
                 <TH className="text-right">Price</TH>
                 <TH>Inventory</TH>
                 <TH>Status</TH>
@@ -274,10 +340,28 @@ export function ProductsTab() {
             <TBody>
               {data?.docs.map((p) => (
                 <TR key={p.id}>
-                  <TD className="font-medium text-zinc-900">{p.name}</TD>
+                  <TD>
+                    {p.images?.[0] ? (
+                      <img src={p.images[0]} alt={p.name} className="h-10 w-10 rounded-lg object-cover" />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 text-zinc-300">
+                        <Package className="h-5 w-5" />
+                      </div>
+                    )}
+                  </TD>
+                  <TD className="font-medium text-zinc-900">
+                    <div className="flex items-center gap-1.5">
+                      {p.featured && <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />}
+                      {p.name}
+                    </div>
+                  </TD>
                   <TD className="text-zinc-600">{p.category}</TD>
-                  <TD className="text-zinc-600">{p.productType}</TD>
-                  <TD className="text-right font-mono font-medium text-zinc-900">{fmtPrice(p.priceCents)}</TD>
+                  <TD className="text-right font-mono font-medium text-zinc-900">
+                    {fmtPrice(p.priceCents, p.currency)}
+                    {p.compareAtCents > 0 && (
+                      <span className="ml-1 text-xs text-zinc-400 line-through">{fmtPrice(p.compareAtCents, p.currency)}</span>
+                    )}
+                  </TD>
                   <TD className="font-mono text-zinc-700">{p.productType === "physical" ? p.inventory : "—"}</TD>
                   <TD><Badge variant={productStatusVariant[p.status] || "default"}>{p.status}</Badge></TD>
                   <TD><RowActions onEdit={() => openEdit(p)} onDelete={() => handleDelete(p)} /></TD>
@@ -288,10 +372,73 @@ export function ProductsTab() {
         </GlassCard>
       )}
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit product" : "New product"}>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Name"><input className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
-          <Field label="Price (cents)"><input type="number" className={inputClass} value={form.priceCents} onChange={(e) => setForm({ ...form, priceCents: e.target.value })} required placeholder="e.g. 1900 = €19.00" /></Field>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit product" : "New product"} wide>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Images */}
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Product images</label>
+            <div className="flex flex-wrap gap-3">
+              {imageUrls.map((url, idx) => (
+                <div key={idx} className="group relative h-24 w-24 overflow-hidden rounded-xl border border-stone-200">
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute right-1 top-1 rounded-full bg-rose-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-stone-300 text-stone-400 transition-colors hover:border-amber-400 hover:text-amber-600 disabled:opacity-50"
+              >
+                {uploading ? (
+                  <span className="text-xs">Uploading…</span>
+                ) : (
+                  <>
+                    <Upload className="h-5 w-5" />
+                    <span className="text-xs">Upload</span>
+                  </>
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => handleUpload(e.target.files)}
+              />
+            </div>
+          </div>
+
+          {/* Name + Slug */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Name"><input className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
+            <Field label="Slug"><input className={inputClass} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-generated if empty" /></Field>
+          </div>
+
+          {/* Excerpt */}
+          <Field label="Short description / excerpt"><textarea className={inputClass} rows={2} value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} placeholder="Brief product summary shown in grid" /></Field>
+
+          {/* Pricing */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <Field label="Price (cents)"><input type="number" className={inputClass} value={form.priceCents} onChange={(e) => setForm({ ...form, priceCents: e.target.value })} required placeholder="1900 = €19.00" /></Field>
+            <Field label="Compare-at (cents)"><input type="number" className={inputClass} value={form.compareAtCents} onChange={(e) => setForm({ ...form, compareAtCents: e.target.value })} placeholder="0 = none" /></Field>
+            <Field label="Currency">
+              <select className={selectClass} value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
+                <option value="eur">EUR (€)</option>
+                <option value="usd">USD ($)</option>
+              </select>
+            </Field>
+            <Field label="SKU"><input className={inputClass} value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="optional" /></Field>
+          </div>
+
+          {/* Category + Type */}
           <div className="grid grid-cols-2 gap-4">
             <Field label="Category">
               <select className={selectClass} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
@@ -299,6 +446,9 @@ export function ProductsTab() {
                 <option value="physical">Physical</option>
                 <option value="merchandise">Merchandise</option>
                 <option value="course">Course</option>
+                <option value="bracelets">Bracelets</option>
+                <option value="crystals">Crystals</option>
+                <option value="potions">Potions</option>
               </select>
             </Field>
             <Field label="Product type">
@@ -308,18 +458,56 @@ export function ProductsTab() {
               </select>
             </Field>
           </div>
+
+          {/* Tags */}
+          <Field label="Tags"><input className={inputClass} value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} placeholder="bestseller, new, limited" /></Field>
+
+          {/* Physical-only fields */}
           {form.productType === "physical" && (
-            <Field label="Inventory"><input type="number" className={inputClass} value={form.inventory} onChange={(e) => setForm({ ...form, inventory: e.target.value })} /></Field>
+            <div className="grid grid-cols-3 gap-4">
+              <Field label="Inventory"><input type="number" className={inputClass} value={form.inventory} onChange={(e) => setForm({ ...form, inventory: e.target.value })} /></Field>
+              <Field label="Low stock alert"><input type="number" className={inputClass} value={form.lowStockThreshold} onChange={(e) => setForm({ ...form, lowStockThreshold: e.target.value })} /></Field>
+              <Field label="Weight (g)"><input type="number" className={inputClass} value={form.weightGrams} onChange={(e) => setForm({ ...form, weightGrams: e.target.value })} placeholder="0" /></Field>
+            </div>
           )}
-          <Field label="Status">
-            <select className={selectClass} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
-            </select>
-          </Field>
+
+          {/* Status + Featured */}
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Status">
+              <select className={selectClass} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="archived">Archived</option>
+              </select>
+            </Field>
+            <div className="flex items-end pb-2">
+              <label className="flex items-center gap-2 text-sm text-zinc-700">
+                <input
+                  type="checkbox"
+                  checked={form.featured}
+                  onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                  className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                />
+                <Star className="h-4 w-4 text-amber-400" />
+                Featured product
+              </label>
+            </div>
+          </div>
+
+          {/* Stripe */}
+          <Field label="Stripe Price ID"><input className={inputClass} value={form.stripePriceId} onChange={(e) => setForm({ ...form, stripePriceId: e.target.value })} placeholder="price_... (optional, for checkout)" /></Field>
+
+          {/* SEO */}
+          <div className="border-t border-stone-200 pt-4">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">SEO (optional)</p>
+            <div className="space-y-3">
+              <Field label="SEO title"><input className={inputClass} value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })} placeholder="Custom title for search engines" /></Field>
+              <Field label="SEO description"><textarea className={inputClass} rows={2} value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })} placeholder="Meta description for search engines" /></Field>
+            </div>
+          </div>
+
           {formError && <p className="rounded-lg bg-rose-50 px-4 py-2 text-sm text-rose-600">{formError}</p>}
-          <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update" : "Create"} />
+          <FormActions onCancel={() => setModalOpen(false)} loading={saving} submitLabel={editing ? "Update product" : "Create product"} />
         </form>
       </Modal>
     </div>

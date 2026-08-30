@@ -263,6 +263,7 @@ const Products: CollectionConfig = {
     { name: "name", type: "text", required: true },
     { name: "slug", type: "text", required: true, unique: true },
     { name: "description", type: "richText" },
+    { name: "excerpt", type: "textarea" },
     {
       name: "priceCents",
       type: "number",
@@ -270,9 +271,26 @@ const Products: CollectionConfig = {
       min: 0,
     },
     {
+      name: "compareAtCents",
+      type: "number",
+      min: 0,
+      admin: { description: "Original price for showing a discount" },
+    },
+    {
+      name: "currency",
+      type: "select",
+      options: ["eur", "usd"],
+      defaultValue: "eur",
+    },
+    {
+      name: "sku",
+      type: "text",
+      admin: { description: "Stock keeping unit (optional)" },
+    },
+    {
       name: "category",
       type: "select",
-      options: ["digital", "physical", "merchandise", "course"],
+      options: ["digital", "physical", "merchandise", "course", "bracelets", "crystals", "potions"],
       defaultValue: "digital",
     },
     {
@@ -280,6 +298,11 @@ const Products: CollectionConfig = {
       type: "select",
       options: ["digital", "physical"],
       defaultValue: "digital",
+    },
+    {
+      name: "tags",
+      type: "text",
+      admin: { description: "Comma-separated tags, e.g. 'bestseller,new,limited'" },
     },
     {
       name: "images",
@@ -304,11 +327,41 @@ const Products: CollectionConfig = {
       },
     },
     {
+      name: "lowStockThreshold",
+      type: "number",
+      defaultValue: 5,
+      admin: { condition: (data) => data.productType === "physical" },
+    },
+    {
+      name: "weightGrams",
+      type: "number",
+      admin: { condition: (data) => data.productType === "physical" },
+    },
+    {
       name: "status",
       type: "select",
       options: ["draft", "published", "archived"],
       defaultValue: "draft",
       required: true,
+    },
+    {
+      name: "featured",
+      type: "checkbox",
+      defaultValue: false,
+      admin: { description: "Show on homepage / featured section" },
+    },
+    {
+      name: "stripePriceId",
+      type: "text",
+      admin: { description: "Stripe Price ID for checkout (price_...)" },
+    },
+    {
+      name: "seoTitle",
+      type: "text",
+    },
+    {
+      name: "seoDescription",
+      type: "textarea",
     },
   ],
 };
