@@ -115,8 +115,24 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-stone-200 pt-6 text-center text-xs text-stone-400">
-          © {year} {locale === "bg" ? site.name : site.nameEn}. {tr("footer_rights", locale)}
+        <div className="mt-10 border-t border-stone-200 pt-6">
+          {/* Legal links */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-stone-400">
+            <Link href="/legal/terms" className="hover:text-stone-600">
+              {locale === "bg" ? "Общи условия" : "Terms"}
+            </Link>
+            <span>·</span>
+            <Link href="/legal/privacy" className="hover:text-stone-600">
+              {locale === "bg" ? "Поверителност" : "Privacy"}
+            </Link>
+            <span>·</span>
+            <Link href="/legal/refund" className="hover:text-stone-600">
+              {locale === "bg" ? "Възстановяване" : "Refunds"}
+            </Link>
+          </div>
+          <p className="mt-3 text-center text-xs text-stone-400">
+            © {year} {locale === "bg" ? site.name : site.nameEn}. {tr("footer_rights", locale)}
+          </p>
         </div>
       </div>
     </footer>

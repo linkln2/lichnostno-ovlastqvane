@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { getPayloadInstance } from "@/lib/payload";
 import { generateQrToken } from "@/lib/qr";
+import {
+  sendOrderConfirmation,
+  sendTicketConfirmation,
+  sendSubscriptionWelcome,
+  sendPaymentFailed,
+} from "@/lib/email";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -49,7 +55,28 @@ export async function POST(req: NextRequest) {
         const invoice = event.data.object as Stripe.Invoice;
         const subId = (invoice as any).subscription as string | undefined;
         console.warn("Payment failed for subscription:", subId);
-        // TODO: send Resend email once that's wired
+
+        // Send dunning email
+        if (subId) {
+          try {
+            const payload = await getPayloadInstance();
+            const { docs } = await payload.find({
+              collection: "subscriptions",
+              where: { stripeSubscriptionId: { equals: subId } },
+              limit: 1,
+              overrideAccess: true,
+            });
+            if (docs.length > 0 && docs[0].email) {
+              const amount = invoice.total
+                ? `€${(invoice.total / 100).toFixed(2)}`
+                : "your subscription";
+              const portalUrl = `${process.env.NEXT_PUBLIC_SERVER_URL || ""}/membership`;
+              await sendPaymentFailed(docs[0].email as string, { amount, portalUrl });
+            }
+          } catch (e) {
+            console.error("Dunning email error:", e);
+          }
+        }
         break;
       }
 
@@ -103,12 +130,35 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       overrideAccess: true,
     }).then(async (reg: any) => {
       // Update with the real QR token containing the registration ID
+      const qrToken = generateQrToken(reg.id);
       await payload.update({
         collection: "registrations",
         id: reg.id,
-        data: { qrToken: generateQrToken(reg.id) } as any,
+        data: { qrToken } as any,
         overrideAccess: true,
       });
+
+      // Send ticket confirmation email with QR
+      const eventData = await payload.findByID({
+        collection: "events",
+        id: typeof event === "object" ? (event as any).id : event,
+        overrideAccess: true,
+      });
+      const eventTitle = typeof eventData?.title === "string"
+        ? (() => { try { const p = JSON.parse(eventData.title); return p.en || p.bg; } catch { return eventData.title; } })()
+        : (eventData?.title as any)?.en || "Event";
+      const eventLocation = typeof eventData?.location === "string"
+        ? (() => { try { const p = JSON.parse(eventData.location); return p.en || p.bg; } catch { return eventData.location; } })()
+        : (eventData?.location as any)?.en || "";
+
+      await sendTicketConfirmation(customerEmail, {
+        eventName: eventTitle,
+        packageName: typeof pkg.name === "string" ? pkg.name : (pkg.name as any)?.en || "Ticket",
+        priceCents,
+        startsAt: eventData?.startsAt || "",
+        location: eventLocation,
+        qrToken,
+      }).catch((e: any) => console.error("Ticket email error:", e));
     });
 
     await payload.create({
@@ -142,7 +192,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
     const priceCents = session.amount_total || 0;
 
-    await payload.create({
+    const order = await payload.create({
       collection: "orders",
       data: {
         stripeSessionId: session.id,
@@ -173,6 +223,13 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         overrideAccess: true,
       });
     }
+
+    // Send order confirmation email
+    await sendOrderConfirmation(customerEmail, {
+      productName: product.name,
+      priceCents,
+      orderId: Number(order.id),
+    }).catch((e: any) => console.error("Order email error:", e));
   }
 }
 
@@ -268,6 +325,23 @@ async function handleSubscriptionChange(sub: Stripe.Subscription) {
       } as any,
       overrideAccess: true,
     });
+
+    // Send subscription welcome email
+    if (email && tierId) {
+      const tier = await payload.findByID({
+        collection: "subscription-tiers",
+        id: tierId,
+        overrideAccess: true,
+      });
+      const tierName = typeof tier?.name === "string"
+        ? tier.name
+        : (tier?.name as any)?.en || "Membership";
+      await sendSubscriptionWelcome(email, {
+        tierName,
+        priceCents: tier?.priceCents || 0,
+        interval: tier?.interval || "month",
+      }).catch((e: any) => console.error("Sub welcome email error:", e));
+    }
   }
 }
 

@@ -3,6 +3,7 @@ import "../globals.css";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { CookieConsent } from "@/components/CookieConsent";
 
 export const metadata: Metadata = {
   title: "Личностно овластяване | Personal Empowerment",
@@ -28,6 +29,7 @@ export default function SiteLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <CookieConsent />
         </LocaleProvider>
       </body>
     </html>
