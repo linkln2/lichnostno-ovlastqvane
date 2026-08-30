@@ -1100,6 +1100,139 @@ export function RegistrationsTab() {
   );
 }
 
+// ─── Analytics tab ──────────────────────────────────────────────
+
+export function AnalyticsTab() {
+  const { data, loading, error } = useFetch<{
+    subscribers: { active: number; cancelled: number; pastDue: number; churnRate: number };
+    eventStats: { id: number; title: string; views: number; registrations: number; conversionRate: number }[];
+    topBlogPosts: { id: number; title: string; slug: string; views: number }[];
+    revenueTimeSeries: { date: string; cents: number }[];
+  }>("/api/dashboard/analytics");
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
+  if (!data) return <EmptyState message="No analytics data yet." />;
+
+  function fmtEur(cents: number) {
+    return `€${(cents / 100).toFixed(0)}`;
+  }
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Analytics" subtitle="Subscriber retention, event conversion, and content performance" />
+
+      {/* Subscriber stats */}
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <AnalyticsCard label="Active subscribers" value={String(data.subscribers.active)} color="text-indigo-700" />
+        <AnalyticsCard label="Cancelled" value={String(data.subscribers.cancelled)} color="text-rose-600" />
+        <AnalyticsCard label="Past due" value={String(data.subscribers.pastDue)} color="text-amber-600" />
+        <AnalyticsCard label="Churn rate" value={`${data.subscribers.churnRate}%`} color="text-rose-600" />
+      </section>
+
+      {/* Event conversion */}
+      <div>
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">
+          Event conversion (views → registrations)
+        </h3>
+        {data.eventStats.length === 0 ? (
+          <p className="text-sm text-zinc-400">No events yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {data.eventStats.map((e) => (
+              <div key={e.id} className="rounded-xl border border-white/60 bg-white/40 p-4 backdrop-blur">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-zinc-900">{e.title}</p>
+                    <div className="mt-1 flex items-center gap-3 text-xs text-zinc-500">
+                      <span>{e.views} views</span>
+                      <span>→</span>
+                      <span>{e.registrations} registrations</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-lg font-bold ${e.conversionRate > 10 ? "text-green-600" : e.conversionRate > 0 ? "text-amber-600" : "text-zinc-400"}`}>
+                      {e.conversionRate}%
+                    </span>
+                  </div>
+                </div>
+                {/* Conversion bar */}
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-200">
+                  <div
+                    className={`h-full rounded-full ${e.conversionRate > 10 ? "bg-green-500" : "bg-amber-500"}`}
+                    style={{ width: `${Math.min(100, e.conversionRate)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Top blog posts */}
+      <div>
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">
+          Most-read blog posts
+        </h3>
+        {data.topBlogPosts.length === 0 || data.topBlogPosts.every((p) => p.views === 0) ? (
+          <p className="text-sm text-zinc-400">No blog views tracked yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {data.topBlogPosts
+              .filter((p) => p.views > 0)
+              .map((p, i) => (
+                <div key={p.id} className="flex items-center gap-3 rounded-xl border border-white/60 bg-white/40 p-3 backdrop-blur">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-700 text-xs font-bold text-white">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-zinc-900">{p.title}</p>
+                  </div>
+                  <span className="shrink-0 text-sm font-mono text-zinc-500">{p.views} views</span>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Revenue over time */}
+      {data.revenueTimeSeries.length > 0 && (
+        <div>
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">
+            Revenue (last 90 days)
+          </h3>
+          <div className="rounded-2xl border border-white/60 bg-white/40 p-6 backdrop-blur">
+            <div className="flex items-end gap-1 h-32">
+              {data.revenueTimeSeries.slice(-30).map((point, i) => {
+                const maxCents = Math.max(...data.revenueTimeSeries.slice(-30).map((p) => p.cents), 1);
+                const heightPct = (point.cents / maxCents) * 100;
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t bg-gradient-to-t from-indigo-600 to-teal-400 transition-all hover:opacity-80"
+                    style={{ height: `${Math.max(2, heightPct)}%` }}
+                    title={`${point.date}: ${fmtEur(point.cents)}`}
+                  />
+                );
+              })}
+            </div>
+            <p className="mt-3 text-xs text-zinc-400">Last 30 days of paid orders</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AnalyticsCard({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div className="rounded-2xl border border-white/60 bg-white/40 p-5 backdrop-blur">
+      <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
+      <p className={`mt-2 text-2xl font-bold ${color}`}>{value}</p>
+    </div>
+  );
+}
+
 // ─── Settings tab (presentational) ───────────────────────────────
 
 export function SettingsTab() {

@@ -10,6 +10,7 @@ import {
   Settings,
   Users,
   TicketCheck,
+  BarChart3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ export const nav: NavItem[] = [
   { label: "Orders", icon: Receipt },
   { label: "Registrations", icon: TicketCheck },
   { label: "Subscribers", icon: Users },
+  { label: "Analytics", icon: BarChart3 },
   { label: "Settings", icon: Settings },
 ];
 

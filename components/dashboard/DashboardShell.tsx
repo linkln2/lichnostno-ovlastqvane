@@ -15,6 +15,7 @@ import {
   OrdersTab,
   RegistrationsTab,
   SubscribersTab,
+  AnalyticsTab,
   SettingsTab,
 } from "./tabs";
 import { CalendarClock, CircleDollarSign, Users, Ticket } from "lucide-react";
@@ -58,6 +59,7 @@ export function DashboardShell() {
           {active === "Orders" && <OrdersTab />}
           {active === "Registrations" && <RegistrationsTab />}
           {active === "Subscribers" && <SubscribersTab />}
+          {active === "Analytics" && <AnalyticsTab />}
           {active === "Settings" && <SettingsTab />}
         </main>
 

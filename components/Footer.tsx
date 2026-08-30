@@ -130,7 +130,7 @@ export default function Footer() {
               {locale === "bg" ? "Възстановяване" : "Refunds"}
             </Link>
           </div>
-          <p className="mt-3 text-center text-xs text-stone-400">
+          <p className="mt-3 text-center text-sm font-medium text-stone-600">
             © {year} {locale === "bg" ? site.name : site.nameEn}. {tr("footer_rights", locale)}. Made with ❤️ by Georgi
           </p>
         </div>
