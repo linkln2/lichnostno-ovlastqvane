@@ -43,10 +43,15 @@ export function Sidebar({
         <img
           src="/logo.png"
           alt="Logo"
-          className="h-9 w-9 rounded-full object-cover ring-2 ring-white/60"
+          className="h-9 w-9 rounded-full object-cover ring-2 ring-white/60 dark:hidden"
+        />
+        <img
+          src="/pictures/dark-mode-logo.png"
+          alt="Logo"
+          className="hidden h-9 w-9 rounded-full object-cover ring-2 ring-white/20 dark:block"
         />
         <span
-          className="text-lg font-semibold tracking-tight text-zinc-900"
+          className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-white"
           style={{ fontFamily: "var(--font-fraunces)" }}
         >
           Dashboard
@@ -112,12 +117,12 @@ export function Topbar({ name = "Maria" }: { name?: string }) {
     <header className="flex items-center gap-4 px-6 py-5 md:px-8">
       <div className="min-w-0 flex-1">
         <h1
-          className="truncate text-xl font-semibold text-zinc-900 md:text-2xl"
+          className="truncate text-xl font-semibold text-zinc-900 dark:text-white md:text-2xl"
           style={{ fontFamily: "var(--font-fraunces)" }}
         >
           {greeting}, {name}
         </h1>
-        <p className="text-sm text-zinc-500">Here's what's happening in your studio today.</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">Here's what's happening in your studio today.</p>
       </div>
 
       <div className="hidden flex-1 sm:block">

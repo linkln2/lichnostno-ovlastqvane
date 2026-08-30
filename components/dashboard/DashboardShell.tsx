@@ -96,7 +96,7 @@ export function DashboardShell() {
         </main>
 
         {/* Mobile bottom navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/60 bg-white/80 px-2 py-2 backdrop-blur-xl md:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/60 bg-white/80 px-2 py-2 backdrop-blur-xl dark:border-white/10 dark:bg-black/80 md:hidden">
           <ul className="flex justify-around">
             {nav.map((item) => {
               const isActive = active === item.label;
