@@ -22,3 +22,43 @@ All UI must be designed for mobile first and then enhanced for larger screens.
 - Test visually with a mobile device or browser DevTools mobile emulation before committing.
 
 <!-- END:mobile-first-design-rules -->
+
+<!-- BEGIN:project-conventions -->
+
+# Project Conventions
+
+## Build & Dev
+
+- `npm run dev` — Turbopack dev server (port 3001 if 3000 is taken)
+- `npm run build` — Production build (Turbopack)
+- `npx tsc --noEmit` — Type check (run before committing)
+- Deploy: `vercel --prod --yes` or push to `origin/main` (auto-deploy)
+
+## Theme System
+
+- `ThemeProvider` exposes `useTheme()` → `{ theme, toggleTheme, mounted }`
+- Default: time-based (dark 19:00–06:00, light otherwise)
+- Manual toggle saves to `localStorage` and overrides auto-switching
+- All backgrounds must be **opaque in light mode** with `dark:` variants
+- Never use semi-transparent backgrounds (`bg-white/85`) on pages with the fixed starfield — it causes low contrast
+
+## Tailwind v4 + Turbopack Notes
+
+- Responsive variants (`md:`, `lg:`) may not generate `@media` wrappers reliably
+- For critical responsive layouts, use CSS modules (`*.module.css`) with real `@media` queries
+- Example: `Footer.module.css` uses `@media (min-width: 1024px)` for 4-column grid
+
+## Auth & Route Protection
+
+- `proxy.ts` handles redirects: `/login` → `/membership`, `/dashboard` + `/inner-circle` + `/account` require auth
+- Staff whitelist in `lib/auth.ts`
+- Customer entitlements computed in `lib/entitlements.ts`
+- Header fetches `/api/auth/me` + `/api/entitlements` to show/hide member features
+
+## Content
+
+- Bilingual BG/EN via `lib/i18n.ts` (`tr()` helper) and `lib/content.ts` (structured content)
+- Payload CMS collections are localized (bg default, en fallback)
+- Static content in `lib/content.ts` is being migrated to Payload
+
+<!-- END:project-conventions -->

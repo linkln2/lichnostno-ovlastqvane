@@ -1,93 +1,343 @@
-# Бяла книга
+# Whitepaper — Technical Feature Reference
 
-## Продажба на билети, календар на събития и резервации за „Личностно овластяване" — уеб приложение
+## Личностно овластяване · Personal Empowerment Web App
 
-*Пазарно проучване, сравнение на опции и препоръчана пътна карта*
-Август 2026
+*Comprehensive catalog of all features, pages, API routes, and systems*
+
+Last updated: 31 August 2026
 
 ---
 
-## 1. Обобщение
+## 1. Overview
 
-Този документ разглежда практическите опции за три свързани функции на бъдещото уеб приложение „Личностно овластяване": (а) продажба на билети за семинари и събития, (б) публичен календар на предстоящи събития, и (в) резервация на индивидуални (1:1) коучинг сесии. За всяка функция са прегледани водещи съществуващи решения на пазара (готови платформи и инструменти за самостоятелно изграждане), с фокус върху разходи, контрол върху марката и данните, и сложност на внедряване.
+The **Личностно овластяване** web app is a bilingual (Bulgarian/English) platform combining a public marketing site, e-commerce shop, event ticketing, membership subscriptions, a gated member area, and a staff admin dashboard — all built on a single Next.js codebase with Payload CMS for content management and Stripe for payments.
 
-Основната препоръка е поетапен подход: старт с готови инструменти с ниска цена и бърз старт (Stripe Payment Links / Ticket Tailor за билети, Cal.com за резервации), с преминаване към собствена система, вградена директно в сайта, когато обемът на продажбите оправдае инвестицията в разработка.
+### Tech Stack
 
-## 2. Пазарно проучване — сравними проекти
+| Layer | Technology |
+| --- | --- |
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Language | TypeScript 5 |
+| UI | React 19 + Tailwind CSS 4 |
+| CMS / Admin | Payload CMS 3 (self-hosted, embedded) |
+| Database | PostgreSQL 16 (Payload Postgres adapter) |
+| Payments | Stripe (subscriptions, one-time, billing portal) |
+| Email | Resend (transactional) |
+| Fonts | Fraunces (serif), Inter (UI), JetBrains Mono (data) |
+| Charts | Recharts (dashboard) |
+| Hosting | Vercel (production), Netlify (configured) |
+| QR Codes | `html5-qrcode` (scanner), custom JWT tokens |
 
-Прегледани са платформи, използвани от организатори на семинари, работилници и събития със сходен мащаб (десетки до няколкостотин участници на събитие), както и два водещи играча на българския пазар за контекст.
+---
 
-### 2.1 Международни платформи за продажба на билети
+## 2. Route Architecture
 
-| Платформа | Модел на таксуване | Кога е подходяща |
-|---|---|---|
-| Eventbrite | ~3,7% + $1,79 на билет (плюс задължителен абонамент от 2026 г.) | Търсите публична откриваемост в маркетплейс с готова аудитория |
-| Ticket Tailor | Плосък fee ~$0,75/билет (до $0,30 при предплатени кредити) | Имате собствена аудитория; искате предвидими, ниски разходи |
-| Humanitix | Сходно на Ticket Tailor; дарява част от таксите за благотворителност | Ценностно съответствие с проект с мисия за общество |
-| Zoho Backstage | 0% комисионна (в рамките на Zoho екосистемата) | Вече използвате Zoho инструменти; искате всичко в едно |
-| TixHQ | Фиксирана месечна цена, 0% такса на билет | Стабилен, предвидим обем продажби всеки месец |
+The app uses Next.js route groups, each with its own root layout:
 
-### 2.2 Българският пазар — контекст
+| Group | Path | Purpose |
+| --- | --- | --- |
+| Public site | `app/(site)/` | Marketing, shop, events, membership, blog, legal |
+| Dashboard | `app/(dashboard)/` | Staff-only Coaching Studio |
+| Payload admin | `app/(payload)/` | Auto-generated `/admin` UI + REST/GraphQL API |
+| App API | `app/api/` | Custom routes for commerce, auth, dashboard, webhooks |
 
-Eventim.bg и Ticket Station са водещите платформи за билети в България, но са ориентирани към мащабни концерти, фестивали и спортни събития с хиляди посетители — договорните им условия и таксова структура не са пригодени за малък организатор на еднократни семинари от 20–40 души.
+---
 
-По-подходящ ориентир за проект от този мащаб са международните „boutique" инструменти по-горе, комбинирани с локален разплащателен процесор.
+## 3. Public Site Pages
 
-> **Плащания в България:** Stripe вече поддържа български търговски сметки директно (от 2020 г. насам), с ценообразуване в лв. и евро. Кешът остава разпространен offline (около 78% от POS транзакциите исторически), но онлайн плащанията растат — затова е разумно онлайн формата да поддържа карта, а на място да остане опция за брой/банков превод.
+| Page | Route | Features |
+| --- | --- | --- |
+| **Home** | `/` | Hero with logo, launch countdown timer, mission & values with orbiting solar system animation, caduceus symbolism cards, video feed (TikTok/Instagram tabs), shop preview carousel, membership tier cards, testimonials, recent blog posts, starfield background with particles |
+| **About** | `/about` | Mission, values, team bio, particle/starfield effects |
+| **Services** | `/services` | Service catalog cards + FAQ section |
+| **Events** | `/events` | Upcoming & past events list |
+| **Event detail** | `/events/[slug]` | Event info, ticket package selection, Stripe checkout, waitlist when sold out, view tracking |
+| **Testimonials** | `/testimonials` | Participant stories grid |
+| **Blog** | `/blog` | Published posts list |
+| **Blog post** | `/blog/[slug]` | Full article + view count tracking |
+| **Feed / Videos** | `/feed` | TikTok and Facebook embed tabs, follow CTAs |
+| **Shop** | `/shop` | Product grid from Payload, category filters |
+| **Product detail** | `/shop/[slug]` | Product info + Stripe checkout modal |
+| **Membership** | `/membership` | Tier cards from Payload, inline login form, account activation, Stripe subscription checkout |
+| **Membership success** | `/membership/success` | Post-payment confirmation |
+| **Inner Circle** | `/inner-circle` | Gated member-only video feed (requires active membership) |
+| **Account** | `/account` | Customer profile, active memberships, event tickets, product orders, logout |
+| **Contact** | `/contact` | Contact form → saves to JSON store |
+| **Legal** | `/legal/[slug]` | Terms, Privacy, Refund policy pages |
+| **404** | `not-found` | Bilingual not-found with home link |
 
-### 2.3 Инструменти за резервация на 1:1 сесии
+---
 
-| Инструмент | Цена | Забележка |
-|---|---|---|
-| Cal.com | Безплатен облачен план (1 потребител, неограничени резервации); self-host — напълно безплатен | Отворен код, пълен API достъп, най-добро съотношение цена/контрол |
-| Calendly | От $10–12/потребител/месец за нужните функции (плащания, брандиране) | По-полирано изживяване „из кутията", по-скъпо във времето |
-| Talkspresso | Комисионна на сесия | Всичко в едно (видео + плащане + резервация) — по-малко гъвкавост |
+## 4. Dashboard (Staff Only)
 
-## 3. Опции за продажба на билети в сайта
+| Page | Route | Features |
+| --- | --- | --- |
+| **Coaching Studio** | `/dashboard` | Overview tab (KPIs, revenue chart, momentum ring, recent orders, subscriber tier donut, upcoming events), Products tab (CRUD), Events tab (CRUD + Facebook import), Blog tab (CRUD), Orders tab (list + refund), Subscribers tab, Registrations tab, Analytics tab, Settings tab (social stats) |
+| **Check-in scanner** | `/checkin` | QR code scanner using camera, validates tickets via `/api/checkin` |
 
-### Опция А — Вграждане на готова платформа (Ticket Tailor / Humanitix)
+---
 
-Събитието се създава в платформата на трета страна, а бутонът „Регистрация" на сайта отваря техния checkout (нов таб или вграден iframe/widget).
+## 5. API Routes
 
-- **Плюсове:** старт за часове, а не седмици; вградена защита от овербукинг, QR билети, checkin приложение.
-- **Минуси:** посетителят напуска частично усещането за твоя бранд; месечна/на-билет такса, дори да е ниска.
-- **Ориентировъчен разход:** ~0,75–0,85 $ на билет + процесинг на картата (~2,9% + 0,30 лв.).
+### 5.1 Public / Customer API
 
-### Опция Б — Stripe Payment Links / Checkout Page (леко собствено решение)
+| Route | Methods | Description |
+| --- | --- | --- |
+| `GET /api/products` | GET | List published products |
+| `GET /api/products/[slug]` | GET | Single product by slug |
+| `GET /api/events/[slug]` | GET | Event + packages with spots-left/waitlist math |
+| `GET /api/subscription-tiers` | GET | Membership tiers |
+| `POST /api/register` | POST | Create event registration |
+| `POST /api/contact` | POST | Save contact message |
+| `POST /api/track` | POST | Increment view count (blog/event) |
+| `GET /api/qr/[token]` | GET | PNG QR code image for a ticket |
 
-Директна интеграция със Stripe — създава се линк или вграден бутон за плащане за всяко събитие, без отделна ticketing платформа.
+### 5.2 Authentication
 
-- **Плюсове:** пълен контрол на бранда, само таксите на Stripe за процесинг (без допълнителна платформена такса), бърз старт.
-- **Минуси:** без вградени лимити на бройки, без автоматичен QR/checkin — изисква Zapier/Sheets за проследяване на записи, или инструмент върху Stripe (напр. Checkout Page — от $29/мес.).
-- **Най-подходящо за:** онлайн въведения и по-малки, безплатни или еднократни събития, докато обемът е нисък.
+| Route | Methods | Description |
+| --- | --- | --- |
+| `POST /api/auth/login` | POST | Staff login (whitelisted emails, auto-provisions staff) |
+| `POST /api/auth/customer-login` | POST | Customer login (requires active subscription + activated account) |
+| `POST /api/auth/signup` | POST | Customer self-registration |
+| `POST /api/auth/activate` | POST | Set password for subscriber after Stripe purchase |
+| `GET /api/auth/me` | GET | Current user from token cookie |
+| `POST /api/auth/logout` | POST | Clear auth cookie |
 
-### Опция В — Собствена система, вградена в приложението (Stripe API + база данни)
+### 5.3 Commerce & Entitlements
 
-Разработва се модул „Събития" директно в кода на сайта — списък на събития от база данни, бройка налични места, Stripe Checkout Session за плащане, автоматичен имейл с потвърждение и уникален QR код за вход.
+| Route | Methods | Description |
+| --- | --- | --- |
+| `POST /api/checkout` | POST | Stripe Checkout for subscriptions, event tickets, products |
+| `POST /api/portal` | POST | Stripe customer billing portal |
+| `GET /api/entitlements` | GET | Customer memberships, tickets, products |
+| `POST /api/webhooks/stripe` | POST | Stripe webhook: checkout, subscriptions, invoices |
 
-- **Плюсове:** пълна консистентност с дизайна на сайта; данните за участниците остават изцяло в твоята база; никаква платформена такса — само процесинг на Stripe (~2,9% + 0,30 лв.).
-- **Минуси:** изисква разработка и поддръжка (backend, база данни, изпращане на имейли); по-дълъг път до пускане.
-- **Най-подходящо за:** етап, в който събитията се провеждат редовно (месечно+) и обемът оправдава инвестицията.
+### 5.4 Customer Self-Service
 
-> **Препоръка:** старт с Опция Б (Stripe Payment Links) за първите 2–3 събития, за да се провери реалното търсене, с преминаване към Опция В, когато честотата на събитията стане месечна или по-висока.
+| Route | Methods | Description |
+| --- | --- | --- |
+| `GET /api/customer/orders` | GET | Customer order history |
+| `GET /api/customer/registrations` | GET | Customer event registrations |
+| `GET /api/customer/subscriptions` | GET | Customer subscriptions |
 
-## 4. Опции за календар на събития
+### 5.5 Staff Dashboard API
 
-| Подход | Описание | Кога е подходящ |
-|---|---|---|
-| Статични данни (текущ MVP) | Списък със събития, ръчно въведен в кода на сайта | Много малко на брой събития, рядко актуализирани |
-| Headless CMS (напр. Notion API, Sanity, Airtable) | Нетехнически администратор добавя/редактира събития в прост интерфейс; сайтът ги показва автоматично | Редовни събития, нетехнически администратор актуализира сам |
-| Вграден календар на трета страна (Cal.com booking pages) | Публичен booking-календар, вграден директно в страницата „Събития" | Комбинира се естествено с резервациите за 1:1 сесии |
+| Route | Methods | Description |
+| --- | --- | --- |
+| `GET /api/dashboard/stats` | GET | Overview: revenue, subscribers, events, orders |
+| `GET /api/dashboard/analytics` | GET | Deep analytics: conversion, top blog, revenue time series |
+| `GET/POST /api/dashboard/products` | GET, POST | List / create products |
+| `PATCH/DELETE /api/dashboard/products/[id]` | PATCH, DELETE | Update / delete product |
+| `GET/POST /api/dashboard/events` | GET, POST | List / create events |
+| `PATCH/DELETE /api/dashboard/events/[id]` | PATCH, DELETE | Update / delete event |
+| `GET/POST /api/dashboard/event-packages` | GET, POST | List / create event packages |
+| `PATCH/DELETE /api/dashboard/event-packages/[id]` | PATCH, DELETE | Update / delete package |
+| `GET/POST /api/dashboard/subscription-tiers` | GET, POST | List / create tiers |
+| `PATCH/DELETE /api/dashboard/subscription-tiers/[id]` | PATCH, DELETE | Update / delete tier |
+| `GET/POST /api/dashboard/blog-posts` | GET, POST | List / create blog posts |
+| `PATCH/DELETE /api/dashboard/blog-posts/[id]` | PATCH, DELETE | Update / delete post |
+| `GET /api/dashboard/orders` | GET | List all orders |
+| `POST /api/dashboard/orders/[id]/refund` | POST | Stripe refund + mark order refunded |
+| `GET /api/dashboard/registrations` | GET | List all registrations |
+| `GET /api/dashboard/subscriptions` | GET | List all subscriptions |
+| `GET/POST /api/dashboard/social-stats` | GET, POST | List / create social stats |
+| `PATCH/DELETE /api/dashboard/social-stats/[id]` | PATCH, DELETE | Update / delete social stats |
+| `POST /api/dashboard/upload` | POST | Upload file to media collection |
+| `POST /api/dashboard/events/import-facebook` | POST | Scrape Facebook event → create event record |
 
-За проект от този мащаб, Airtable или Notion, свързани през публично API, дават на екипа лесен за ползване „бекенд" без нужда от отделен административен панел — Деница или друг администратор може да добавя събития в таблица, а те да се появяват автоматично на сайта.
+### 5.6 Setup / Migration
 
-## 5. Препоръчана поетапна пътна карта
+| Route | Methods | Description |
+| --- | --- | --- |
+| `POST /api/setup` | POST | One-time staff + product seed (requires `?key=`) |
+| `POST /api/migrate` | POST | Force Drizzle schema push (requires `?key=`) |
 
-| Фаза | Обхват | Инструменти |
-|---|---|---|
-| Фаза 1 — MVP (сега) | Статичен сайт с мокови данни, форма за интерес (не истинско плащане) | Текущият прототип |
-| Фаза 2 — Първи продажби | Реални плащания през Stripe Payment Links; резервации за коучинг през Cal.com (безплатен план) | Stripe, Cal.com безплатен облак |
-| Фаза 3 — Растеж | Календар през Airtable/Notion API; автоматични имейл потвърждения (Zapier) | Airtable/Notion, Zapier, Stripe |
-| Фаза 4 — Собствена платформа | Пълен модул „Събития" вграден в кода — бази данни, QR билети, админ панел | Собствен backend + Stripe API |
+---
 
-> Този документ е работен материал за вземане на решение и не представлява правен или счетоводен съвет — таксите на трети страни (Stripe, Ticket Tailor и др.) могат да се променят; препоръчва се проверка на актуалните им условия преди договаряне.
+## 6. Payload CMS Collections
+
+| Collection | Auth | Access | Key Fields |
+| --- | --- | --- | --- |
+| **Staff** | Yes | `isStaff` role-based | `name`, `role` (owner/admin/editor) |
+| **Customers** | Yes | Public create | `name`, `phone`, `city`, `stripeCustomerId` |
+| **Media** | No | Public read, staff CUD | Upload to `public/media`, `alt` |
+| **Blog Posts** | No | Public read, staff CUD | `title` (loc), `slug`, `excerpt`, `body`, `coverImage`, `status`, `publishAt`, `viewCount` |
+| **Events** | No | Public read, staff CUD | `title` (loc), `slug`, `description`, `location`, `startsAt`, `endsAt`, `capacity`, `status`, `packages`, `viewCount`, `facebookEventId` |
+| **Event Packages** | No | Public read, staff CUD | `event` relation, `name` (loc), `priceCents`, `spots`, `stripePriceId` |
+| **Products** | No | Public read, staff CUD | `name`, `slug`, `description`, `priceCents`, `category`, `inventory`, `images`, `stripePriceId` |
+| **Subscription Tiers** | No | Public read, staff CUD | `name`, `priceCents`, `interval`, `stripePriceId`, `perks[]` |
+| **Pages** | No | Public read, staff CUD | `title`, `slug`, `content`, `seoTitle`, `seoDescription` |
+| **Orders** | No | Staff only | `customer`, `source`, `stripeSessionId`, `status`, `totalCents`, `items[]` |
+| **Registrations** | No | Public create, staff read | `customer`, `event`, `package`, `status`, `qrToken` |
+| **Subscriptions** | No | Staff only | `customer`, `tier`, `stripeSubscriptionId`, `status`, `currentPeriodStart/End`, `cancelAtPeriodEnd` |
+| **Check-Ins** | No | Staff only | `registration`, `staff`, `checkedInAt` |
+| **Social Stats** | No | Public read, staff CUD | `platform`, `handle`, `followers`, `posts`, `engagementRate` |
+
+**Localization:** bg (default), en (fallback) — enabled on title, excerpt, body, description, name fields.
+
+---
+
+## 7. Authentication & Access Model
+
+### Staff Auth
+- Whitelisted emails in `lib/auth.ts`
+- `/api/auth/login` auto-creates staff user if missing
+- `requireStaff` middleware protects all `/api/dashboard/*` routes
+- `proxy.ts` redirects `/admin` → `/dashboard` if already authenticated
+
+### Customer Auth
+- Customers sign up via `/api/auth/signup` or are auto-created on Stripe checkout
+- After Stripe purchase, customers receive an activation link to set a password (`/api/auth/activate`)
+- Login via `/api/auth/customer-login` requires an active subscription
+- `lib/entitlements.ts` computes: `hasActiveMembership`, `hasTierAtLeast`, `hasEventTicket`, `ownsProduct`
+
+### Route Protection (`proxy.ts`)
+- `/login` → redirects to `/membership`
+- `/dashboard`, `/inner-circle`, `/account` → require `payload-token` cookie, else redirect to `/membership`
+
+---
+
+## 8. Commerce & Stripe Integration
+
+### Checkout Types
+1. **Subscriptions** — `POST /api/checkout` with `mode: "subscription"` + `tierId`
+2. **Event tickets** — `POST /api/checkout` with `eventPackageId`
+3. **Products** — `POST /api/checkout` with `productId`
+
+### Stripe Webhook Lifecycle
+- `checkout.session.completed` → create registrations + orders, decrement inventory, send confirmation email
+- `customer.subscription.created/updated` → create/update subscription records
+- `customer.subscription.deleted` → mark subscription as cancelled
+- `invoice.payment_failed` → send dunning email
+
+### Billing Portal
+- `POST /api/portal` creates a Stripe Customer Portal session for self-service subscription management
+
+---
+
+## 9. Email System (Resend)
+
+| Function | Trigger | Content |
+| --- | --- | --- |
+| `sendOrderConfirmation` | Product purchase | Order details, product info |
+| `sendTicketConfirmation` | Event registration | Ticket details + embedded QR code image |
+| `sendSubscriptionWelcome` | New subscription | Welcome message, tier perks |
+| `sendPaymentFailed` | Failed invoice | Dunning notice with retry info |
+
+---
+
+## 10. Theme System
+
+- **ThemeProvider** exposes `useTheme()` → `{ theme, toggleTheme, mounted }`
+- **Default:** Time-based (dark mode 19:00–06:00, light otherwise)
+- **Manual toggle:** Saves to `localStorage`, overrides auto-switching
+- **Toggle UI:** Sun/moon icon button in navbar (desktop) + labeled button in mobile menu
+- **Hydration-safe:** Server renders light, client adjusts after mount
+- All section backgrounds are opaque in light mode with `dark:` variants
+
+---
+
+## 11. Internationalization
+
+- **Languages:** Bulgarian (bg, default) + English (en)
+- **Dictionary:** `lib/i18n.ts` with `tr(key, locale)` helper
+- **Content:** `lib/content.ts` holds bilingual structured content
+- **CMS:** Payload collections are localized (bg/en)
+- **UI:** Language toggle in header (BG/EN pills), persisted via `LocaleProvider`
+
+---
+
+## 12. Components
+
+### Site Components
+| Component | Purpose |
+| --- | --- |
+| `Header` | Sticky nav with logo, menu, theme toggle, language toggle, auth-aware links |
+| `Footer` | 4-column grid: Company, Discover, Offerings, Support + contact + social + copyright |
+| `LocaleProvider` | React context for locale state (localStorage persistence) |
+| `ThemeProvider` | Dark/light theme with time-based default + manual toggle |
+| `CookieConsent` | GDPR consent banner |
+| `CountdownTimer` | Launch countdown to target date |
+| `ParticleBurst` | Animated particle effect for hero/mission sections |
+| `SolarSystemOrbits` | Decorative orbiting planets animation |
+| `StarfieldBackground` | Canvas-based animated starfield with colored stars + comets |
+| `RegistrationForm` | Event registration form component |
+| `TikTokEmbed` | TikTok video feed embed |
+| `FacebookEmbed` | Facebook page embed |
+
+### Dashboard Components
+| Component | Purpose |
+| --- | --- |
+| `DashboardShell` | Main layout with tab switcher + overview |
+| `Sidebar` / `Topbar` | Navigation |
+| `StatCard` | KPI metric card |
+| `MomentumRing` | Circular progress indicator |
+| `GlassCard` | Glassmorphism container |
+| `RevenueChart` | Revenue trend (Recharts) |
+| `RecentOrdersTable` | Orders data table |
+| `UpcomingEventsList` | Event list widget |
+| `SubscriberTierDonut` | Tier distribution donut chart |
+| Tab components | Products, Events, Blog, Orders, Subscribers, Registrations, Analytics, Settings |
+
+---
+
+## 13. Business Logic Libraries
+
+| File | Exports | Purpose |
+| --- | --- | --- |
+| `lib/auth.ts` | `WHITELISTED_EMAILS`, `isWhitelisted` | Staff email whitelist |
+| `lib/entitlements.ts` | `getCustomerEntitlements`, `hasMembership`, `hasTierAtLeast`, `hasEventTicket`, `ownsProduct` | Customer gating logic |
+| `lib/stripe.ts` | `getStripe`, `createSubscriptionCheckoutSession`, `createPortalSession` | Stripe helpers |
+| `lib/email.ts` | `sendOrderConfirmation`, `sendTicketConfirmation`, `sendSubscriptionWelcome`, `sendPaymentFailed` | Transactional emails |
+| `lib/i18n.ts` | `locales`, `defaultLocale`, `tr`, `localeNames` | Translations |
+| `lib/payload.ts` | `getPayloadInstance`, `ensureEvent` | Payload instance + helpers |
+| `lib/content.ts` | Static content objects | Bilingual marketing copy, events, blog, products, tiers |
+| `lib/dashboard-api.ts` | `requireStaff`, `fetchCollection`, `createRecord`, `updateRecord`, `deleteRecord`, `loc` | Dashboard API utilities |
+| `lib/qr.ts` | `generateQrToken`, `verifyQrToken` | JWT QR tokens for tickets |
+| `lib/utils.ts` | `cn` | Class name merge helper |
+
+---
+
+## 14. SEO & Discovery
+
+- `app/sitemap.ts` — static + dynamic URLs (events, blog, products)
+- `app/robots.ts` — disallows `/admin`, `/dashboard`, `/api`, `/checkin`
+- Per-page metadata with Open Graph tags
+- Blog post and event view tracking via `/api/track`
+
+---
+
+## 15. Environment Variables
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URI` | Postgres connection string |
+| `PAYLOAD_SECRET` | Payload session/token signing |
+| `NEXT_PUBLIC_SERVER_URL` | Public base URL |
+| `STRIPE_SECRET_KEY` | Stripe API secret |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook verification |
+| `RESEND_API_KEY` | Resend email API key |
+| `FROM_EMAIL` | Sender email address |
+| `SETUP_KEY` | One-time setup/migrate endpoint key |
+| `INITIAL_STAFF_PASSWORD` | Staff seed password |
+
+---
+
+## 16. Deployment
+
+- **Production:** Vercel (auto-deploy on push to `main`)
+- **Build:** `npm run build` (Turbopack, ~21s build time)
+- **Database:** PostgreSQL (managed or Docker for dev)
+- **Static generation:** 54 pages prerendered
+- **Dynamic routes:** Event/blog/product detail, all API routes
+
+---
+
+## 17. Known Gaps & Recommendations
+
+1. **Thank-you/cancel pages** — Stripe checkout redirects to `/thank-you` and `/cancel` but these pages don't exist yet
+2. **Customer orders API** — `/api/customer/orders` returns only profile, not actual orders
+3. **QR scanner page protection** — `/checkin` page itself isn't protected by `proxy.ts`
+4. **Setup/migrate endpoints** — Should be removed or disabled after initial deployment
+5. **Demo analytics fallbacks** — Dashboard stats fall back to simulated numbers when no real data exists
+6. **Placeholder content** — `lib/content.ts` contains dummy products and TikTok URLs to be replaced with real data via Payload
