@@ -1,6 +1,6 @@
 import { getPayloadInstance } from "@/lib/payload";
 import { WHITELISTED_EMAILS } from "@/lib/auth";
-import { products } from "@/lib/content";
+import { products, membershipTiers } from "@/lib/content";
 
 // One-time setup endpoint: creates/syncs the whitelisted staff users.
 // Requires ?key=SETUP_KEY env var to prevent unauthorized password resets.
@@ -89,7 +89,33 @@ export async function POST(request: Request) {
       seededProducts.push({ id: p.id, slug: product.slug, name: product.name.en });
     }
 
-    return Response.json({ success: true, created, products: seededProducts });
+    // Seed subscription tiers
+    const seededTiers = [];
+    for (const tier of membershipTiers) {
+      const found = await payload.find({
+        collection: "subscription-tiers",
+        where: { name: { equals: tier.name.en } },
+        limit: 1,
+        overrideAccess: true,
+      });
+      if (found.docs.length > 0) {
+        continue;
+      }
+      const t = await payload.create({
+        collection: "subscription-tiers",
+        data: {
+          name: tier.name.en,
+          priceCents: tier.price * 100,
+          interval: "month",
+          stripePriceId: "",
+          perks: tier.perks.map((p) => ({ perk: p.en })),
+        } as any,
+        overrideAccess: true,
+      });
+      seededTiers.push({ id: t.id, name: tier.name.en, priceCents: tier.price * 100 });
+    }
+
+    return Response.json({ success: true, created, products: seededProducts, tiers: seededTiers });
   } catch (err) {
     console.error("Setup error:", err);
     return Response.json(
