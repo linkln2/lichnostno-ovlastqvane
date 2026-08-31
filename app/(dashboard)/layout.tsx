@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   description: "Admin dashboard for the coaching studio.",
 };
 
+// Dashboard pages require a database connection (payload.auth) which is
+// not available during build-time prerendering. Force dynamic rendering.
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {
