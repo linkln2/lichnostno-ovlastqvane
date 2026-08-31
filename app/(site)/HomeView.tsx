@@ -100,6 +100,71 @@ export default function HomePage() {
   const videoScrollRef = useRef<HTMLDivElement>(null);
   const productScrollRef = useRef<HTMLDivElement>(null);
 
+  // ─── CMS-driven homepage content ──────────────────────────────
+  // Fetches from /api/homepage (Payload global). Falls back to the
+  // static content in lib/content.ts when the database is unreachable
+  // or the global hasn't been saved yet.
+  const [cms, setCms] = useState<any>(null);
+  useEffect(() => {
+    fetch("/api/homepage")
+      .then((r) => r.json())
+      .then((data) => setCms(data))
+      .catch(() => {});
+  }, []);
+
+  // Merge CMS data over static content — CMS wins when present
+  const heroContent = cms?.hero
+    ? {
+        title: cms.hero.title?.bg || cms.hero.title?.en || hero.title.bg
+          ? { bg: cms.hero.title?.bg || hero.title.bg, en: cms.hero.title?.en || hero.title.en }
+          : hero.title,
+        subtitle: cms.hero.subtitle?.bg || cms.hero.subtitle?.en
+          ? { bg: cms.hero.subtitle?.bg || hero.subtitle.bg, en: cms.hero.subtitle?.en || hero.subtitle.en }
+          : hero.subtitle,
+        primaryCtaText: cms.hero.primaryCtaText?.bg
+          ? { bg: cms.hero.primaryCtaText.bg, en: cms.hero.primaryCtaText.en || cms.hero.primaryCtaText.bg }
+          : { bg: "Разгледай", en: "Explore" },
+        primaryCtaHref: cms.hero.primaryCtaHref || "/shop",
+        secondaryCtaText: cms.hero.secondaryCtaText?.bg
+          ? { bg: cms.hero.secondaryCtaText.bg, en: cms.hero.secondaryCtaText.en || cms.hero.secondaryCtaText.bg }
+          : { bg: "Научи повече", en: "Learn more" },
+        secondaryCtaHref: cms.hero.secondaryCtaHref || "/about",
+        showCountdown: cms.hero.showCountdown ?? true,
+        showVideoFeed: cms.hero.showVideoFeed ?? true,
+      }
+    : {
+        title: hero.title,
+        subtitle: hero.subtitle,
+        primaryCtaText: { bg: "Разгледай", en: "Explore" },
+        primaryCtaHref: "/shop",
+        secondaryCtaText: { bg: "Научи повече", en: "Learn more" },
+        secondaryCtaHref: "/about",
+        showCountdown: true,
+        showVideoFeed: true,
+      };
+
+  const missionContent: { bg: string; en: string } = cms?.mission?.text?.bg || cms?.mission?.text?.en
+    ? { bg: cms.mission.text.bg || mission.bg, en: cms.mission.text.en || mission.en }
+    : mission;
+
+  const valuesContent: { title: { bg: string; en: string }; desc: { bg: string; en: string } }[] =
+    cms?.values?.cards?.length > 0
+      ? cms.values.cards.map((c: any) => ({
+          title: { bg: c.title?.bg || c.title?.en || "", en: c.title?.en || c.title?.bg || "" },
+          desc: { bg: c.description?.bg || c.description?.en || "", en: c.description?.en || c.description?.bg || "" },
+        }))
+      : values;
+
+  const sectionsEnabled = {
+    mission: cms?.mission?.enabled ?? true,
+    values: cms?.values?.enabled ?? true,
+    products: cms?.productsSection?.enabled ?? true,
+    membership: cms?.membershipSection?.enabled ?? true,
+    testimonials: cms?.testimonialsSection?.enabled ?? true,
+    video: cms?.videoSection?.enabled ?? true,
+    blog: cms?.blogSection?.enabled ?? true,
+  };
+
   const [aztecPattern, setAztecPattern] = useState<string | null>(null);
   const [flowerPattern, setFlowerPattern] = useState<string | null>(null);
   useEffect(() => {
@@ -236,10 +301,10 @@ export default function HomePage() {
                 {tr("hero_badge", locale)}
               </span>
               <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl lg:text-6xl lg:leading-[1.1]">
-                {hero.title[locale]}
+                {heroContent.title[locale]}
               </h1>
               <p className="mt-6 text-lg leading-relaxed text-stone-600">
-                {hero.subtitle[locale]}
+                {heroContent.subtitle[locale]}
               </p>
             </div>
           </div>
@@ -248,6 +313,7 @@ export default function HomePage() {
       </section>
 
       {/* Countdown with buy ticket */}
+      {heroContent.showCountdown && (
       <section className="bg-stone-100 py-8 dark:bg-stone-900/80 sm:py-10">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
           <h2 className="text-lg font-bold text-stone-800 sm:text-xl">
@@ -274,8 +340,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Video feed */}
+      {sectionsEnabled.video && (
       <section className="bg-stone-50 py-16 dark:bg-stone-900/60 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
@@ -363,8 +431,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Shop */}
+      {sectionsEnabled.products && (
       <section className="bg-white py-16 dark:bg-stone-900/70 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
@@ -466,8 +536,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Mission + Values — centered around holy.png with particles */}
+      {sectionsEnabled.mission && sectionsEnabled.values && (
       <section className="relative overflow-hidden bg-gradient-to-b from-amber-50 to-stone-50 py-20 dark:bg-gradient-to-b dark:from-amber-50/10 dark:to-stone-900/60 sm:py-28">
         {/* Particle burst effect */}
         <ParticleBurst />
@@ -487,7 +559,7 @@ export default function HomePage() {
               {locale === "bg" ? "Нашата мисия и ценности" : "Our mission & values"}
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-stone-600">
-              {mission[locale]}
+              {missionContent[locale]}
             </p>
           </div>
 
@@ -495,7 +567,7 @@ export default function HomePage() {
           <div className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-12">
             {/* Left values (2) — icon top-right */}
             <div className="flex flex-col gap-8 lg:gap-12">
-              {values.slice(0, 2).map((v, i) => (
+              {valuesContent.slice(0, 2).map((v, i) => (
                 <div
                   key={v.title.en}
                   className="flex flex-1 flex-col rounded-2xl border border-amber-200 bg-white p-6 transition-all hover:border-amber-300 hover:bg-amber-50 hover:shadow-lg dark:border-amber-200/30 dark:bg-white/10 dark:hover:bg-white/20"
@@ -530,7 +602,7 @@ export default function HomePage() {
 
             {/* Right values (2) — icon top-left */}
             <div className="flex flex-col gap-8 lg:gap-12">
-              {values.slice(2, 4).map((v, i) => (
+              {valuesContent.slice(2, 4).map((v, i) => (
                 <div
                   key={v.title.en}
                   className="flex flex-1 flex-col rounded-2xl border border-amber-200 bg-white p-6 transition-all hover:border-amber-300 hover:bg-amber-50 hover:shadow-lg dark:border-amber-200/30 dark:bg-white/10 dark:hover:bg-white/20"
@@ -545,7 +617,7 @@ export default function HomePage() {
 
           {/* Mobile: values below image in a grid */}
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:hidden">
-            {values.map((v, i) => (
+            {valuesContent.map((v, i) => (
               <div
                 key={v.title.en}
                 className="flex flex-col rounded-2xl border border-amber-200 bg-white p-5 dark:border-amber-200/30 dark:bg-white/10"
@@ -613,8 +685,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Testimonials preview */}
+      {sectionsEnabled.testimonials && (
       <section className="bg-white py-16 dark:bg-stone-900/70 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
@@ -646,8 +720,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Membership tiers */}
+      {sectionsEnabled.membership && (
       <section className="bg-stone-50 py-16 dark:bg-stone-900/60 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
@@ -737,8 +813,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Recent posts */}
+      {sectionsEnabled.blog && (
       <section className="mx-auto max-w-6xl px-4 py-16 dark:bg-stone-900/70 sm:px-6 sm:py-20">
         <h2 className="text-center text-2xl font-bold text-amber-800 sm:text-3xl">
           {tr("section_recent_posts", locale)}
@@ -784,6 +862,7 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+      )}
 
       {/* Buy ticket modal */}
       {ticketOpen && (
