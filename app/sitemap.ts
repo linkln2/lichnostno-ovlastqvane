@@ -1,7 +1,11 @@
 import type { MetadataRoute } from "next";
 import { events, blogPosts, products } from "@/lib/content";
+import { legalSlugs } from "@/lib/legal";
+import { SITE_URL } from "@/lib/seo";
 
-const BASE_URL = "https://lichnostno-ovlastqvane.vercel.app";
+// Single source of truth for the origin, shared with the canonical URLs in
+// lib/seo.ts so the sitemap can never drift from what pages declare.
+const BASE_URL = SITE_URL;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -40,5 +44,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...eventPages, ...blogPages, ...productPages];
+  const legalPagesEntries: MetadataRoute.Sitemap = legalSlugs.map((slug) => ({
+    url: `${BASE_URL}/legal/${slug}`,
+    lastModified: now,
+    changeFrequency: "yearly",
+    priority: 0.3,
+  }));
+
+  return [
+    ...staticPages,
+    ...eventPages,
+    ...blogPages,
+    ...productPages,
+    ...legalPagesEntries,
+  ];
 }

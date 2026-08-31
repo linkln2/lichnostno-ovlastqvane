@@ -1,91 +1,53 @@
-"use client";
+import { notFound } from "next/navigation";
+import { pageMetadata } from "@/lib/seo";
+import { blogPosts, getPostBySlug } from "@/lib/content";
+import BlogPostView from "./BlogPostView";
 
-import { useEffect } from "react";
-import Link from "next/link";
-import { useParams, notFound } from "next/navigation";
-import { useLocale } from "@/components/LocaleProvider";
-import { tr } from "@/lib/i18n";
-import { getPostBySlug, formatDate, blogPosts } from "@/lib/content";
+// Posts come from the static content module, so every slug can be rendered
+// at build time.
+export function generateStaticParams() {
+  return blogPosts.map((post) => ({ slug: post.slug }));
+}
 
-export default function BlogPostPage() {
-  const { locale } = useLocale();
-  const params = useParams<{ slug: string }>();
-  const post = getPostBySlug(params.slug);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const post = getPostBySlug(slug);
 
-  useEffect(() => {
-    if (params.slug) {
-      fetch("/api/track", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ collection: "blog-posts", slug: params.slug }),
-      }).catch(() => {});
-    }
-  }, [params.slug]);
+  if (!post) {
+    return pageMetadata({
+      title: "Статията не е намерена",
+      description: "Тази статия не съществува или е преместена.",
+      path: `/blog/${slug}`,
+      noIndex: true,
+    });
+  }
 
-  if (!post) return notFound();
+  // Bulgarian is the default locale, so it drives the crawler-visible copy.
+  return pageMetadata({
+    title: post.title.bg,
+    description: post.excerpt.bg,
+    path: `/blog/${post.slug}`,
+    image: post.cover,
+    type: "article",
+    publishedTime: post.date,
+  });
+}
 
-  const paragraphs = post.content[locale].split("\n\n");
-  const related = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 2);
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
 
-  return (
-    <article>
-      {/* Cover image */}
-      {post.cover && (
-        <div className="relative w-full overflow-hidden">
-          <img
-            src={post.cover}
-            alt={post.title[locale]}
-            className="max-h-[600px] w-full object-contain"
-          />
-        </div>
-      )}
+  // Resolve on the server so a bad slug 404s before any JS runs.
+  if (!getPostBySlug(slug)) {
+    notFound();
+  }
 
-      <section className={`bg-gradient-to-b from-amber-50 to-stone-50 py-16 sm:py-20 ${post.cover ? "pt-8" : ""}`}>
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <Link href="/blog" className="text-sm text-amber-700 hover:text-amber-800">
-            ← {tr("nav_blog", locale)}
-          </Link>
-          <h1 className="mt-4 text-3xl font-bold leading-tight text-stone-900 sm:text-4xl">
-            {post.title[locale]}
-          </h1>
-          <div className="mt-4 flex items-center gap-3 text-sm text-stone-400">
-            <time>{formatDate(post.date, locale)}</time>
-            <span>·</span>
-            <span>{post.readTime[locale]}</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-        <div className="space-y-5 leading-relaxed text-stone-700">
-          {paragraphs.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </div>
-
-        {/* Related */}
-        {related.length > 0 && (
-          <div className="mt-16 border-t border-stone-200 pt-8">
-            <h2 className="text-lg font-bold text-stone-900">
-              {locale === "bg" ? "Още статии" : "More posts"}
-            </h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {related.map((p) => (
-                <Link
-                  key={p.slug}
-                  href={`/blog/${p.slug}`}
-                  className="group rounded-xl border border-stone-200 bg-white p-4 transition-colors hover:border-amber-300"
-                >
-                  <h3 className="font-semibold text-stone-900 group-hover:text-amber-800">
-                    {p.title[locale]}
-                  </h3>
-                  <p className="mt-1 text-sm text-stone-500">{p.excerpt[locale]}</p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
-    </article>
-  );
+  return <BlogPostView />;
 }

@@ -6,6 +6,7 @@ import "../globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getPayloadInstance } from "@/lib/payload";
+import { isWhitelisted } from "@/lib/auth";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -25,11 +26,13 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Real auth check — proxy.ts only checks cookie presence, not validity
+  // Real auth check — proxy.ts only checks cookie presence, not validity.
+  // Must match requireStaff: a valid token is not enough, it has to be a
+  // whitelisted staff account or any signed-up customer could load the shell.
   const payload = await getPayloadInstance();
   const hdrs = await headers();
   const { user } = await payload.auth({ headers: hdrs });
-  if (!user) {
+  if (!user || user.collection !== "staff" || !isWhitelisted(user.email ?? "")) {
     redirect("/membership");
   }
 

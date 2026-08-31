@@ -8,12 +8,13 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CookieConsent } from "@/components/CookieConsent";
+import { SITE_URL } from "@/lib/seo";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", weight: ["500", "600"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://lichnostno-ovlastqvane.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Личностно овластяване | Personal Empowerment",
     template: "%s — Личностно овластяване",
@@ -44,7 +45,6 @@ export const metadata: Metadata = {
     type: "website",
     locale: "bg_BG",
     alternateLocale: "en_US",
-    url: "https://lichnostno-ovlastqvane.vercel.app",
     siteName: "Личностно овластяване",
     title: "Личностно овластяване | Personal Empowerment",
     description:
@@ -65,13 +65,11 @@ export const metadata: Metadata = {
       "Семинари, коучинг и общност за личностно овластяване. Върни си своя вътрешен авторитет.",
     images: ["/logo.png"],
   },
-  alternates: {
-    canonical: "https://lichnostno-ovlastqvane.vercel.app",
-    languages: {
-      bg: "https://lichnostno-ovlastqvane.vercel.app",
-      en: "https://lichnostno-ovlastqvane.vercel.app",
-    },
-  },
+  // No `alternates` here on purpose. A canonical set on the root layout is
+  // inherited by every route, which made the whole site declare the homepage
+  // as its canonical. Each page sets its own via `pageMetadata()` in lib/seo.ts.
+  // `languages` is also omitted: BG/EN share one URL (locale is client-side),
+  // so there are no distinct per-language URLs to advertise.
   robots: {
     index: true,
     follow: true,
