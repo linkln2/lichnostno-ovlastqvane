@@ -56,7 +56,7 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
           {/* Logo — single img, CSS handles dark mode swap */}
           <img
-            src="/logo.png"
+            src="/logo.webp"
             alt={locale === "bg" ? site.name : site.nameEn}
             className="h-10 w-10 rounded-full object-cover"
           />

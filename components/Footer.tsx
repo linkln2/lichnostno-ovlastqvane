@@ -66,7 +66,7 @@ export default function Footer() {
         <div className="flex flex-col gap-4 border-b border-stone-200 pb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <img
-              src="/logo.png"
+              src="/logo.webp"
               alt={locale === "bg" ? site.name : site.nameEn}
               className="h-20 w-20 shrink-0 rounded-full object-cover dark:hidden sm:h-24 sm:w-24"
             />

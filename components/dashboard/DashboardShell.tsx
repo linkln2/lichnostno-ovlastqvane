@@ -44,7 +44,7 @@ function deltaPct(curr: number, prev: number): number {
 
 export function DashboardShell() {
   const [active, setActive] = useState("Overview");
-  const [userName, setUserName] = useState("Valeria");
+  const [userName, setUserName] = useState("");
 
   // Sync active tab with URL hash (e.g. /dashboard#products)
   useEffect(() => {

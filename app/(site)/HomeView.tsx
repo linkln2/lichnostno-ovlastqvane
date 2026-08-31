@@ -59,13 +59,12 @@ function VideoCard({ video }: { video: VideoItem }) {
     >
       <video
         ref={videoRef}
-        src={video.src}
+        src={visible ? video.src : undefined}
         poster={video.poster}
         muted
-        autoPlay
         loop
         playsInline
-        preload="metadata"
+        preload="none"
         className="h-full w-full object-cover"
       />
     </div>

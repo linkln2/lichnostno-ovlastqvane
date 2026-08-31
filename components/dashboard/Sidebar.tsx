@@ -41,7 +41,7 @@ export function Sidebar({
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-white/60 bg-white/45 backdrop-blur-xl md:flex">
       <div className="flex items-center gap-2.5 px-5 py-5">
         <img
-          src="/logo.png"
+          src="/logo.webp"
           alt="Logo"
           className="h-9 w-9 rounded-full object-cover ring-2 ring-white/60 dark:hidden"
         />
@@ -108,7 +108,7 @@ export function Sidebar({
   );
 }
 
-export function Topbar({ name = "Maria" }: { name?: string }) {
+export function Topbar({ name = "" }: { name?: string }) {
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
@@ -120,7 +120,7 @@ export function Topbar({ name = "Maria" }: { name?: string }) {
           className="truncate text-xl font-semibold text-zinc-900 dark:text-white md:text-2xl"
           style={{ fontFamily: "var(--font-fraunces)" }}
         >
-          {greeting}, {name}
+          {greeting}{name ? `, ${name}` : ""}
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">Here's what's happening in your studio today.</p>
       </div>
