@@ -3,7 +3,7 @@ import { buildConfig, type Access } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import sharp from "sharp";
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, GlobalConfig } from "payload";
 
 const isStaff: Access = ({ req }) => {
   return req.user?.collection === "staff";
@@ -741,6 +741,139 @@ const SocialStats: CollectionConfig = {
   ],
 };
 
+// ─── Globals ─────────────────────────────────────────────────────
+// Singletons — one per installation. The customer edits these from the
+// dashboard "Website" tab to control homepage content without touching code.
+
+const Homepage: GlobalConfig = {
+  slug: "homepage",
+  label: "Homepage",
+  access: {
+    read: () => true,
+    update: isStaff,
+  },
+  fields: [
+    // ─── Hero ───
+    {
+      type: "group",
+      name: "hero",
+      label: "Hero Section",
+      fields: [
+        { name: "title", type: "text", localized: true, required: true, admin: { description: "Main headline" } },
+        { name: "subtitle", type: "textarea", localized: true, admin: { description: "Subheadline paragraph" } },
+        { name: "primaryCtaText", type: "text", localized: true, defaultValue: "Explore" },
+        { name: "primaryCtaHref", type: "text", defaultValue: "/shop" },
+        { name: "secondaryCtaText", type: "text", localized: true, defaultValue: "Learn more" },
+        { name: "secondaryCtaHref", type: "text", defaultValue: "/about" },
+        { name: "showCountdown", type: "checkbox", defaultValue: false },
+        { name: "showVideoFeed", type: "checkbox", defaultValue: true },
+      ],
+    },
+    // ─── Mission / Introduction ───
+    {
+      type: "group",
+      name: "mission",
+      label: "Mission Section",
+      fields: [
+        { name: "title", type: "text", localized: true, defaultValue: "Мисия" },
+        { name: "text", type: "textarea", localized: true, admin: { description: "Mission statement paragraph" } },
+        { name: "enabled", type: "checkbox", defaultValue: true },
+      ],
+    },
+    // ─── Values ───
+    {
+      type: "group",
+      name: "values",
+      label: "Values Section",
+      fields: [
+        { name: "title", type: "text", localized: true, defaultValue: "Ценности" },
+        { name: "enabled", type: "checkbox", defaultValue: true },
+        {
+          name: "cards",
+          type: "array",
+          label: "Value Cards",
+          fields: [
+            { name: "title", type: "text", localized: true, required: true },
+            { name: "description", type: "textarea", localized: true },
+          ],
+        },
+      ],
+    },
+    // ─── Symbolism / Caduceus ───
+    {
+      type: "group",
+      name: "symbolism",
+      label: "Symbolism Section",
+      fields: [
+        { name: "title", type: "text", localized: true, defaultValue: "Символизъм" },
+        { name: "enabled", type: "checkbox", defaultValue: true },
+        {
+          name: "cards",
+          type: "array",
+          label: "Symbolism Cards",
+          fields: [
+            { name: "title", type: "text", localized: true, required: true },
+            { name: "description", type: "textarea", localized: true },
+          ],
+        },
+      ],
+    },
+    // ─── Featured Products ───
+    {
+      type: "group",
+      name: "productsSection",
+      label: "Products Section",
+      fields: [
+        { name: "enabled", type: "checkbox", defaultValue: true },
+        { name: "heading", type: "text", localized: true, defaultValue: "Магазин" },
+        { name: "maxItems", type: "number", defaultValue: 8, admin: { description: "Max products to show" } },
+      ],
+    },
+    // ─── Membership ───
+    {
+      type: "group",
+      name: "membershipSection",
+      label: "Membership Section",
+      fields: [
+        { name: "enabled", type: "checkbox", defaultValue: true },
+        { name: "heading", type: "text", localized: true, defaultValue: "Членство" },
+        { name: "description", type: "textarea", localized: true },
+      ],
+    },
+    // ─── Testimonials ───
+    {
+      type: "group",
+      name: "testimonialsSection",
+      label: "Testimonials Section",
+      fields: [
+        { name: "enabled", type: "checkbox", defaultValue: true },
+        { name: "heading", type: "text", localized: true, defaultValue: "Отзиви" },
+      ],
+    },
+    // ─── Video Feed ───
+    {
+      type: "group",
+      name: "videoSection",
+      label: "Video Feed Section",
+      fields: [
+        { name: "enabled", type: "checkbox", defaultValue: true },
+        { name: "heading", type: "text", localized: true, defaultValue: "Видео" },
+      ],
+    },
+    // ─── Latest Articles ───
+    {
+      type: "group",
+      name: "blogSection",
+      label: "Latest Articles Section",
+      fields: [
+        { name: "enabled", type: "checkbox", defaultValue: true },
+        { name: "heading", type: "text", localized: true, defaultValue: "Последни статии" },
+        { name: "maxItems", type: "number", defaultValue: 3 },
+      ],
+    },
+  ],
+};
+
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000",
   db: postgresAdapter({
@@ -781,6 +914,9 @@ export default buildConfig({
     Subscriptions,
     CheckIns,
     SocialStats,
+  ],
+  globals: [
+    Homepage,
   ],
   typescript: {
     outputFile: path.resolve("payload-types.ts"),

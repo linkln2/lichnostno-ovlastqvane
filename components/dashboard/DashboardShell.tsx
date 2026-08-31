@@ -18,6 +18,7 @@ import {
   AnalyticsTab,
   SettingsTab,
 } from "./tabs";
+import { WebsiteTab } from "./WebsiteTab";
 import { CalendarClock, CircleDollarSign, Users, Ticket } from "lucide-react";
 
 type Stats = {
@@ -92,6 +93,7 @@ export function DashboardShell() {
           {active === "Registrations" && <RegistrationsTab />}
           {active === "Subscribers" && <SubscribersTab />}
           {active === "Analytics" && <AnalyticsTab />}
+          {active === "Website" && <WebsiteTab />}
           {active === "Settings" && <SettingsTab />}
         </main>
 
