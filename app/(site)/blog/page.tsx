@@ -1,4 +1,5 @@
 import { pageMetadata } from "@/lib/seo";
+import { getBlogPosts } from "@/lib/api";
 import BlogListView from "./BlogListView";
 
 export const metadata = pageMetadata({
@@ -8,6 +9,9 @@ export const metadata = pageMetadata({
   path: "/blog",
 });
 
-export default function Page() {
-  return <BlogListView />;
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const posts = await getBlogPosts();
+  return <BlogListView posts={posts} />;
 }

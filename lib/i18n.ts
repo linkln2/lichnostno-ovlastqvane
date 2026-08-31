@@ -26,14 +26,14 @@ export const t: Dict = {
   nav_register: { bg: "Запиши се", en: "Register" },
 
   // Countdown
-  countdown_label: { bg: "Следващ уебинар", en: "Next webinar" },
+  countdown_label: { bg: "Следващ семинар", en: "Next seminar" },
   countdown_days: { bg: "Дни", en: "Days" },
   countdown_hours: { bg: "Часа", en: "Hours" },
   countdown_minutes: { bg: "Минути", en: "Minutes" },
   countdown_seconds: { bg: "Секунди", en: "Seconds" },
   countdown_title: {
-    bg: "Обратното броене до следващия уебинар",
-    en: "Countdown to the next webinar",
+    bg: "Обратното броене до следващия семинар",
+    en: "Countdown to the next seminar",
   },
   countdown_subtitle: {
     bg: "Нещо могъщо се подготвя. Бъди сред първите, които ще го преживеят.",
@@ -48,7 +48,6 @@ export const t: Dict = {
   },
   feed_tiktok: { bg: "TikTok", en: "TikTok" },
   feed_facebook: { bg: "Facebook", en: "Facebook" },
-  feed_instagram: { bg: "Instagram", en: "Instagram" },
   feed_all: { bg: "Всички", en: "All" },
   feed_empty: {
     bg: "Все още няма добавени видеа. Очаквайте скоро!",
@@ -110,7 +109,10 @@ export const t: Dict = {
   section_values_title: { bg: "Нашите ценности", en: "Our values" },
   section_services_title: { bg: "Програми и услуги", en: "Programs & services" },
   section_upcoming_title: { bg: "Предстоящи събития", en: "Upcoming events" },
-  section_past_title: { bg: "Минали събития", en: "Past events" },
+  section_past_title: { bg: "История на събитията", en: "Event History" },
+  event_kind_seminar: { bg: "Семинар", en: "Seminar" },
+  event_kind_lecture: { bg: "Лекция", en: "Lecture" },
+  event_kind_coaching: { bg: "Коучинг", en: "Coaching" },
   section_recent_posts: { bg: "Последни статии", en: "Recent posts" },
 
   // How it works steps

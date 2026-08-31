@@ -539,7 +539,7 @@ export function EventsTab() {
   const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "", slug: "", location: "",
-    startsAt: "", endsAt: "", capacity: "0", status: "upcoming",
+    startsAt: "", endsAt: "", capacity: "0", status: "upcoming", kind: "seminar",
     coverUrl: "", facebookUrl: "",
   });
 
@@ -552,7 +552,7 @@ export function EventsTab() {
 
   function openCreate() {
     setEditing(null);
-    setForm({ title: "", slug: "", location: "", startsAt: "", endsAt: "", capacity: "0", status: "upcoming", coverUrl: "", facebookUrl: "" });
+    setForm({ title: "", slug: "", location: "", startsAt: "", endsAt: "", capacity: "0", status: "upcoming", kind: "seminar", coverUrl: "", facebookUrl: "" });
     setFormError(null);
     setModalOpen(true);
   }
@@ -567,6 +567,7 @@ export function EventsTab() {
       endsAt: e.endsAt ? e.endsAt.slice(0, 16) : "",
       capacity: String(e.capacity ?? "0"),
       status: e.status || "upcoming",
+      kind: e.kind || "seminar",
       coverUrl: e.coverUrl || "",
       facebookUrl: e.facebookUrl || "",
     });
@@ -712,6 +713,13 @@ export function EventsTab() {
               </select>
             </Field>
           </div>
+          <Field label="Type">
+            <select className={selectClass} value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>
+              <option value="seminar">Seminar</option>
+              <option value="lecture">Lecture</option>
+              <option value="coaching">Coaching</option>
+            </select>
+          </Field>
           <Field label="Cover image URL"><input className={inputClass} value={form.coverUrl} onChange={(e) => setForm({ ...form, coverUrl: e.target.value })} placeholder="https://..." /></Field>
           {form.facebookUrl && (
             <Field label="Facebook URL"><input className={inputClass} value={form.facebookUrl} onChange={(e) => setForm({ ...form, facebookUrl: e.target.value })} placeholder="https://facebook.com/events/..." /></Field>
@@ -1548,14 +1556,12 @@ export function AnalyticsTab() {
 
 const platformIcons: Record<string, string> = {
   facebook: "f",
-  instagram: "IG",
   tiktok: "TT",
   youtube: "YT",
 };
 
 const platformColors: Record<string, string> = {
   facebook: "text-blue-600",
-  instagram: "text-pink-600",
   tiktok: "text-zinc-900",
   youtube: "text-red-600",
 };
@@ -1644,7 +1650,6 @@ function SocialStatsSection() {
                   className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm"
                 >
                   <option value="facebook">Facebook</option>
-                  <option value="instagram">Instagram</option>
                   <option value="tiktok">TikTok</option>
                   <option value="youtube">YouTube</option>
                 </select>

@@ -185,6 +185,14 @@ const Events: CollectionConfig = {
       required: true,
     },
     {
+      name: "kind",
+      type: "select",
+      options: ["seminar", "lecture", "coaching"],
+      defaultValue: "seminar",
+      required: true,
+      admin: { description: "Event category — seminars, lectures and coaching only" },
+    },
+    {
       name: "packages",
       type: "relationship",
       relationTo: "event-packages",
@@ -725,7 +733,7 @@ const SocialStats: CollectionConfig = {
     {
       name: "platform",
       type: "select",
-      options: ["facebook", "instagram", "tiktok", "youtube"],
+      options: ["facebook", "tiktok", "youtube"],
       required: true,
       unique: true,
     },
@@ -765,7 +773,7 @@ const Homepage: GlobalConfig = {
         { name: "primaryCtaHref", type: "text", defaultValue: "/shop" },
         { name: "secondaryCtaText", type: "text", localized: true, defaultValue: "Learn more" },
         { name: "secondaryCtaHref", type: "text", defaultValue: "/about" },
-        { name: "showCountdown", type: "checkbox", defaultValue: false },
+        { name: "showCountdown", type: "checkbox", defaultValue: true },
         { name: "showVideoFeed", type: "checkbox", defaultValue: true },
       ],
     },
@@ -885,7 +893,18 @@ export default buildConfig({
     push: true,
   }),
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || "dev-secret-change-me",
+  secret: (() => {
+    const secret = process.env.PAYLOAD_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error(
+          "PAYLOAD_SECRET environment variable is required in production. Set it in your Vercel project settings."
+        );
+      }
+      return "dev-secret-change-me";
+    }
+    return secret;
+  })(),
   sharp,
   localization: {
     defaultLocale: "bg",

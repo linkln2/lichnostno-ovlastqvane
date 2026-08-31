@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import { tr } from "@/lib/i18n";
-import { events, formatDateRange } from "@/lib/content";
+import { formatDateRange, type EventItem } from "@/lib/content";
 
-export default function EventsPage() {
+export default function EventsPage({ events }: { events: EventItem[] }) {
   const { locale } = useLocale();
   const upcoming = events.filter((e) => e.status === "upcoming");
   const past = events.filter((e) => e.status === "past");
@@ -40,9 +40,14 @@ export default function EventsPage() {
                 href={`/events/${event.slug}`}
                 className="group flex flex-col rounded-2xl border border-stone-200 bg-white p-6 transition-colors hover:border-amber-300 hover:bg-amber-50/40"
               >
-                <span className="inline-flex w-fit items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                  {formatDateRange(event.date, event.dateEnd, locale)}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex w-fit items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                    {formatDateRange(event.date, event.dateEnd, locale)}
+                  </span>
+                  <span className="inline-flex w-fit items-center rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600">
+                    {tr(`event_kind_${event.kind}`, locale)}
+                  </span>
+                </div>
                 <h3 className="mt-3 text-xl font-bold text-stone-900 group-hover:text-amber-800">
                   {event.title[locale]}
                 </h3>
@@ -75,9 +80,14 @@ export default function EventsPage() {
                   key={event.slug}
                   className="rounded-2xl border border-stone-200 bg-stone-50 p-6 opacity-80"
                 >
-                  <span className="inline-flex w-fit items-center rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-600">
-                    {formatDateRange(event.date, event.dateEnd, locale)}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex w-fit items-center rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-600">
+                      {formatDateRange(event.date, event.dateEnd, locale)}
+                    </span>
+                    <span className="inline-flex w-fit items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-stone-500 ring-1 ring-stone-200">
+                      {tr(`event_kind_${event.kind}`, locale)}
+                    </span>
+                  </div>
                   <h3 className="mt-3 text-lg font-bold text-stone-700">
                     {event.title[locale]}
                   </h3>

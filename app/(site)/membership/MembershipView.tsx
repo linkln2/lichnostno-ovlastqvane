@@ -1,26 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocale } from "@/components/LocaleProvider";
 import { membershipTiers, site } from "@/lib/content";
+import type { Tier } from "@/lib/api";
 
-type Tier = {
-  id: number;
-  name: string;
-  priceCents: number;
-  interval: "month" | "year";
-  stripePriceId: string;
-  perks: { perk: string }[];
-};
-
-export default function MembershipPage() {
+export default function MembershipPage({ tiers }: { tiers: Tier[] }) {
   const { locale } = useLocale();
-  const [tiers, setTiers] = useState<Tier[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   // Checkout state
-  const [checkoutTierId, setCheckoutTierId] = useState<number | null>(null);
+  const [checkoutTierId, setCheckoutTierId] = useState<number | string | null>(null);
   const [checkoutEmail, setCheckoutEmail] = useState("");
   const [checkoutStatus, setCheckoutStatus] = useState<"idle" | "loading" | "error">("idle");
   const [checkoutError, setCheckoutError] = useState("");
@@ -64,22 +54,11 @@ export default function MembershipPage() {
     staticByPrice[tier.price * 100] = tier;
   }
 
-  useEffect(() => {
-    fetch("/api/subscription-tiers")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.docs) setTiers(d.docs);
-        else if (d.errors) setError("Failed to load tiers");
-      })
-      .catch(() => setError("Failed to load"))
-      .finally(() => setLoading(false));
-  }, []);
-
   function fmtPrice(cents: number) {
     return `€${(cents / 100).toFixed(0)}`;
   }
 
-  async function handleSubscribe(tierId: number) {
+  async function handleSubscribe(tierId: number | string) {
     setCheckoutTierId(tierId);
     setShowEmailModal(true);
     setCheckoutStatus("idle");
@@ -237,14 +216,7 @@ export default function MembershipPage() {
 
       {/* Tier cards */}
       <section className="mx-auto max-w-6xl px-4 pt-4 pb-16 sm:px-6 sm:pt-5">
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <svg className="h-8 w-8 animate-spin text-amber-600" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.2" />
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-            </svg>
-          </div>
-        ) : error ? (
+        {error ? (
           <p className="text-center text-stone-500">{error}</p>
         ) : tiers.length === 0 ? (
           <p className="py-20 text-center text-lg text-stone-500">{t.noTiers}</p>
@@ -255,7 +227,7 @@ export default function MembershipPage() {
               const isPopular = meta?.mostPopular ?? idx === 1;
               const displayName = meta ? meta.name[locale] : tier.name;
               const icon = meta?.icon ?? tierIconMap[tier.priceCents];
-              const perks = meta ? meta.perks.map((p) => p[locale]) : tier.perks.map((p) => p.perk);
+              const perks = meta ? meta.perks.map((p) => p[locale]) : tier.perks;
               return (
                 <div
                   key={tier.id}

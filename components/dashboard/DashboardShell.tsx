@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Sidebar, Topbar, nav } from "./Sidebar";
 import { StatCard } from "./StatCard";
-import { MomentumRing } from "./MomentumRing";
 import { RevenueChart } from "./RevenueChart";
 import { UpcomingEventsList } from "./UpcomingEventsList";
 import { RecentOrdersTable } from "./RecentOrdersTable";

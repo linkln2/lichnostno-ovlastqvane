@@ -96,6 +96,7 @@ export async function POST(request: Request) {
       endsAt: endsAt || undefined,
       capacity: 0,
       status: "upcoming",
+      kind: "seminar",
       coverUrl: coverUrl || undefined,
       facebookUrl,
       facebookEventId,

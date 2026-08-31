@@ -20,6 +20,7 @@ export async function GET(request: Request) {
       endsAt: e.endsAt,
       capacity: e.capacity,
       status: e.status,
+      kind: e.kind || "seminar",
       description: typeof e.description === "string" ? e.description : "",
       coverUrl: e.coverUrl || "",
       facebookUrl: e.facebookUrl || "",
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
       endsAt: body.endsAt || undefined,
       capacity: Number(body.capacity) || 0,
       status: body.status || "upcoming",
+      kind: body.kind || "seminar",
       coverUrl: body.coverUrl || undefined,
       facebookUrl: body.facebookUrl || undefined,
     });

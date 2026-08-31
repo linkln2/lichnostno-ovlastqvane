@@ -1,26 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
+import type { ShopProduct } from "@/lib/api";
 
-type Product = {
-  id: number;
-  name: string;
-  slug: string;
-  priceCents: number;
-  category: string;
-  productType: string;
-  inventory: number;
-  images: any[];
-  image?: string;
-};
-
-export default function ShopPage() {
+export default function ShopPage({ products }: { products: ShopProduct[] }) {
   const { locale } = useLocale();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const t = {
     title: locale === "bg" ? "Магазин" : "Shop",
@@ -29,20 +14,8 @@ export default function ShopPage() {
         ? "Цифрови продукти, курсове и материали."
         : "Digital products, courses, and materials.",
     soldOut: locale === "bg" ? "Изчерпано" : "Sold out",
-    loading: locale === "bg" ? "Зареждане…" : "Loading…",
     empty: locale === "bg" ? "Няма продукти все още." : "No products yet.",
   };
-
-  useEffect(() => {
-    fetch("/api/products")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.docs) setProducts(d.docs);
-        else setError(d.error || "Failed to load");
-      })
-      .catch(() => setError("Failed to load"))
-      .finally(() => setLoading(false));
-  }, []);
 
   function fmtPrice(cents: number) {
     return `€${(cents / 100).toFixed(0)}`;
@@ -56,7 +29,7 @@ export default function ShopPage() {
     return null;
   }
 
-  function isSoldOut(p: Product) {
+  function isSoldOut(p: ShopProduct) {
     return p.productType === "physical" && typeof p.inventory === "number" && p.inventory <= 0;
   }
 
@@ -72,16 +45,7 @@ export default function ShopPage() {
 
       {/* Product grid — 2-col on mobile, 3-4 on larger */}
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <svg className="h-8 w-8 animate-spin text-amber-600" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.2" />
-              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-            </svg>
-          </div>
-        ) : error ? (
-          <p className="py-20 text-center text-stone-500">{error}</p>
-        ) : products.length === 0 ? (
+        {products.length === 0 ? (
           <p className="py-20 text-center text-lg text-stone-500">{t.empty}</p>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">

@@ -1,4 +1,5 @@
 import { pageMetadata } from "@/lib/seo";
+import { getEvents } from "@/lib/api";
 import EventsListView from "./EventsListView";
 
 export const metadata = pageMetadata({
@@ -8,6 +9,9 @@ export const metadata = pageMetadata({
   path: "/events",
 });
 
-export default function Page() {
-  return <EventsListView />;
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const events = await getEvents();
+  return <EventsListView events={events} />;
 }

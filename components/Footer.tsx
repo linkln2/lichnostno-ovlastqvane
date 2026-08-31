@@ -123,9 +123,6 @@ export default function Footer() {
             <a href={site.facebook} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-amber-700">
               Facebook
             </a>
-            <a href={site.instagram} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-amber-700">
-              Instagram
-            </a>
             <a href={site.tiktok} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-amber-700">
               TikTok
             </a>

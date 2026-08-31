@@ -1,4 +1,5 @@
 import { pageMetadata } from "@/lib/seo";
+import { getProducts } from "@/lib/api";
 import ShopListView from "./ShopListView";
 
 export const metadata = pageMetadata({
@@ -8,6 +9,10 @@ export const metadata = pageMetadata({
   path: "/shop",
 });
 
-export default function Page() {
-  return <ShopListView />;
+// Force dynamic rendering — products come from the database at request time.
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const products = await getProducts();
+  return <ShopListView products={products} />;
 }

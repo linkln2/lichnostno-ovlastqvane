@@ -83,6 +83,7 @@ async function seed() {
           endsAt: event.dateEnd,
           capacity: event.capacity,
           status: event.status,
+          kind: event.kind,
           description: toLexical(event.description.bg),
         } as any,
         overrideAccess: true,

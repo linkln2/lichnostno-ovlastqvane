@@ -95,20 +95,6 @@ export default function ContactPage() {
                 </div>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-xl">📷</span>
-                <div>
-                  <div className="text-sm text-stone-500">Instagram</div>
-                  <a
-                    href={site.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-stone-900 hover:text-amber-700"
-                  >
-                    @lichnostno_ovlastyavane
-                  </a>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
                 <span className="text-xl">🎵</span>
                 <div>
                   <div className="text-sm text-stone-500">TikTok</div>

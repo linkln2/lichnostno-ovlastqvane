@@ -13,7 +13,6 @@ export const site = {
   phoneDisplay: "087 944 7749",
   city: { bg: "Бургас 8000, България", en: "Burgas 8000, Bulgaria" },
   facebook: "https://www.facebook.com/profile.php?id=61562005563695",
-  instagram: "https://www.instagram.com/lichnostno_ovlastyavane",
   tiktok: "https://www.tiktok.com/@azraltar",
 };
 
@@ -146,6 +145,36 @@ export const services: Service[] = [
     price: { bg: "от 180 €", en: "from 180 EUR" },
   },
   {
+    slug: "lectures",
+    icon: "🎤",
+    title: { bg: "Лекции", en: "Lectures" },
+    who: {
+      bg: "За хора, които правят първи стъпки и искат да чуят темите на живо.",
+      en: "For people taking their first steps who want to hear the topics live.",
+    },
+    desc: {
+      bg: "Единични лекции на живо, в които представям конкретна тема — Рейки, Тета-хилинг, електрокултура, констелации. Достъпен формат за запознаване с работата, без ангажимент към дълъг процес.",
+      en: "Standalone live lectures presenting a specific topic — Reiki, Theta healing, electro-culture, constellations. An accessible format for getting to know the work, without committing to a long process.",
+    },
+    outcomes: {
+      bg: [
+        "Ясна представа за темата и метода",
+        "Практични насоки, приложими веднага",
+        "Възможност за въпроси на живо",
+        "Първи контакт с общността",
+      ],
+      en: [
+        "A clear picture of the topic and the method",
+        "Practical guidance you can apply right away",
+        "The chance to ask questions live",
+        "A first contact with the community",
+      ],
+    },
+    format: { bg: "На живо, офлайн", en: "Live, in-person" },
+    duration: { bg: "90–120 мин.", en: "90–120 min" },
+    price: { bg: "по договаряне", en: "by arrangement" },
+  },
+  {
     slug: "coaching",
     icon: "💬",
     title: { bg: "Индивидуален коучинг", en: "1:1 Coaching" },
@@ -175,41 +204,14 @@ export const services: Service[] = [
     duration: { bg: "60–90 мин. на сесия", en: "60–90 min per session" },
     price: { bg: "от 120 € / сесия", en: "from 120 EUR / session" },
   },
-  {
-    slug: "group-programs",
-    icon: "🤝",
-    title: { bg: "Групови програми", en: "Group Programs" },
-    who: {
-      bg: "За хора, които искат продължителна работа в кръг от съмишленици.",
-      en: "For people who want ongoing work in a circle of like-minded people.",
-    },
-    desc: {
-      bg: "Месечни или тримесечни програми, в които малка група се среща редовно за дълбока работа. Силата на груповото поле ускорява процеса за всеки участник.",
-      en: "Monthly or quarterly programs where a small group meets regularly for deep work. The power of the group field accelerates the process for each participant.",
-    },
-    outcomes: {
-      bg: [
-        "Продължителна подкрепа и отчетност",
-        "Силата на груповото поле",
-        "Задълбочени връзки с другите участници",
-        "Интеграция на промяната във времето",
-      ],
-      en: [
-        "Ongoing support and accountability",
-        "The power of the group field",
-        "Deep connections with other participants",
-        "Integration of change over time",
-      ],
-    },
-    format: { bg: "Онлайн, затворена група", en: "Online, closed group" },
-    duration: { bg: "3–6 месеца", en: "3–6 months" },
-    price: { bg: "по договаряне", en: "by arrangement" },
-  },
 ];
+
+export type EventKind = "seminar" | "lecture" | "coaching";
 
 export type EventItem = {
   slug: string;
   status: "upcoming" | "past";
+  kind: EventKind;
   title: Bi;
   date: string; // ISO
   dateEnd: string; // ISO
@@ -223,14 +225,15 @@ export type EventItem = {
 
 export const events: EventItem[] = [
   {
-    slug: "lichnostno-ovlastqvane-primorsko-2025",
-    status: "upcoming",
+    slug: "lichnostno-ovlastqvane-primorsko-2024",
+    status: "past",
+    kind: "seminar",
     title: {
       bg: "Личностно овластяване — Първо издание",
       en: "Personal Empowerment — First Edition",
     },
-    date: "2025-08-24",
-    dateEnd: "2025-08-25",
+    date: "2024-08-24",
+    dateEnd: "2024-08-25",
     location: {
       bg: "Хотели комплекс „Магнолия“, ММЦ Приморско",
       en: "Hotel Complex Magnolia, MMC Primorsko",
@@ -241,14 +244,18 @@ export const events: EventItem[] = [
     },
     highlights: {
       bg: [
+        "Рейки",
         "Тета-хилинг сесии",
+        "Електрокултура",
         "Системни констелации",
         "Работа с полето на Акаша",
         "Практики за ежедневно овластяване",
         "Време за почивка и интеграция в природата",
       ],
       en: [
+        "Reiki",
         "Theta healing sessions",
+        "Electro-culture",
         "Systemic constellations",
         "Akashic field work",
         "Daily empowerment practices",
@@ -491,80 +498,6 @@ export function localized(name: Bi, locale: Locale): string {
 // ─── Launch countdown target ────────────────────────────────────────────────
 // Format: "YYYY-MM-DDTHH:mm:ss" in local time
 export const launchDate = "2026-11-10T10:00:00";
-
-// ─── Video feed ──────────────────────────────────────────────────────────────
-// Add videos here. For TikTok, use the full video URL and extract the numeric
-// video ID from it (the long number in the URL path).
-// For Facebook, use the full video/post URL.
-// To add more videos, simply append objects to this array.
-
-export type VideoItem = {
-  id: string; // unique internal id
-  platform: "tiktok" | "instagram" | "facebook";
-  url?: string; // full URL to the video/post
-  videoId?: string; // TikTok numeric video ID (extracted from URL)
-  src?: string; // local video path after fetching
-  poster?: string; // local poster/thumbnail path
-  caption: Bi;
-  date: string; // ISO date for sorting
-};
-
-export const videos: VideoItem[] = [
-  // ── TikTok videos (@azraltar) ──
-  // Replace these with real video URLs from https://www.tiktok.com/@azraltar
-  // Example format: https://www.tiktok.com/@azraltar/video/7298765432109876543
-  {
-    id: "tt-1",
-    platform: "tiktok",
-    url: "https://www.tiktok.com/@azraltar/video/7298765432109876543",
-    videoId: "7298765432109876543",
-    caption: {
-      bg: "Какво е личностно овластяване? Кратко обяснение.",
-      en: "What is personal empowerment? A short explanation.",
-    },
-    date: "2025-08-20",
-  },
-  {
-    id: "tt-2",
-    platform: "tiktok",
-    url: "https://www.tiktok.com/@azraltar/video/7298765432109876544",
-    videoId: "7298765432109876544",
-    caption: {
-      bg: "Три практики за ежедневно овластяване.",
-      en: "Three practices for daily empowerment.",
-    },
-    date: "2025-08-15",
-  },
-  {
-    id: "tt-3",
-    platform: "tiktok",
-    url: "https://www.tiktok.com/@azraltar/video/7298765432109876545",
-    videoId: "7298765432109876545",
-    caption: {
-      bg: "Кои са „културните инженери“?",
-      en: "Who are the \"cultural engineers\"?",
-    },
-    date: "2025-08-10",
-  },
-  // ── Facebook videos ──
-  // Replace with real Facebook video/post URLs
-  {
-    id: "fb-1",
-    platform: "facebook",
-    url: "https://www.facebook.com/profile.php?id=61562005563695",
-    caption: {
-      bg: "Семинарът в Приморско — моменти от събитието.",
-      en: "The Primorsko seminar — moments from the event.",
-    },
-    date: "2025-08-25",
-  },
-];
-
-export function getVideosByPlatform(platform: "all" | "tiktok" | "facebook"): VideoItem[] {
-  const sorted = [...videos].sort((a, b) => b.date.localeCompare(a.date));
-  if (platform === "all") return sorted;
-  return sorted.filter((v) => v.platform === platform);
-}
 
 // ─── Demo shop products ─────────────────────────────────────────────────────
 

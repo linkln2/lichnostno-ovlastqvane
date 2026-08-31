@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import { tr } from "@/lib/i18n";
-import { blogPosts, formatDate } from "@/lib/content";
+import { formatDate, type BlogPost } from "@/lib/content";
 
-export default function BlogPage() {
+export default function BlogPage({ posts }: { posts: BlogPost[] }) {
   const { locale } = useLocale();
 
   return (
@@ -25,7 +25,7 @@ export default function BlogPage() {
 
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {blogPosts.map((post) => (
+          {posts.map((post) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}

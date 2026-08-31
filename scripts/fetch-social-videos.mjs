@@ -7,7 +7,7 @@ const YT_DLP = process.env.YT_DLP || "/opt/homebrew/bin/yt-dlp";
 
 const SOURCES = [
   { url: "https://www.tiktok.com/@azraltar", platform: "tiktok" },
-  { url: "https://www.instagram.com/lichnostno_ovlastyavane", platform: "instagram" },
+  { url: "https://www.facebook.com/profile.php?id=61562005563695", platform: "facebook" },
 ];
 
 const LIMIT = 6;

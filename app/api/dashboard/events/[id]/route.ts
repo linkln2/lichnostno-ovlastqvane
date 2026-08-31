@@ -23,6 +23,7 @@ export async function PATCH(
     if (body.endsAt !== undefined) data.endsAt = body.endsAt || undefined;
     if (body.capacity !== undefined) data.capacity = Number(body.capacity) || 0;
     if (body.status !== undefined) data.status = body.status;
+    if (body.kind !== undefined) data.kind = body.kind;
     if (body.coverUrl !== undefined) data.coverUrl = body.coverUrl || undefined;
     if (body.facebookUrl !== undefined) data.facebookUrl = body.facebookUrl || undefined;
 
