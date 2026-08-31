@@ -73,10 +73,14 @@ function VideoCard({ video }: { video: VideoItem }) {
 }
 
 const valueIcons = [
-  <svg key="0" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>,
-  <svg key="1" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" /></svg>,
-  <svg key="2" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>,
-  <svg key="3" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
+  /* Responsibility — shield with check (taking charge, accountability) */
+  <svg key="0" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>,
+  /* Awareness — eye (seeing, perception) */
+  <svg key="1" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>,
+  /* Authenticity — diamond/gem (true self, inner value) */
+  <svg key="2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12l4 6-10 13L2 9z" /><path d="M11 3 8 9l4 13 4-13-3-6" /><path d="M2 9h20" /></svg>,
+  /* Community — users (togetherness, support) */
+  <svg key="3" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
 ];
 
 const ankhPattern = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M50 12 C30 12 18 24 18 40 C18 52 28 60 40 62 L40 92 L60 92 L60 62 C72 60 82 52 82 40 C82 24 70 12 50 12 Z" /><path d="M50 62 L50 92" stroke-width="5" /><path d="M25 78 L75 78" stroke-width="5" /></svg>`;
@@ -208,12 +212,12 @@ export default function HomePage() {
 
       <div className="relative z-10">
       {/* Hero + countdown to next event */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-amber-50/95 via-stone-50/90 to-stone-50/85">
+      <section className="relative overflow-hidden bg-gradient-to-b from-amber-50 to-stone-50 dark:bg-gradient-to-b dark:from-amber-50/10 dark:to-stone-900/80">
         <div className="absolute inset-0 opacity-[0.04]" style={{
           backgroundImage: "radial-gradient(circle at 1px 1px, #292524 1px, transparent 0)",
           backgroundSize: "32px 32px",
         }} />
-        <div className="relative mx-auto max-w-6xl px-4 py-20 bg-transparent sm:px-6 sm:py-28">
+        <div className="relative mx-auto max-w-6xl px-4 py-20 dark:bg-transparent sm:px-6 sm:py-28">
           {/* Top row: logo left, title + text right */}
           <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:gap-14">
             <div className="shrink-0">
@@ -229,7 +233,7 @@ export default function HomePage() {
               />
             </div>
             <div className="flex-1 text-center lg:text-left">
-              <span className="inline-block rounded-full border border-amber-200 bg-amber-100/60 px-4 py-1 text-xs font-medium text-amber-800">
+              <span className="inline-block rounded-full border border-amber-200 bg-amber-100 px-4 py-1 text-xs font-medium text-amber-800 dark:border-amber-200/30 dark:bg-amber-100/20">
                 {tr("hero_badge", locale)}
               </span>
               <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl lg:text-6xl lg:leading-[1.1]">
@@ -245,7 +249,7 @@ export default function HomePage() {
       </section>
 
       {/* Countdown with buy ticket */}
-      <section className="bg-stone-100/85 py-8 sm:py-10">
+      <section className="bg-stone-100 py-8 dark:bg-stone-900/80 sm:py-10">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
           <h2 className="text-lg font-bold text-stone-800 sm:text-xl">
             {locale === "bg" ? "Голямото събитие идва скоро" : "The big event is coming soon"}
@@ -273,7 +277,7 @@ export default function HomePage() {
       </section>
 
       {/* Video feed */}
-      <section className="bg-stone-50/85 py-16 sm:py-20">
+      <section className="bg-stone-50 py-16 dark:bg-stone-900/60 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
             {tr("feed_title", locale)}
@@ -362,7 +366,7 @@ export default function HomePage() {
       </section>
 
       {/* Shop */}
-      <section className="bg-white/85 py-16 sm:py-20">
+      <section className="bg-white py-16 dark:bg-stone-900/70 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
             {tr("section_shop_title", locale)}
@@ -465,7 +469,7 @@ export default function HomePage() {
       </section>
 
       {/* Mission + Values — centered around holy.png with particles */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-amber-50/30 via-amber-50/15 to-stone-50/80 py-20 sm:py-28">
+      <section className="relative overflow-hidden bg-gradient-to-b from-amber-50 to-stone-50 py-20 dark:bg-gradient-to-b dark:from-amber-50/10 dark:to-stone-900/60 sm:py-28">
         {/* Particle burst effect */}
         <ParticleBurst />
 
@@ -490,16 +494,16 @@ export default function HomePage() {
 
           {/* Center image with values orbiting */}
           <div className="mt-16 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-12">
-            {/* Left values (2) */}
-            <div className="space-y-8 lg:space-y-12">
+            {/* Left values (2) — icon top-right */}
+            <div className="flex flex-col gap-8 lg:gap-12">
               {values.slice(0, 2).map((v, i) => (
                 <div
                   key={v.title.en}
-                  className="rounded-2xl border border-amber-200/50 bg-white/70 p-6 backdrop-blur-sm transition-all hover:border-amber-300/80 hover:bg-white/90 hover:shadow-lg lg:text-right"
+                  className="flex flex-1 flex-col rounded-2xl border border-amber-200 bg-white p-6 transition-all hover:border-amber-300 hover:bg-amber-50 hover:shadow-lg dark:border-amber-200/30 dark:bg-white/10 dark:hover:bg-white/20"
                 >
-                  <div className="mb-3 text-amber-700">{valueIcons[i]}</div>
+                  <div className="mb-3 flex justify-end text-amber-700">{valueIcons[i]}</div>
                   <h4 className="text-lg font-semibold text-amber-800">{v.title[locale]}</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
                 </div>
               ))}
             </div>
@@ -525,16 +529,16 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Right values (2) */}
-            <div className="space-y-8 lg:space-y-12">
+            {/* Right values (2) — icon top-left */}
+            <div className="flex flex-col gap-8 lg:gap-12">
               {values.slice(2, 4).map((v, i) => (
                 <div
                   key={v.title.en}
-                  className="rounded-2xl border border-amber-200/50 bg-white/70 p-6 backdrop-blur-sm transition-all hover:border-amber-300/80 hover:bg-white/90 hover:shadow-lg"
+                  className="flex flex-1 flex-col rounded-2xl border border-amber-200 bg-white p-6 transition-all hover:border-amber-300 hover:bg-amber-50 hover:shadow-lg dark:border-amber-200/30 dark:bg-white/10 dark:hover:bg-white/20"
                 >
-                  <div className="mb-3 text-amber-700">{valueIcons[i + 2]}</div>
+                  <div className="mb-3 flex justify-start text-amber-700">{valueIcons[i + 2]}</div>
                   <h4 className="text-lg font-semibold text-amber-800">{v.title[locale]}</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
                 </div>
               ))}
             </div>
@@ -545,11 +549,13 @@ export default function HomePage() {
             {values.map((v, i) => (
               <div
                 key={v.title.en}
-                className="rounded-2xl border border-amber-200/50 bg-white/70 p-5 backdrop-blur-sm"
+                className="flex flex-col rounded-2xl border border-amber-200 bg-white p-5 dark:border-amber-200/30 dark:bg-white/10"
               >
-                <div className="mb-3 text-amber-700">{valueIcons[i]}</div>
+                <div className={`mb-3 flex text-amber-700 ${i < 2 ? "justify-end" : "justify-start"}`}>
+                  {valueIcons[i]}
+                </div>
                 <h4 className="text-lg font-semibold text-amber-800">{v.title[locale]}</h4>
-                <p className="mt-2 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
               </div>
             ))}
           </div>
@@ -561,29 +567,29 @@ export default function HomePage() {
             </h3>
             <div className="grid gap-6 sm:grid-cols-2">
               {/* Two serpents */}
-              <div className="rounded-2xl border border-amber-200/40 bg-white/50 p-5 backdrop-blur-sm">
+              <div className="rounded-2xl border border-amber-200 bg-white p-5 dark:border-amber-200/30 dark:bg-white/10">
                 <h4 className="text-sm font-semibold text-amber-800">
                   {locale === "bg" ? "Двете змии" : "The Two Serpents"}
                 </h4>
                 <p className="mt-2 text-sm leading-relaxed text-stone-600">
                   {locale === "bg"
-                    ? "Две противоположни сили — мъжко/женско, слънце/луна, дух/материя — се извиват около централната ос. Всеко пресичане е етап: опитност → конфликт → помирение → трансформация."
-                    : "Two opposing forces — masculine/feminine, sun/moon, spirit/matter — wind around the central axis. Each crossing is a stage: experience → conflict → reconciliation → transformation."}
+                    ? "Две противоположни сили — мъжко/женско, слънце/луна, дух/материя — се извиват около централната ос. Всяко пресичане е етап: опитност → конфликт → помирение → трансформация."
+                    : "Two opposing forces — masculine/feminine, sun/moon, spirit/matter — wind around the central axis. Each crossing marks a stage: experience → conflict → reconciliation → transformation."}
                 </p>
               </div>
               {/* Central staff */}
-              <div className="rounded-2xl border border-amber-200/40 bg-white/50 p-5 backdrop-blur-sm">
+              <div className="rounded-2xl border border-amber-200 bg-white p-5 dark:border-amber-200/30 dark:bg-white/10">
                 <h4 className="text-sm font-semibold text-amber-800">
                   {locale === "bg" ? "Централният жезъл" : "The Central Staff"}
                 </h4>
                 <p className="mt-2 text-sm leading-relaxed text-stone-600">
                   {locale === "bg"
-                    ? "Жезълът е пътят нагоре — оста на възхода. Крилата на върха символизират трансценденция, духовно издигане и достигане на по-високо състояние на съзнание."
-                    : "The staff is the path upward — the axis of ascent. The wings at the top represent transcendence, spiritual elevation, and reaching a higher state of consciousness."}
+                    ? "Жезълът е оста на възхода — пътят от заземената материя към разширено осъзнаване."
+                    : "The staff is the axis of ascent — the path from grounded matter toward expanded awareness."}
                 </p>
               </div>
               {/* Seven stages */}
-              <div className="rounded-2xl border border-amber-200/40 bg-white/50 p-5 backdrop-blur-sm">
+              <div className="rounded-2xl border border-amber-200 bg-white p-5 dark:border-amber-200/30 dark:bg-white/10">
                 <h4 className="text-sm font-semibold text-amber-800">
                   {locale === "bg" ? "Седемте планетарни етапа" : "The Seven Planetary Stages"}
                 </h4>
@@ -594,14 +600,14 @@ export default function HomePage() {
                 </p>
               </div>
               {/* The ascent */}
-              <div className="rounded-2xl border border-amber-200/40 bg-white/50 p-5 backdrop-blur-sm">
+              <div className="rounded-2xl border border-amber-200 bg-white p-5 dark:border-amber-200/30 dark:bg-white/10">
                 <h4 className="text-sm font-semibold text-amber-800">
                   {locale === "bg" ? "Възходът" : "The Ascent"}
                 </h4>
                 <p className="mt-2 text-sm leading-relaxed text-stone-600">
                   {locale === "bg"
-                    ? "От земята и материята, през планетарните етапи, към интеграция на противоположностите и духовно освобождение. Символът става все по-отворен и небесен към върха."
-                    : "From earth and matter, through the planetary stages, toward integration of opposites and spiritual liberation. The symbol becomes more open and celestial toward the top."}
+                    ? "От материята, през планетарните етапи, към интеграция на противоположностите — където символът се отваря в криле и изкачването става полет."
+                    : "From matter, through the planetary stages, toward the integration of opposites — where the symbol opens outward into wings, and the climb becomes flight."}
                 </p>
               </div>
             </div>
@@ -610,7 +616,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials preview */}
-      <section className="bg-white/85 py-16 sm:py-20">
+      <section className="bg-white py-16 dark:bg-stone-900/70 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
             {tr("section_testimonials_title", locale)}
@@ -643,7 +649,7 @@ export default function HomePage() {
       </section>
 
       {/* Membership tiers */}
-      <section className="bg-stone-50/85 py-16 sm:py-20">
+      <section className="bg-stone-50 py-16 dark:bg-stone-900/60 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
             {locale === "bg" ? "Членство" : "Membership"}
@@ -734,8 +740,8 @@ export default function HomePage() {
       </section>
 
       {/* Recent posts */}
-      <section className="mx-auto max-w-6xl px-4 py-16 bg-transparent sm:px-6 sm:py-20">
-        <h2 className="text-center text-2xl font-bold text-stone-900 sm:text-3xl">
+      <section className="mx-auto max-w-6xl px-4 py-16 dark:bg-stone-900/70 sm:px-6 sm:py-20">
+        <h2 className="text-center text-2xl font-bold text-amber-800 sm:text-3xl">
           {tr("section_recent_posts", locale)}
         </h2>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -743,7 +749,7 @@ export default function HomePage() {
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white transition-colors hover:border-amber-300 hover:bg-amber-50/40"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white transition-colors hover:border-amber-300 hover:bg-amber-50 dark:border-stone-700 dark:bg-stone-800 dark:hover:border-amber-500 dark:hover:bg-stone-700"
             >
               {post.cover && (
                 <div className="aspect-video w-full overflow-hidden bg-stone-100">

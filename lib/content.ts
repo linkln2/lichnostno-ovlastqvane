@@ -40,29 +40,29 @@ export const values: { title: Bi; desc: Bi }[] = [
   {
     title: { bg: "Отговорност", en: "Responsibility" },
     desc: {
-      bg: "Първата стъпка към овластяването е да поемеш пълна отговорност за всичко в живота си — без обвинения, без жертва.",
-      en: "The first step to empowerment is taking full responsibility for everything in your life — no blame, no victimhood.",
+      bg: "Овластяването започва в момента, в който спреш да обвиняваш — включително себе си — и поемеш пълна отговорност за живота си.",
+      en: "Empowerment begins the moment you stop assigning blame — including to yourself — and claim full ownership of your life.",
     },
   },
   {
     title: { bg: "Осъзнатост", en: "Awareness" },
     desc: {
-      bg: "Промяната започва с виждане. Помагаме ти да видиш моделите, вярванията и механизмите, които те задържат.",
-      en: "Change begins with seeing. We help you see the patterns, beliefs, and mechanisms that hold you back.",
+      bg: "Промяната започва с виждане. Помагаме ти да разпознаеш моделите, вярванията и механизмите, които тихо оформят изборите ти.",
+      en: "Change begins with seeing. We help you recognize the patterns, beliefs, and mechanisms that quietly shape your choices.",
     },
   },
   {
     title: { bg: "Автентичност", en: "Authenticity" },
     desc: {
-      bg: "Истинската сила идва, когато живееш в съгласие със себе си — не с очакванията на другите.",
-      en: "True power comes when you live in alignment with yourself — not with others' expectations.",
+      bg: "Истинската сила идва от съгласието — да живееш по свой компас, а не по заети очаквания.",
+      en: "True power comes from alignment — living by your own compass rather than borrowed expectations.",
     },
   },
   {
     title: { bg: "Общност", en: "Community" },
     desc: {
-      bg: "Не си сам. Създаваме пространство, в което хората се подкрепят взаимно в процеса на растеж.",
-      en: "You are not alone. We create a space where people support each other in the process of growth.",
+      bg: "Не си сам. Създаваме пространство, в което хората вървят по пътя на растежа заедно.",
+      en: "You are not alone. We create a space where people walk the path of growth together.",
     },
   },
 ];

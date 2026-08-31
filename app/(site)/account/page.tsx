@@ -110,7 +110,7 @@ export default function AccountPage() {
   ];
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-stone-50 dark:bg-stone-900">
       <StarfieldBackground className="opacity-30" />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
@@ -171,7 +171,7 @@ export default function AccountPage() {
           {tab === "overview" && (
             <div className="grid gap-4 sm:grid-cols-3">
               {/* Rank card */}
-              <div className="rounded-2xl border border-stone-200 bg-white/90 p-5">
+              <div className="rounded-2xl border border-stone-200 bg-white p-5 dark:bg-stone-800">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t.rank}</h3>
                 <p className="mt-2 text-lg font-bold text-stone-900">
                   {entitlements.highestTierName || t.none}
@@ -184,7 +184,7 @@ export default function AccountPage() {
               </div>
 
               {/* Tickets card */}
-              <div className="rounded-2xl border border-stone-200 bg-white/90 p-5">
+              <div className="rounded-2xl border border-stone-200 bg-white p-5 dark:bg-stone-800">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t.tickets}</h3>
                 <p className="mt-2 text-lg font-bold text-stone-900">
                   {entitlements.eventTickets.filter((t) => ["confirmed", "checked_in"].includes(t.status)).length}
@@ -195,7 +195,7 @@ export default function AccountPage() {
               </div>
 
               {/* Products card */}
-              <div className="rounded-2xl border border-stone-200 bg-white/90 p-5">
+              <div className="rounded-2xl border border-stone-200 bg-white p-5 dark:bg-stone-800">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t.products}</h3>
                 <p className="mt-2 text-lg font-bold text-stone-900">
                   {entitlements.products.length}
@@ -210,7 +210,7 @@ export default function AccountPage() {
                 <div className="sm:col-span-3">
                   <Link
                     href="/inner-circle"
-                    className="flex items-center justify-between rounded-2xl border border-amber-300 bg-amber-50/80 p-5 transition-colors hover:bg-amber-50"
+                    className="flex items-center justify-between rounded-2xl border border-amber-300 bg-amber-50 p-5 transition-colors hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-50/20 dark:hover:bg-amber-50/30"
                   >
                     <div>
                       <h3 className="font-bold text-stone-900">{t.innerCircle}</h3>
@@ -225,7 +225,7 @@ export default function AccountPage() {
                 </div>
               ) : (
                 <div className="sm:col-span-3">
-                  <div className="flex items-center justify-between rounded-2xl border border-stone-200 bg-white/90 p-5">
+                  <div className="flex items-center justify-between rounded-2xl border border-stone-200 bg-white p-5 dark:bg-stone-800">
                     <div>
                       <h3 className="font-bold text-stone-900">
                         {locale === "bg" ? "Присъедини се към вътрешния кръг" : "Join the Inner Circle"}
@@ -265,7 +265,7 @@ export default function AccountPage() {
             ) : (
               <div className="space-y-3">
                 {entitlements.memberships.map((m, i) => (
-                  <div key={i} className="rounded-xl border border-stone-200 bg-white/90 p-4">
+                  <div key={i} className="rounded-xl border border-stone-200 bg-white p-4 dark:bg-stone-800">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="font-medium text-stone-900">{m.tierName}</p>
@@ -306,7 +306,7 @@ export default function AccountPage() {
             ) : (
               <div className="space-y-3">
                 {entitlements.eventTickets.map((t, i) => (
-                  <div key={i} className="rounded-xl border border-stone-200 bg-white/90 p-4">
+                  <div key={i} className="rounded-xl border border-stone-200 bg-white p-4 dark:bg-stone-800">
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-stone-900">{t.eventTitle}</p>
@@ -336,7 +336,7 @@ export default function AccountPage() {
             ) : (
               <div className="space-y-3">
                 {entitlements.products.map((p, i) => (
-                  <div key={i} className="rounded-xl border border-stone-200 bg-white/90 p-4">
+                  <div key={i} className="rounded-xl border border-stone-200 bg-white p-4 dark:bg-stone-800">
                     <div className="flex items-start justify-between gap-4">
                       <p className="font-medium text-stone-900">{p.productName}</p>
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${

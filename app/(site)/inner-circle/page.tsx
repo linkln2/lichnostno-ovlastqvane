@@ -114,8 +114,8 @@ export default function InnerCirclePage() {
   // Not a member — show upgrade prompt
   if (!entitlements || !entitlements.hasActiveMembership) {
     return (
-      <div className="relative min-h-screen">
-        <StarfieldBackground className="opacity-40" />
+      <div className="relative min-h-screen bg-stone-50 dark:bg-stone-900">
+        <StarfieldBackground className="opacity-20" />
         <div className="relative z-10 mx-auto max-w-2xl px-4 py-24 text-center">
           <div className="mb-6 text-6xl">🔒</div>
           <h1 className="text-3xl font-bold text-stone-900">
@@ -142,8 +142,8 @@ export default function InnerCirclePage() {
   const userTierPrice = entitlements.highestTierPrice || 0;
 
   return (
-    <div className="relative min-h-screen">
-      <StarfieldBackground className="opacity-30" />
+    <div className="relative min-h-screen bg-stone-50 dark:bg-stone-900">
+      <StarfieldBackground className="opacity-15" />
 
       <div className="relative z-10">
         {/* Header */}
@@ -184,7 +184,7 @@ export default function InnerCirclePage() {
               return (
                 <div
                   key={video.id}
-                  className="overflow-hidden rounded-2xl border border-stone-200 bg-white/90 shadow-sm"
+                  className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm dark:bg-stone-800"
                 >
                   {/* Video player or lock */}
                   {hasAccess ? (
@@ -240,7 +240,7 @@ export default function InnerCirclePage() {
 
         {/* Entitlements summary */}
         <section className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
-          <div className="rounded-2xl border border-stone-200 bg-white/90 p-6">
+          <div className="rounded-2xl border border-stone-200 bg-white p-6 dark:bg-stone-800">
             <h3 className="mb-4 font-bold text-stone-900">
               {locale === "bg" ? "Твоите права" : "Your entitlements"}
             </h3>

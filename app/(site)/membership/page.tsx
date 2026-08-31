@@ -155,7 +155,7 @@ export default function MembershipPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 sm:px-6 md:flex-row md:items-stretch md:justify-between md:gap-12">
           {/* Title — left */}
           <div className="w-full text-center md:max-w-xl md:text-left">
-            <div className="rounded-2xl border-2 border-amber-500/30 bg-amber-50/50 px-6 py-6 shadow-sm sm:px-8 sm:py-8 md:flex md:h-full md:flex-col md:justify-center">
+            <div className="rounded-2xl border-2 border-amber-500/30 bg-amber-50 px-6 py-6 shadow-sm dark:border-amber-500/40 dark:bg-amber-50/20 sm:px-8 sm:py-8 md:flex md:h-full md:flex-col md:justify-center">
               <h1 className="text-4xl font-black uppercase tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
                 {t.title}
               </h1>

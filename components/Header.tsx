@@ -50,7 +50,7 @@ export default function Header() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-stone-200/60 bg-stone-50/85 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-stone-200/60 bg-stone-50 backdrop-blur-md dark:border-stone-700/60 dark:bg-stone-900/85">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         {/* Logo + name */}
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
@@ -104,13 +104,13 @@ export default function Header() {
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-300 bg-white text-stone-600 transition-colors hover:bg-stone-100 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-stone-300 bg-white text-stone-600 transition-colors hover:bg-stone-100 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
             aria-label={theme === "dark" ? (locale === "bg" ? "Светъл режим" : "Light mode") : (locale === "bg" ? "Тъмен режим" : "Dark mode")}
             title={theme === "dark" ? (locale === "bg" ? "Светъл режим" : "Light mode") : (locale === "bg" ? "Тъмен режим" : "Dark mode")}
           >
             {mounted && theme === "dark" ? (
               /* Sun icon — click to go light */
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="5" />
                 <line x1="12" y1="1" x2="12" y2="3" />
                 <line x1="12" y1="21" x2="12" y2="23" />
@@ -123,7 +123,7 @@ export default function Header() {
               </svg>
             ) : (
               /* Moon icon — click to go dark */
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
               </svg>
             )}
@@ -195,7 +195,7 @@ export default function Header() {
 
       {/* Mobile nav */}
       {open && (
-        <nav className="border-t border-stone-200 bg-stone-50 px-4 py-3 md:hidden">
+        <nav className="border-t border-stone-200 bg-stone-50 px-4 py-3 dark:border-stone-700 dark:bg-stone-900 md:hidden">
           <div className="flex flex-col gap-1">
             {navItems.map((item) => (
               <Link
