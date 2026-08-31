@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Fraunces } from "next/font/google";
 import "../globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -7,6 +8,9 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CookieConsent } from "@/components/CookieConsent";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", weight: ["500", "600"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://lichnostno-ovlastqvane.vercel.app"),
@@ -91,7 +95,10 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="bg" className="h-full antialiased">
+    <html lang="bg" className={`${inter.variable} ${fraunces.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');if(!t){var h=new Date().getHours();t=(h>=19||h<6)?'dark':'light';}document.documentElement.classList.add(t);}catch(e){}})();` }} />
+      </head>
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <ThemeProvider>
           <LocaleProvider>

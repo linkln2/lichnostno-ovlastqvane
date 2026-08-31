@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Fraunces } from "next/font/google";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import "../globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { getPayloadInstance } from "@/lib/payload";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -17,13 +20,24 @@ export const metadata: Metadata = {
   description: "Admin dashboard for the coaching studio.",
 };
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Real auth check — proxy.ts only checks cookie presence, not validity
+  const payload = await getPayloadInstance();
+  const hdrs = await headers();
+  const { user } = await payload.auth({ headers: hdrs });
+  if (!user) {
+    redirect("/membership");
+  }
+
   return (
-    <html lang="en" className={`${inter.variable} ${mono.variable} ${fraunces.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${mono.variable} ${fraunces.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');if(!t){var h=new Date().getHours();t=(h>=19||h<6)?'dark':'light';}document.documentElement.classList.add(t);}catch(e){}})();` }} />
+      </head>
       <body
         className="min-h-full bg-zinc-50 text-zinc-900 dark:bg-black dark:text-white"
         style={{ fontFamily: "var(--font-inter)" }}

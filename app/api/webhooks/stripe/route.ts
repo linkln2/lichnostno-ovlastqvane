@@ -13,13 +13,17 @@ import type Stripe from "stripe";
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
   const signature = req.headers.get("stripe-signature") || "";
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    throw new Error("STRIPE_WEBHOOK_SECRET is not configured");
+  }
 
   let event: Stripe.Event;
   try {
     event = getStripe().webhooks.constructEvent(
       rawBody,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET || ""
+      webhookSecret
     );
   } catch (err) {
     console.error("Stripe webhook signature error:", err);
@@ -101,6 +105,19 @@ export async function POST(req: NextRequest) {
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const payload = await getPayloadInstance();
   const { eventPackageId, productId } = session.metadata || {};
+
+  // Idempotency guard — if an order with this session ID already exists,
+  // this is a Stripe retry; don't duplicate registrations/orders
+  const existingOrder = await payload.find({
+    collection: "orders",
+    where: { stripeSessionId: { equals: session.id } },
+    limit: 1,
+    overrideAccess: true,
+  });
+  if (existingOrder.docs.length > 0) {
+    console.log(`Webhook retry for session ${session.id} — order already exists, skipping`);
+    return;
+  }
 
   const customerEmail =
     session.customer_details?.email || session.customer_email || "";

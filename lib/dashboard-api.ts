@@ -1,20 +1,5 @@
 import { getPayloadInstance } from "@/lib/payload";
-
-// Shared helper for dashboard API routes.
-// Verifies the payload-token cookie exists, then uses the local Payload API
-// with overrideAccess (the proxy already gates /dashboard behind auth).
-export async function requireStaff(request: Request) {
-  const cookie = request.headers.get("cookie") || "";
-  const token = cookie
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith("payload-token="));
-
-  if (!token) {
-    return { ok: false as const, response: Response.json({ error: "Unauthorized" }, { status: 401 }) };
-  }
-  return { ok: true as const };
-}
+export { requireStaff } from "@/lib/auth-request";
 
 // Parse a localized JSON field from Payload (stored as {"bg":"...","en":"..."})
 export function loc(field: unknown, locale = "en"): string {

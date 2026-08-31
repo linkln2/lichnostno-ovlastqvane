@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// Next.js 16 renamed middleware → proxy. This runs on the edge before routes.
+// Next.js 16 renamed middleware → proxy. This runs on the Node.js runtime before routes.
+// Note: proxy is for routing/redirects only — real auth checks happen in layout/page server code.
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("payload-token")?.value;

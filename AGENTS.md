@@ -42,18 +42,15 @@ All UI must be designed for mobile first and then enhanced for larger screens.
 - All backgrounds must be **opaque in light mode** with `dark:` variants
 - Never use semi-transparent backgrounds (`bg-white/85`) on pages with the fixed starfield — it causes low contrast
 
-## Tailwind v4 + Turbopack Notes
-
-- Responsive variants (`md:`, `lg:`) may not generate `@media` wrappers reliably
-- For critical responsive layouts, use CSS modules (`*.module.css`) with real `@media` queries
-- Example: `Footer.module.css` uses `@media (min-width: 1024px)` for 4-column grid
-
 ## Auth & Route Protection
 
 - `proxy.ts` handles redirects: `/login` → `/membership`, `/dashboard` + `/inner-circle` + `/account` require auth
-- Staff whitelist in `lib/auth.ts`
+- `proxy.ts` runs on the Node.js runtime (not edge) and is for routing only — real auth checks use `payload.auth({ headers })`
+- Shared auth helpers in `lib/auth-request.ts`: `getAuthUser`, `requireStaff`, `requireCustomer`
+- Staff whitelist in `lib/auth.ts` — `requireStaff` checks both token validity AND whitelist
 - Customer entitlements computed in `lib/entitlements.ts`
 - Header fetches `/api/auth/me` + `/api/entitlements` to show/hide member features
+- Dashboard layout calls `payload.auth({ headers })` server-side as a second gate beyond proxy
 
 ## Content
 

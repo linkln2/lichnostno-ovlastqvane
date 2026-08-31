@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useLocale } from "./LocaleProvider";
 import { tr } from "@/lib/i18n";
 import { site } from "@/lib/content";
-import styles from "./Footer.module.css";
 
 type FooterLink = {
   href: string;
@@ -87,7 +86,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <nav className={`${styles.footerGrid} py-8`} aria-label={locale === "bg" ? "Навигация във футъра" : "Footer navigation"}>
+        <nav className="grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4 py-8" aria-label={locale === "bg" ? "Навигация във футъра" : "Footer navigation"}>
           {footerGroups.map((group) => (
             <div key={group.titleEn}>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-400">

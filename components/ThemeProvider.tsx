@@ -31,14 +31,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   const [manualOverride, setManualOverride] = useState(false);
 
-  // On mount: check localStorage first, then time-based theme
+  // On mount: read the theme class that the inline script already set.
+  // If localStorage has a saved preference, mark it as a manual override
+  // so the time-based auto-switch doesn't clobber it.
   useEffect(() => {
-    const saved = localStorage.getItem("theme") as Theme | null;
-    if (saved) {
-      setTheme(saved);
+    const root = document.documentElement;
+    const current = root.classList.contains("dark") ? "dark" : "light";
+    setTheme(current);
+    if (localStorage.getItem("theme") !== null) {
       setManualOverride(true);
-    } else {
-      setTheme(getTimeTheme());
     }
     setMounted(true);
   }, []);

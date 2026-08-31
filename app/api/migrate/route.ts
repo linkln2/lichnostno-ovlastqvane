@@ -2,9 +2,16 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 
 // POST /api/migrate?key=SETUP_KEY — creates all database tables by forcing
-// Drizzle schema push. Works in production by temporarily switching NODE_ENV
-// and auto-accepting any drizzle prompts.
+// Drizzle schema push. Disabled in production — run locally or in a
+// staging environment only.
 export async function POST(request: Request) {
+  if (process.env.NODE_ENV === "production") {
+    return Response.json(
+      { error: "Migrations are disabled in production" },
+      { status: 403 },
+    );
+  }
+
   const url = new URL(request.url);
   const key = url.searchParams.get("key");
   const expectedKey = process.env.SETUP_KEY;
