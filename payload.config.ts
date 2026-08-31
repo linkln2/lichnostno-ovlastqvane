@@ -880,7 +880,9 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI,
     },
-    push: false,
+    // push: true auto-creates/syncs tables on startup. Safe for development
+    // and small projects. Switch to explicit migrations before production scale.
+    push: true,
   }),
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "dev-secret-change-me",
