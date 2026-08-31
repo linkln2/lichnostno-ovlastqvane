@@ -30,11 +30,11 @@ export async function GET() {
     return Response.json({
       docs: membershipTiers.map((t, i) => ({
         id: i + 1,
-        name: t.name,
+        name: t.name.bg,
         priceCents: t.price * 100,
         interval: "month" as const,
         stripePriceId: "",
-        perks: t.perks.map((p) => ({ perk: p })),
+        perks: t.perks.map((p) => ({ perk: p.bg })),
       })),
     });
   }

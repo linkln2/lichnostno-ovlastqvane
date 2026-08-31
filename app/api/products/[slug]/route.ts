@@ -53,7 +53,7 @@ export async function GET(
     }
     return Response.json({
       id: staticProduct.slug,
-      name: staticProduct.name,
+      name: staticProduct.name.bg,
       slug: staticProduct.slug,
       priceCents: staticProduct.price * 100,
       category: staticProduct.category,
@@ -61,7 +61,7 @@ export async function GET(
       inventory: 100,
       status: "published",
       images: [],
-      description: staticProduct.description,
+      description: staticProduct.description.bg,
       downloadFile: null,
       image: staticProduct.image,
     });

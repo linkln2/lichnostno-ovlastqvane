@@ -42,7 +42,7 @@ export async function GET() {
     return Response.json({
       docs: staticProducts.map((p) => ({
         id: p.slug,
-        name: p.name,
+        name: p.name.bg,
         slug: p.slug,
         priceCents: p.price * 100,
         category: p.category,
