@@ -253,7 +253,7 @@ const EventPackages: CollectionConfig = {
     {
       name: "stripePriceId",
       type: "text",
-      required: true,
+      admin: { description: "Stripe Price ID for checkout (price_...). Leave empty until Stripe is configured." },
     },
     {
       name: "capacity",
@@ -410,7 +410,7 @@ const SubscriptionTiers: CollectionConfig = {
     {
       name: "stripePriceId",
       type: "text",
-      required: true,
+      admin: { description: "Stripe Price ID for checkout (price_...). Leave empty until Stripe is configured." },
     },
     {
       name: "perks",
