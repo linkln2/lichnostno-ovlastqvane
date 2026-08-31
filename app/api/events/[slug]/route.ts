@@ -1,6 +1,8 @@
 import { getPayloadInstance } from "@/lib/payload";
+import { events as staticEvents, getEventBySlug } from "@/lib/content";
 
 // Public endpoint: returns a single event with its ticket packages.
+// Falls back to static content if the database is unreachable.
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },
@@ -92,7 +94,32 @@ export async function GET(
       })),
     });
   } catch (err) {
-    console.error("Error fetching event:", err);
-    return Response.json({ error: "Failed to load event" }, { status: 500 });
+    console.error("Error fetching event, falling back to static:", err);
+    // Fallback to static content
+    const staticEvent = getEventBySlug(slug);
+    if (!staticEvent) {
+      return Response.json({ error: "Event not found" }, { status: 404 });
+    }
+    return Response.json({
+      id: staticEvent.slug,
+      title: staticEvent.title.en || staticEvent.title.bg,
+      slug: staticEvent.slug,
+      location: staticEvent.location.en || staticEvent.location.bg,
+      startsAt: staticEvent.date,
+      endsAt: staticEvent.dateEnd,
+      capacity: staticEvent.capacity || 0,
+      status: staticEvent.status,
+      packages: staticEvent.packages?.map((p, i) => ({
+        id: i + 1,
+        name: p.name.en || p.name.bg,
+        priceCents: parseInt(String(p.price).replace(/[^0-9]/g, "")) || 0,
+        priceDisplay: typeof p.price === "string" ? p.price : `€${p.price}`,
+        spots: p.spots.en || p.spots.bg,
+        stripePriceId: "",
+        capacity: 0,
+        spotsLeft: null,
+        isSoldOut: false,
+      })) || [],
+    });
   }
 }

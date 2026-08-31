@@ -1,7 +1,8 @@
 import { getPayloadInstance } from "@/lib/payload";
-import { products } from "@/lib/content";
+import { products as staticProducts } from "@/lib/content";
 
 // Public endpoint: returns published products for the shop grid.
+// Falls back to static content if the database is unreachable.
 export async function GET() {
   try {
     const payload = await getPayloadInstance();
@@ -15,7 +16,7 @@ export async function GET() {
 
     return Response.json({
       docs: result.docs.map((p: any) => {
-        const staticProduct = products.find((sp) => sp.slug === p.slug);
+        const staticProduct = staticProducts.find((sp) => sp.slug === p.slug);
         const firstImage = p.images?.[0];
         const imageUrl =
           (firstImage?.sizes?.thumbnail?.url || firstImage?.url) ??
@@ -36,7 +37,21 @@ export async function GET() {
       }),
     });
   } catch (err) {
-    console.error("Error fetching products:", err);
-    return Response.json({ error: "Failed to load products" }, { status: 500 });
+    console.error("Error fetching products, falling back to static:", err);
+    // Fallback to static content so the shop is never empty
+    return Response.json({
+      docs: staticProducts.map((p) => ({
+        id: p.slug,
+        name: p.name,
+        slug: p.slug,
+        priceCents: p.price * 100,
+        category: p.category,
+        productType: "physical",
+        inventory: 100,
+        status: "published",
+        images: [],
+        image: p.image,
+      })),
+    });
   }
 }

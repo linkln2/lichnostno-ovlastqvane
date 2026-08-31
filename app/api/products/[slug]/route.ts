@@ -2,6 +2,7 @@ import { getPayloadInstance } from "@/lib/payload";
 import { products } from "@/lib/content";
 
 // Public endpoint: returns a single product by slug.
+// Falls back to static content if the database is unreachable.
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> },
@@ -44,7 +45,25 @@ export async function GET(
       image: imageUrl,
     });
   } catch (err) {
-    console.error("Error fetching product:", err);
-    return Response.json({ error: "Failed to load product" }, { status: 500 });
+    console.error("Error fetching product, falling back to static:", err);
+    // Fallback to static content
+    const staticProduct = products.find((p) => p.slug === slug);
+    if (!staticProduct) {
+      return Response.json({ error: "Product not found" }, { status: 404 });
+    }
+    return Response.json({
+      id: staticProduct.slug,
+      name: staticProduct.name,
+      slug: staticProduct.slug,
+      priceCents: staticProduct.price * 100,
+      category: staticProduct.category,
+      productType: "physical",
+      inventory: 100,
+      status: "published",
+      images: [],
+      description: staticProduct.description,
+      downloadFile: null,
+      image: staticProduct.image,
+    });
   }
 }
