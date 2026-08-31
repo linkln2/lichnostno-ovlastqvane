@@ -93,8 +93,8 @@ export async function POST(req: NextRequest) {
       mode: mode as Stripe.Checkout.SessionCreateParams.Mode,
       line_items: lineItems,
       customer_email: customerEmail,
-      success_url: `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/cancel`,
+      success_url: `${origin}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/membership`,
       metadata: {
         eventPackageId: eventPackageId || "",
         productId: productId || "",

@@ -21,7 +21,7 @@ function SuccessContent() {
   };
 
   return (
-    <section className="flex min-h-[70vh] items-center justify-center px-4 py-12">
+    <section className="flex min-h-[70vh] items-center justify-center bg-stone-50 px-4 py-12 dark:bg-stone-900">
       <div className="w-full max-w-md text-center">
         {/* Success icon */}
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
