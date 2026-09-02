@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LangDropdown } from "./lang-context";
 
 type NavItem = { label: string; icon: LucideIcon; active?: boolean };
 
@@ -142,6 +143,7 @@ export function Topbar({ name = "" }: { name?: string }) {
       </div>
 
       <div className="flex items-center gap-2">
+        <LangDropdown />
         <button
           className="flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 text-zinc-600 backdrop-blur-xl transition-colors hover:text-zinc-900 outline-none focus-visible:ring-2 focus-visible:ring-indigo-700"
           aria-label="Notifications"

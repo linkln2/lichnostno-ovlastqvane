@@ -18,6 +18,7 @@ import {
   SettingsTab,
 } from "./tabs";
 import { WebsiteTab } from "./WebsiteTab";
+import { DashboardLangProvider } from "./lang-context";
 import { CalendarClock, CircleDollarSign, Users, Ticket } from "lucide-react";
 
 type Stats = {
@@ -78,47 +79,49 @@ export function DashboardShell() {
   }, []);
 
   return (
-    <div className="flex">
-      <Sidebar active={active} onChange={handleChange} />
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <Topbar name={userName} />
+    <DashboardLangProvider>
+      <div className="flex">
+        <Sidebar active={active} onChange={handleChange} />
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+          <Topbar name={userName} />
 
-        <main className="flex flex-1 flex-col gap-6 px-6 pb-24 md:px-8 md:pb-10">
-          {active === "Overview" && <OverviewTab />}
-          {active === "Events" && <EventsTab />}
-          {active === "Blog" && <BlogTab />}
-          {active === "Products" && <ProductsTab />}
-          {active === "Orders" && <OrdersTab />}
-          {active === "Registrations" && <RegistrationsTab />}
-          {active === "Subscribers" && <SubscribersTab />}
-          {active === "Analytics" && <AnalyticsTab />}
-          {active === "Website" && <WebsiteTab />}
-          {active === "Settings" && <SettingsTab />}
-        </main>
+          <main className="flex flex-1 flex-col gap-6 px-6 pb-24 md:px-8 md:pb-10">
+            {active === "Overview" && <OverviewTab />}
+            {active === "Events" && <EventsTab />}
+            {active === "Blog" && <BlogTab />}
+            {active === "Products" && <ProductsTab />}
+            {active === "Orders" && <OrdersTab />}
+            {active === "Registrations" && <RegistrationsTab />}
+            {active === "Subscribers" && <SubscribersTab />}
+            {active === "Analytics" && <AnalyticsTab />}
+            {active === "Website" && <WebsiteTab />}
+            {active === "Settings" && <SettingsTab />}
+          </main>
 
-        {/* Mobile bottom navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/60 bg-white/80 px-2 py-2 backdrop-blur-xl dark:border-white/10 dark:bg-black/80 md:hidden">
-          <ul className="flex justify-around">
-            {nav.map((item) => {
-              const isActive = active === item.label;
-              return (
-                <li key={item.label}>
-                  <button
-                    onClick={() => handleChange(item.label)}
-                    className={`flex flex-col items-center gap-0.5 rounded-lg p-1 text-[10px] font-medium ${
-                      isActive ? "text-indigo-700" : "text-zinc-500"
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+          {/* Mobile bottom navigation */}
+          <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/60 bg-white/80 px-2 py-2 backdrop-blur-xl dark:border-white/10 dark:bg-black/80 md:hidden">
+            <ul className="flex justify-around">
+              {nav.map((item) => {
+                const isActive = active === item.label;
+                return (
+                  <li key={item.label}>
+                    <button
+                      onClick={() => handleChange(item.label)}
+                      className={`flex flex-col items-center gap-0.5 rounded-lg p-1 text-[10px] font-medium ${
+                        isActive ? "text-indigo-700" : "text-zinc-500"
+                      }`}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>
       </div>
-    </div>
+    </DashboardLangProvider>
   );
 }
 

@@ -4,23 +4,20 @@ import { useEffect, useState, useCallback, createContext, useContext } from "rea
 import { GlassCard } from "./GlassCard";
 import { Field, inputClass, textareaClass } from "./Modal";
 import { cn } from "@/lib/utils";
-import { Save, Eye, EyeOff, ChevronDown, ChevronUp, Languages, LayoutTemplate, Sparkles, Blocks, ListTree } from "lucide-react";
+import { Save, Eye, EyeOff, ChevronDown, ChevronUp, LayoutTemplate, Sparkles, Blocks, ListTree } from "lucide-react";
+import {
+  useDashboardLang,
+  type DashboardLocale,
+  dashboardLocaleNames,
+} from "./lang-context";
 
 // ─── Types ───────────────────────────────────────────────────────
-
-type DashboardLocale = "bg" | "en" | "es" | "it" | "de";
-const dashboardLocales: DashboardLocale[] = ["bg", "en", "es", "it", "de"];
-const dashboardLocaleNames: Record<DashboardLocale, string> = {
-  bg: "БГ",
-  en: "EN",
-  es: "ES",
-  it: "IT",
-  de: "DE",
-};
 
 type Multilingual = Partial<Record<DashboardLocale, string>>;
 
 const LangContext = createContext<DashboardLocale>("bg");
+
+const dashboardLocales: DashboardLocale[] = ["bg", "en", "es", "it", "de"];
 
 type HomepageData = {
   hero: {
@@ -187,8 +184,7 @@ export function WebsiteTab() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lang, setLang] = useState<DashboardLocale>("bg");
-  const [translating, setTranslating] = useState(false);
+  const { lang, registerTranslate } = useDashboardLang();
   const [subTab, setSubTab] = useState<SubTab>("hero");
 
   const fetchHomepage = useCallback(async () => {
@@ -281,7 +277,6 @@ export function WebsiteTab() {
 
   async function translateAll() {
     if (!data) return;
-    setTranslating(true);
     setError(null);
     try {
       if (lang === "bg") return;
@@ -310,10 +305,13 @@ export function WebsiteTab() {
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Translation failed");
-    } finally {
-      setTranslating(false);
     }
   }
+
+  // Register translate function with the shared lang context
+  useEffect(() => {
+    registerTranslate(translateAll);
+  }, [registerTranslate, data, lang]);
 
   if (loading) {
     return (
@@ -350,33 +348,6 @@ export function WebsiteTab() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {/* Language switcher */}
-              <div className="flex flex-wrap items-center rounded-lg border border-stone-200 bg-white/80 p-0.5 dark:border-stone-700 dark:bg-stone-800/50">
-                {dashboardLocales.map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => setLang(l)}
-                    className={cn(
-                      "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
-                      lang === l
-                        ? "bg-amber-600 text-white"
-                        : "text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
-                    )}
-                  >
-                    {dashboardLocaleNames[l]}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                onClick={translateAll}
-                disabled={translating || lang === "bg"}
-                className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-900 dark:bg-amber-900/20 dark:text-amber-300"
-              >
-                <Languages size={14} />
-                {translating ? "Translating…" : `BG → ${dashboardLocaleNames[lang]}`}
-              </button>
-
               {saved && (
                 <span className="text-sm text-green-600 dark:text-green-400">✓ Saved</span>
               )}
