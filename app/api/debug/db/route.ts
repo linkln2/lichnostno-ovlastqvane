@@ -11,11 +11,37 @@ export async function GET() {
 
   try {
     const payload = await getPayloadInstance();
+    const queries: Record<string, unknown> = {};
+
+    const testCollections = [
+      "orders",
+      "subscriptions",
+      "events",
+      "registrations",
+      "products",
+      "blog-posts",
+    ];
+
+    for (const collection of testCollections) {
+      try {
+        const result = await payload.find({
+          collection: collection as any,
+          limit: 1,
+          overrideAccess: true,
+        });
+        queries[collection] = { ok: true, totalDocs: result.totalDocs };
+      } catch (queryErr) {
+        const message = queryErr instanceof Error ? queryErr.message : String(queryErr);
+        queries[collection] = { ok: false, error: message };
+      }
+    }
+
     return Response.json({
       ok: true,
       ...checks,
       payloadVersion: "initialized",
       collections: Object.keys(payload.collections || {}).length,
+      queries,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
