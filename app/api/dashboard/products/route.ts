@@ -1,6 +1,18 @@
 import { requireStaff, fetchCollection, createRecord } from "@/lib/dashboard-api";
 
-// Helper to resolve image URLs from media uploads
+// Helper to resolve media file URLs from uploads
+function resolveMedia(img: any): { id: number; url: string | null } | null {
+  if (!img) return null;
+  if (typeof img === "number") return { id: img, url: null };
+  if (typeof img === "object") {
+    return {
+      id: img.id,
+      url: img.url || img.sizes?.thumbnail?.url || null,
+    };
+  }
+  return null;
+}
+
 function resolveImageUrl(img: any): string | null {
   if (!img) return null;
   if (typeof img === "string") return img;
@@ -33,6 +45,7 @@ export async function GET(request: Request) {
       productType: p.productType,
       tags: p.tags || "",
       images: (p.images || []).map(resolveImageUrl).filter(Boolean),
+      downloadFile: resolveMedia(p.downloadFile),
       inventory: p.inventory,
       lowStockThreshold: p.lowStockThreshold || 5,
       weightGrams: p.weightGrams || 0,
@@ -62,6 +75,8 @@ export async function POST(request: Request) {
       category: body.category || "digital",
       productType: body.productType || "digital",
       tags: body.tags || undefined,
+      images: body.images?.length ? body.images.map((id: string | number) => Number(id) || id) : undefined,
+      downloadFile: body.downloadFile ? (Number(body.downloadFile) || body.downloadFile) : undefined,
       inventory: body.productType === "physical" ? Number(body.inventory) || 0 : undefined,
       lowStockThreshold: body.productType === "physical" ? Number(body.lowStockThreshold) || 5 : undefined,
       weightGrams: body.productType === "physical" && body.weightGrams ? Number(body.weightGrams) : undefined,

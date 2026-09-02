@@ -25,6 +25,8 @@ export type ShopProduct = {
   status: string;
   images: any[];
   image: string | null;
+  description?: any;
+  downloadFile?: { id?: number | string; url?: string } | null;
 };
 
 export type Tier = {
@@ -125,6 +127,10 @@ export async function getProducts(): Promise<ShopProduct[]> {
         status: p.status,
         images: p.images || [],
         image: imageUrl,
+        description: p.description,
+        downloadFile: p.downloadFile
+          ? { id: p.downloadFile.id, url: p.downloadFile.url || null }
+          : null,
       };
     });
   } catch (err) {
@@ -176,6 +182,10 @@ export async function getProductBySlug(slug: string): Promise<ShopProduct | null
       status: p.status,
       images: p.images || [],
       image: imageUrl,
+      description: p.description,
+      downloadFile: p.downloadFile
+        ? { id: p.downloadFile.id, url: p.downloadFile.url || null }
+        : null,
     };
   } catch (err) {
     console.error("getProductBySlug: falling back to static:", err);
@@ -192,6 +202,8 @@ export async function getProductBySlug(slug: string): Promise<ShopProduct | null
       status: "published",
       images: [],
       image: sp.image ?? null,
+      description: null,
+      downloadFile: null,
     };
   }
 }

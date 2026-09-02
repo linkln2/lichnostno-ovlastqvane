@@ -30,6 +30,13 @@ export async function GET(
       (firstImage?.sizes?.thumbnail?.url || firstImage?.url) ??
       staticProduct?.image ??
       null;
+    const downloadFile = p.downloadFile
+      ? {
+          id: p.downloadFile.id,
+          url: p.downloadFile.url || p.downloadFile.sizes?.thumbnail?.url || null,
+          filename: p.downloadFile.filename || p.downloadFile.name || null,
+        }
+      : null;
     return Response.json({
       id: p.id,
       name: p.name,
@@ -41,7 +48,7 @@ export async function GET(
       status: p.status,
       images: p.images || [],
       description: p.description,
-      downloadFile: p.downloadFile,
+      downloadFile,
       image: imageUrl,
     });
   } catch (err) {

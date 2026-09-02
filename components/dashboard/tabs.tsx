@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Pencil, Plus, Trash2, Upload, X, Star, Package } from "lucide-react";
+import { Pencil, Plus, Trash2, Upload, X, Star, Package, FileText } from "lucide-react";
 import { GlassCard } from "./GlassCard";
 
 // Facebook icon (lucide doesn't have a brand icon)
@@ -200,8 +200,11 @@ export function ProductsTab() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [downloadFile, setDownloadFile] = useState<{ id: number; url: string } | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     name: "",
     slug: "",
@@ -232,6 +235,7 @@ export function ProductsTab() {
       status: "draft", featured: false, stripePriceId: "", seoTitle: "", seoDescription: "",
     });
     setImageUrls([]);
+    setDownloadFile(null);
     setFormError(null);
     setModalOpen(true);
   }
@@ -258,7 +262,8 @@ export function ProductsTab() {
       seoTitle: p.seoTitle || "",
       seoDescription: p.seoDescription || "",
     });
-    setImageUrls(p.images || []);
+    setImageUrls((p.images || []).map((img: any) => (typeof img === "string" ? img : img?.url)).filter(Boolean));
+    setDownloadFile(p.downloadFile || null);
     setFormError(null);
     setModalOpen(true);
   }
@@ -294,12 +299,41 @@ export function ProductsTab() {
     setImageUrls((prev) => prev.filter((_, i) => i !== idx));
   }
 
+  async function handlePdfUpload(file: File | null) {
+    if (!file) return;
+    setUploadingPdf(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("alt", file.name);
+      const res = await fetch("/api/dashboard/upload", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("PDF upload failed");
+      const data = await res.json();
+      if (data.id) {
+        setDownloadFile({ id: data.id, url: data.url || data.id });
+      }
+    } catch (err) {
+      setFormError(`PDF upload failed: ${err}`);
+    } finally {
+      setUploadingPdf(false);
+      if (pdfInputRef.current) pdfInputRef.current.value = "";
+    }
+  }
+
+  function removeDownloadFile() {
+    setDownloadFile(null);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setFormError(null);
     try {
-      const payload = { ...form, images: imageUrls };
+      const payload = { ...form, images: imageUrls, downloadFile: downloadFile?.id || null };
       if (editing) {
         await apiCall(`/api/dashboard/products/${editing.id}`, "PATCH", payload);
       } else {
@@ -477,6 +511,57 @@ export function ProductsTab() {
               <Field label="Inventory"><input type="number" className={inputClass} value={form.inventory} onChange={(e) => setForm({ ...form, inventory: e.target.value })} /></Field>
               <Field label="Low stock alert"><input type="number" className={inputClass} value={form.lowStockThreshold} onChange={(e) => setForm({ ...form, lowStockThreshold: e.target.value })} /></Field>
               <Field label="Weight (g)"><input type="number" className={inputClass} value={form.weightGrams} onChange={(e) => setForm({ ...form, weightGrams: e.target.value })} placeholder="0" /></Field>
+            </div>
+          )}
+
+          {/* Digital-only fields */}
+          {form.productType === "digital" && (
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-zinc-500">Download file (PDF / ebook)</label>
+              {downloadFile?.url ? (
+                <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white p-3 dark:border-stone-700 dark:bg-stone-800">
+                  <FileText className="h-8 w-8 text-amber-600" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+                      {downloadFile.url.split("/").pop()}
+                    </p>
+                    <p className="text-xs text-zinc-500">Uploaded file</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeDownloadFile}
+                    className="rounded-full p-1 text-rose-500 hover:bg-rose-50"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => pdfInputRef.current?.click()}
+                  disabled={uploadingPdf}
+                  className="flex h-24 w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-stone-300 text-stone-400 transition-colors hover:border-amber-400 hover:text-amber-600 disabled:opacity-50"
+                >
+                  {uploadingPdf ? (
+                    <span className="text-xs">Uploading…</span>
+                  ) : (
+                    <>
+                      <Upload className="h-5 w-5" />
+                      <span className="text-xs">Upload PDF or ebook</span>
+                    </>
+                  )}
+                </button>
+              )}
+              <input
+                ref={pdfInputRef}
+                type="file"
+                accept=".pdf,.epub,.mobi,application/pdf"
+                className="hidden"
+                onChange={(e) => handlePdfUpload(e.target.files?.[0] || null)}
+              />
+              <p className="mt-1 text-xs text-zinc-500">
+                Set price to 0 to offer it as a freebie. Paid digital products also need a Stripe Price ID below.
+              </p>
             </div>
           )}
 

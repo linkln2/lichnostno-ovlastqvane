@@ -23,6 +23,8 @@ export async function PATCH(
     if (body.category !== undefined) data.category = body.category;
     if (body.productType !== undefined) data.productType = body.productType;
     if (body.tags !== undefined) data.tags = body.tags || null;
+    if (body.images !== undefined) data.images = body.images?.length ? body.images.map((id: string | number) => Number(id) || id) : [];
+    if (body.downloadFile !== undefined) data.downloadFile = body.downloadFile ? (Number(body.downloadFile) || body.downloadFile) : null;
     if (body.inventory !== undefined) data.inventory = Number(body.inventory) || 0;
     if (body.lowStockThreshold !== undefined) data.lowStockThreshold = Number(body.lowStockThreshold) || 5;
     if (body.weightGrams !== undefined) data.weightGrams = body.weightGrams ? Number(body.weightGrams) : null;

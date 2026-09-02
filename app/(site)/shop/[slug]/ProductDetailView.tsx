@@ -16,6 +16,7 @@ type Product = {
   images: any[];
   image?: string;
   description: any;
+  downloadFile?: { id: number | string; url: string | null; filename?: string | null } | null;
 };
 
 export default function ProductDetailPage() {
