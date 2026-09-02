@@ -54,8 +54,24 @@ All UI must be designed for mobile first and then enhanced for larger screens.
 
 ## Content
 
-- Bilingual BG/EN via `lib/i18n.ts` (`tr()` helper) and `lib/content.ts` (structured content)
+- Public site is bilingual BG/EN via `lib/i18n.ts` (`tr()` helper) and `lib/content.ts` (structured content)
 - Payload CMS collections are localized (bg default, en fallback)
 - Static content in `lib/content.ts` is being migrated to Payload
+- Dashboard Website tab supports **5 languages** (BG, EN, ES, IT, DE) with DeepL auto-translation via `/api/translate` (requires `DEEPL_API_KEY`); BG is the source language, other locales are translated from it
+
+## Dashboard
+
+- Custom dashboard at `/dashboard` (not Payload admin) — `components/dashboard/`
+- Tabs: Overview, Events, Blog, Products, Orders, Registrations, Subscribers, Analytics, Website, Settings
+- Active tab syncs with URL hash (e.g. `/dashboard#website`)
+- **Website tab** (`WebsiteTab.tsx`) uses 3 sub-tabs: Hero / Story / Sections — replaces the old sidebar nav + long scroll. Fields use 2-column grids on large screens. Language switcher + DeepL translate button in the sticky top bar
+- **Products tab** supports digital products: `downloadFile` field (PDF upload via `/api/dashboard/upload`), images, and physical-product fields (inventory, weight) conditionally shown based on `productType`
+
+## Digital Products
+
+- Products have a `downloadFile` field (Payload media reference) for digital goods (PDFs, freebies)
+- Resolved in `/api/products/[slug]` and `/lib/api.ts` (`getProducts`, `getProductBySlug`) as `{ id, url, filename }`
+- Dashboard product form (`tabs.tsx` ProductsTab) has a PDF upload control separate from image uploads
+- Public product detail (`ProductDetailView.tsx`) receives `downloadFile` on the product type
 
 <!-- END:project-conventions -->

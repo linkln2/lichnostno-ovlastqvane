@@ -34,7 +34,7 @@ This web app serves as the public face of **Личностно овластяв�
 | **Event registration** | Form-based registration (being migrated to Payload/Postgres) |
 | **Bilingual content** | Full Bulgarian + English support with a language toggle |
 | **Newsletter & contact** | Lead-capture forms for newsletter sign-ups and general inquiries |
-| **Admin dashboard** | Coaching Studio dashboard at `/dashboard` — glassmorphism UI with revenue trend, orders, subscriber tiers, and upcoming events (mock data, ready to wire to Payload) |
+| **Admin dashboard** | Coaching Studio dashboard at `/dashboard` — glassmorphism UI with revenue trend, orders, subscriber tiers, and upcoming events. Website tab supports 5-language editing (BG/EN/ES/IT/DE) with DeepL auto-translation |
 | **CMS** | Payload CMS at `/admin` — manages blog, events, products, media, and staff auth (Postgres-backed) |
 
 The site is content-driven and designed to be easy to maintain, with placeholder content based on publicly available information from the initiative's Facebook presence.
@@ -141,7 +141,9 @@ npm run start
 
 ## Internationalization (i18n)
 
-The app is bilingual — **Bulgarian (bg)** is the default locale, with **English (en)** available via a toggle. All UI strings live in a single dictionary at [`lib/i18n.ts`](./lib/i18n.ts).
+The **public site** is bilingual — **Bulgarian (bg)** is the default locale, with **English (en)** available via a toggle. All UI strings live in a single dictionary at [`lib/i18n.ts`](./lib/i18n.ts).
+
+The **dashboard Website tab** supports **5 languages** (BG, EN, ES, IT, DE) with DeepL auto-translation from Bulgarian (requires `DEEPL_API_KEY`).
 
 See [`docs/I18N.md`](./docs/I18N.md) for the full guide on adding and using translations.
 
