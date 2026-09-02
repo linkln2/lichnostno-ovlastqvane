@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { GlassCard } from "./GlassCard";
 import { Field, inputClass, textareaClass, FormActions } from "./Modal";
 import { cn } from "@/lib/utils";
-import { Save, RotateCcw, Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { Save, RotateCcw, Eye, EyeOff, ChevronDown, ChevronUp, Languages } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -123,6 +123,29 @@ function BiField({
   onChange: (val: Bi) => void;
   type?: "text" | "textarea";
 }) {
+  const [translating, setTranslating] = useState(false);
+
+  async function translate() {
+    const source = value.bg;
+    if (!source) return;
+    setTranslating(true);
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ text: source, sourceLang: "BG", targetLang: "EN" }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Translation failed");
+      onChange({ ...value, en: json.translated });
+    } catch (err) {
+      console.error("DeepL translate failed:", err);
+    } finally {
+      setTranslating(false);
+    }
+  }
+
   return (
     <div className="space-y-2">
       <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
@@ -148,7 +171,18 @@ function BiField({
           )}
         </div>
         <div>
-          <label className="mb-1 block text-xs text-stone-400">EN</label>
+          <div className="mb-1 flex items-center justify-between">
+            <label className="block text-xs text-stone-400">EN</label>
+            <button
+              type="button"
+              onClick={translate}
+              disabled={translating || !value.bg}
+              className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 disabled:opacity-50 dark:text-amber-400 dark:hover:text-amber-300"
+            >
+              <Languages size={12} />
+              {translating ? "…" : "BG → EN"}
+            </button>
+          </div>
           {type === "textarea" ? (
             <textarea
               value={value.en || ""}
