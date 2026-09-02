@@ -32,7 +32,9 @@ export async function GET() {
         queries[collection] = { ok: true, totalDocs: result.totalDocs };
       } catch (queryErr) {
         const message = queryErr instanceof Error ? queryErr.message : String(queryErr);
-        queries[collection] = { ok: false, error: message };
+        const cause = (queryErr as any)?.cause;
+        const pgError = cause instanceof Error ? cause.message : cause ? String(cause) : undefined;
+        queries[collection] = { ok: false, error: message, pgError };
       }
     }
 
