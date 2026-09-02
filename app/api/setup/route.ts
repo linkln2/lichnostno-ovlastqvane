@@ -5,7 +5,9 @@ import { products, membershipTiers } from "@/lib/content";
 // One-time setup endpoint: creates/syncs the whitelisted staff users.
 // Requires ?key=SETUP_KEY env var to prevent unauthorized password resets.
 // Delete this file after initial setup.
-export async function POST(request: Request) {
+export const dynamic = "force-dynamic";
+
+async function setup(request: Request) {
   const url = new URL(request.url);
   const key = url.searchParams.get("key");
   const expectedKey = process.env.SETUP_KEY;
@@ -123,4 +125,12 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+}
+
+export async function GET(request: Request) {
+  return setup(request);
+}
+
+export async function POST(request: Request) {
+  return setup(request);
 }
