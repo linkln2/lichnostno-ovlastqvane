@@ -150,7 +150,11 @@ export async function GET(request: Request) {
       prevActiveSubscribers: Math.max(0, displaySubscribers - 1247),
     });
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     console.error("Stats error:", err);
-    return Response.json({ error: "Failed to load stats" }, { status: 500 });
+    return Response.json(
+      { error: "Failed to load stats", details: message },
+      { status: 500 }
+    );
   }
 }

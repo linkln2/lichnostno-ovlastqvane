@@ -128,11 +128,14 @@ function OverviewTab() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/dashboard/stats")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.error) setError(d.error);
-        else setStats(d);
+    fetch("/api/dashboard/stats", { credentials: "include" })
+      .then(async (r) => {
+        const data = await r.json();
+        if (data.error) {
+          setError(data.details ? `${data.error}: ${data.details}` : data.error);
+        } else {
+          setStats(data);
+        }
       })
       .catch(() => setError("Failed to load"))
       .finally(() => setLoading(false));
