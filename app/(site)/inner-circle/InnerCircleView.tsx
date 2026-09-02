@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
+import { getLocalized } from "@/lib/i18n";
 import { StarfieldBackground } from "@/components/StarfieldBackground";
 
 type Entitlements = {
@@ -192,7 +193,7 @@ export default function InnerCirclePage() {
                       <iframe
                         className="h-full w-full"
                         src={`https://www.youtube.com/embed/${video.youtubeId}?rel=0`}
-                        title={video.title[locale]}
+                        title={getLocalized(video.title, locale)}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                       />
@@ -226,10 +227,10 @@ export default function InnerCirclePage() {
                       <time className="text-xs text-stone-400">{video.date}</time>
                     </div>
                     <h3 className="mt-3 text-lg font-bold text-stone-900">
-                      {video.title[locale]}
+                      {getLocalized(video.title, locale)}
                     </h3>
                     <p className="mt-1 text-sm text-stone-600">
-                      {video.description[locale]}
+                      {getLocalized(video.description, locale)}
                     </p>
                   </div>
                 </div>

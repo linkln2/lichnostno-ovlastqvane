@@ -41,7 +41,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggle = useCallback(() => {
-    setLocale(locale === "bg" ? "en" : "bg");
+    const currentIndex = locales.indexOf(locale);
+    const nextIndex = (currentIndex + 1) % locales.length;
+    setLocale(locales[nextIndex]);
   }, [locale, setLocale]);
 
   return (

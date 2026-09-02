@@ -469,6 +469,9 @@ export function getPostBySlug(slug: string): BlogPost | undefined {
 const intlLocales: Record<Locale, string> = {
   bg: "bg-BG",
   en: "en-GB",
+  es: "es-ES",
+  it: "it-IT",
+  de: "de-DE",
 };
 
 export function formatDate(iso: string, locale: Locale): string {

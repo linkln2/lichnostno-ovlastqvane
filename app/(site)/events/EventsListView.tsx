@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
-import { tr } from "@/lib/i18n";
+import { tr, getLocalized } from "@/lib/i18n";
 import { formatDateRange, type EventItem } from "@/lib/content";
 
 export default function EventsPage({ events }: { events: EventItem[] }) {
@@ -49,14 +49,14 @@ export default function EventsPage({ events }: { events: EventItem[] }) {
                   </span>
                 </div>
                 <h3 className="mt-3 text-xl font-bold text-stone-900 group-hover:text-amber-800">
-                  {event.title[locale]}
+                  {getLocalized(event.title, locale)}
                 </h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">
-                  {event.description[locale]}
+                  {getLocalized(event.description, locale)}
                 </p>
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm">
-                  <span className="text-stone-500">📍 {event.location[locale]}</span>
-                  <span className="font-semibold text-amber-700">{event.price[locale]}</span>
+                  <span className="text-stone-500">📍 {getLocalized(event.location, locale)}</span>
+                  <span className="font-semibold text-amber-700">{getLocalized(event.price, locale)}</span>
                 </div>
                 <span className="mt-4 text-sm font-semibold text-amber-700 group-hover:text-amber-800">
                   {tr("btn_read_more", locale)} →
@@ -89,9 +89,9 @@ export default function EventsPage({ events }: { events: EventItem[] }) {
                     </span>
                   </div>
                   <h3 className="mt-3 text-lg font-bold text-stone-700">
-                    {event.title[locale]}
+                    {getLocalized(event.title, locale)}
                   </h3>
-                  <p className="mt-1 text-sm text-stone-500">📍 {event.location[locale]}</p>
+                  <p className="mt-1 text-sm text-stone-500">📍 {getLocalized(event.location, locale)}</p>
                 </div>
               ))}
             </div>

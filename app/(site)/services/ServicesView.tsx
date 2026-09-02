@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
-import { tr } from "@/lib/i18n";
+import { tr, getLocalized, getLocalizedList } from "@/lib/i18n";
 import { services } from "@/lib/content";
 
 export default function ServicesPage() {
@@ -34,33 +34,33 @@ export default function ServicesPage() {
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">{service.icon}</span>
                   <h2 className="text-2xl font-bold text-stone-900">
-                    {service.title[locale]}
+                    {getLocalized(service.title, locale)}
                   </h2>
                 </div>
                 <p className="mt-2 text-sm font-medium text-amber-700">
-                  {service.who[locale]}
+                  {getLocalized(service.who, locale)}
                 </p>
                 <p className="mt-4 leading-relaxed text-stone-600">
-                  {service.desc[locale]}
+                  {getLocalized(service.desc, locale)}
                 </p>
                 <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-stone-500">
                   <span>
                     <strong className="text-stone-700">
                       {locale === "bg" ? "Формат:" : "Format:"}
                     </strong>{" "}
-                    {service.format[locale]}
+                    {getLocalized(service.format, locale)}
                   </span>
                   <span>
                     <strong className="text-stone-700">
                       {locale === "bg" ? "Продължителност:" : "Duration:"}
                     </strong>{" "}
-                    {service.duration[locale]}
+                    {getLocalized(service.duration, locale)}
                   </span>
                   <span>
                     <strong className="text-stone-700">
                       {tr("price_label", locale)}:
                     </strong>{" "}
-                    {service.price[locale]}
+                    {getLocalized(service.price, locale)}
                   </span>
                 </div>
               </div>
@@ -69,7 +69,7 @@ export default function ServicesPage() {
                   {locale === "bg" ? "Какво ще получиш" : "What you'll get"}
                 </h3>
                 <ul className="mt-4 space-y-2">
-                  {service.outcomes[locale].map((o, i) => (
+                  {getLocalizedList(service.outcomes, locale).map((o, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
                       <span className="mt-0.5 text-amber-600">✦</span>
                       {o}

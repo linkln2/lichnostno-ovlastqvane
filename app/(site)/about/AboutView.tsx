@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "@/components/LocaleProvider";
-import { tr } from "@/lib/i18n";
+import { tr, getLocalized, getLocalizedList } from "@/lib/i18n";
 import { mission, values, team, localized } from "@/lib/content";
 import { ParticleBurst } from "@/components/ParticleBurst";
 import { SolarSystemOrbits } from "@/components/SolarSystemOrbits";
@@ -45,7 +45,7 @@ export default function AboutPage() {
               {tr("section_mission_title", locale)}
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-stone-600">
-              {mission[locale]}
+              {getLocalized(mission, locale)}
             </p>
           </div>
 
@@ -56,8 +56,8 @@ export default function AboutPage() {
               {values.slice(0, 2).map((v, i) => (
                 <ValueCard
                   key={v.title.en}
-                  title={v.title[locale]}
-                  desc={v.desc[locale]}
+                  title={getLocalized(v.title, locale)}
+                  desc={getLocalized(v.desc, locale)}
                   icon={valueIcons[i]}
                   align="right"
                 />
@@ -84,8 +84,8 @@ export default function AboutPage() {
               {values.slice(2, 4).map((v, i) => (
                 <ValueCard
                   key={v.title.en}
-                  title={v.title[locale]}
-                  desc={v.desc[locale]}
+                  title={getLocalized(v.title, locale)}
+                  desc={getLocalized(v.desc, locale)}
                   icon={valueIcons[i + 2]}
                   align="left"
                 />
@@ -101,8 +101,8 @@ export default function AboutPage() {
                 className="rounded-2xl border border-amber-200/50 bg-white/70 p-5 backdrop-blur-sm"
               >
                 <div className="mb-2 text-2xl text-amber-600">{valueIcons[i]}</div>
-                <h3 className="font-semibold text-amber-800">{v.title[locale]}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+                <h3 className="font-semibold text-amber-800">{getLocalized(v.title, locale)}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-stone-600">{getLocalized(v.desc, locale)}</p>
               </div>
             ))}
           </div>
@@ -171,13 +171,13 @@ export default function AboutPage() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-stone-900">{member.name}</h3>
                   <p className="mt-1 text-sm font-medium text-amber-700">
-                    {member.role[locale]}
+                    {getLocalized(member.role, locale)}
                   </p>
                   <p className="mt-4 leading-relaxed text-stone-600">
-                    {member.bio[locale]}
+                    {getLocalized(member.bio, locale)}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {member.credentials[locale].map((c) => (
+                    {getLocalizedList(member.credentials, locale).map((c) => (
                       <span
                         key={c}
                         className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800"

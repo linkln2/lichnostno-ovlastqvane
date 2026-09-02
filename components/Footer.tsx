@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocale } from "./LocaleProvider";
-import { tr } from "@/lib/i18n";
+import { tr, getLocalized } from "@/lib/i18n";
 import { site } from "@/lib/content";
 
 type FooterLink = {
@@ -116,7 +116,7 @@ export default function Footer() {
             <a href={`tel:${site.phone.replace(/\s/g, "")}`} className="transition-colors hover:text-amber-700">
               {site.phoneDisplay}
             </a>
-            <span>{site.city[locale]}</span>
+            <span>{getLocalized(site.city, locale)}</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-5">

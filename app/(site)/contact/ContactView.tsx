@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "@/components/LocaleProvider";
-import { tr } from "@/lib/i18n";
+import { tr, getLocalized } from "@/lib/i18n";
 import { site } from "@/lib/content";
 
 export default function ContactPage() {
@@ -77,7 +77,7 @@ export default function ContactPage() {
                 <span className="text-xl">📍</span>
                 <div>
                   <div className="text-sm text-stone-500">{tr("location_label", locale)}</div>
-                  <div className="font-medium text-stone-900">{site.city[locale]}</div>
+                  <div className="font-medium text-stone-900">{getLocalized(site.city, locale)}</div>
                 </div>
               </li>
               <li className="flex items-start gap-3">

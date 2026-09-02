@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "@/components/LocaleProvider";
-import { tr } from "@/lib/i18n";
+import { tr, getLocalized } from "@/lib/i18n";
 import { testimonials } from "@/lib/content";
 
 export default function TestimonialsPage() {
@@ -31,11 +31,11 @@ export default function TestimonialsPage() {
             >
               <div className="text-3xl text-amber-300">&ldquo;</div>
               <blockquote className="flex-1 text-sm leading-relaxed text-stone-700">
-                {t.text[locale]}
+                {getLocalized(t.text, locale)}
               </blockquote>
               <figcaption className="mt-4 border-t border-stone-100 pt-4">
                 <div className="font-semibold text-stone-900">{t.name}</div>
-                <div className="text-xs text-stone-500">{t.role[locale]}</div>
+                <div className="text-xs text-stone-500">{getLocalized(t.role, locale)}</div>
               </figcaption>
             </figure>
           ))}

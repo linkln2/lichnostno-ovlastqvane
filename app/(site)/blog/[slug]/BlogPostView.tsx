@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useParams, notFound } from "next/navigation";
 import { useLocale } from "@/components/LocaleProvider";
-import { tr } from "@/lib/i18n";
+import { tr, getLocalized } from "@/lib/i18n";
 import { getPostBySlug, formatDate, blogPosts } from "@/lib/content";
 
 export default function BlogPostPage() {
@@ -24,7 +24,7 @@ export default function BlogPostPage() {
 
   if (!post) return notFound();
 
-  const paragraphs = post.content[locale].split("\n\n");
+  const paragraphs = getLocalized(post.content, locale).split("\n\n");
   const related = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 2);
 
   return (
@@ -34,7 +34,7 @@ export default function BlogPostPage() {
         <div className="relative w-full overflow-hidden">
           <img
             src={post.cover}
-            alt={post.title[locale]}
+            alt={getLocalized(post.title, locale)}
             className="max-h-[600px] w-full object-contain"
           />
         </div>
@@ -46,12 +46,12 @@ export default function BlogPostPage() {
             ← {tr("nav_blog", locale)}
           </Link>
           <h1 className="mt-4 text-3xl font-bold leading-tight text-stone-900 sm:text-4xl">
-            {post.title[locale]}
+            {getLocalized(post.title, locale)}
           </h1>
           <div className="mt-4 flex items-center gap-3 text-sm text-stone-400">
             <time>{formatDate(post.date, locale)}</time>
             <span>·</span>
-            <span>{post.readTime[locale]}</span>
+            <span>{getLocalized(post.readTime, locale)}</span>
           </div>
         </div>
       </section>
@@ -77,9 +77,9 @@ export default function BlogPostPage() {
                   className="group rounded-xl border border-stone-200 bg-white p-4 transition-colors hover:border-amber-300"
                 >
                   <h3 className="font-semibold text-stone-900 group-hover:text-amber-800">
-                    {p.title[locale]}
+                    {getLocalized(p.title, locale)}
                   </h3>
-                  <p className="mt-1 text-sm text-stone-500">{p.excerpt[locale]}</p>
+                  <p className="mt-1 text-sm text-stone-500">{getLocalized(p.excerpt, locale)}</p>
                 </Link>
               ))}
             </div>

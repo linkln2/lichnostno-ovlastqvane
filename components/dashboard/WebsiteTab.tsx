@@ -5,7 +5,6 @@ import { GlassCard } from "./GlassCard";
 import { Field, inputClass, textareaClass, FormActions } from "./Modal";
 import { cn } from "@/lib/utils";
 import { Save, RotateCcw, Eye, EyeOff, ChevronDown, ChevronUp, Languages } from "lucide-react";
-import { localeNames as publicLocaleNames } from "@/lib/i18n";
 
 // ─── Types ───────────────────────────────────────────────────────
 

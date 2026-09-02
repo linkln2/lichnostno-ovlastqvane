@@ -1,18 +1,21 @@
-export type Locale = "bg" | "en";
+export type Locale = "bg" | "en" | "es" | "it" | "de";
 
-export const locales: Locale[] = ["bg", "en"];
+export const locales: Locale[] = ["bg", "en", "es", "it", "de"];
 export const defaultLocale: Locale = "bg";
 
 export const localeNames: Record<Locale, string> = {
   bg: "БГ",
   en: "EN",
+  es: "ES",
+  it: "IT",
+  de: "DE",
 };
 
 export type Multilingual = Partial<Record<Locale, string>>;
 export type MultilingualList = Partial<Record<Locale, string[]>>;
 
 // Centralized translations for UI strings (nav, buttons, labels)
-type Dict = Record<string, Record<Locale, string>>;
+type Dict = Record<string, Partial<Record<Locale, string>>>;
 
 export const t: Dict = {
   // Nav

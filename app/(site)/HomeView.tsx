@@ -485,7 +485,7 @@ export default function HomePage({
                     : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                 }`}
               >
-                {cat.label[locale]}
+                {getLocalized(cat.label, locale)}
               </button>
             ))}
           </div>
@@ -518,7 +518,7 @@ export default function HomePage({
                     {p.image ? (
                       <img
                         src={p.image}
-                        alt={p.name[locale]}
+                        alt={getLocalized(p.name, locale)}
                         className="h-full w-full object-cover"
                         loading="lazy"
                       />
@@ -530,13 +530,13 @@ export default function HomePage({
                       </div>
                     )}
                     <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-stone-700">
-                      {productCategories.find((c) => c.key === p.category)?.label[locale]}
+                      {getLocalized(productCategories.find((c) => c.key === p.category)?.label, locale)}
                     </span>
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-stone-900">{p.name[locale]}</h3>
+                    <h3 className="font-semibold text-stone-900">{getLocalized(p.name, locale)}</h3>
                     <p className="mt-1 line-clamp-2 text-sm text-stone-500">
-                      {p.description[locale]}
+                      {getLocalized(p.description, locale)}
                     </p>
                     <div className="mt-4 flex items-center justify-between">
                       <span className="font-bold text-amber-800">
@@ -645,8 +645,8 @@ export default function HomePage({
                 <div className={`mb-3 flex text-amber-700 ${i < 2 ? "justify-end" : "justify-start"}`}>
                   {valueIcons[i]}
                 </div>
-                <h4 className="text-lg font-semibold text-amber-800">{v.title[locale]}</h4>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+                <h4 className="text-lg font-semibold text-amber-800">{getLocalized(v.title, locale)}</h4>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">{getLocalized(v.desc, locale)}</p>
               </div>
             ))}
           </div>
@@ -721,11 +721,11 @@ export default function HomePage({
                 className="rounded-2xl border border-stone-200 bg-stone-50 p-6"
               >
                 <blockquote className="text-sm leading-relaxed text-stone-700">
-                  &ldquo;{t.text[locale]}&rdquo;
+                  &ldquo;{getLocalized(t.text, locale)}&rdquo;
                 </blockquote>
                 <figcaption className="mt-4">
                   <div className="font-semibold text-stone-900">{t.name}</div>
-                  <div className="text-xs text-stone-500">{t.role[locale]}</div>
+                  <div className="text-xs text-stone-500">{getLocalized(t.role, locale)}</div>
                 </figcaption>
               </figure>
             ))}
@@ -775,13 +775,13 @@ export default function HomePage({
                 <div className="flex items-center gap-4">
                   <img
                     src={tier.icon}
-                    alt={tier.name[locale]}
+                    alt={getLocalized(tier.name, locale)}
                     className="h-16 w-16 shrink-0 object-contain"
                     loading="lazy"
                   />
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg font-bold text-stone-900">
-                      {tier.name[locale]}
+                      {getLocalized(tier.name, locale)}
                     </h3>
                     <div className="mt-1 flex items-baseline gap-1">
                       <span className="text-3xl font-bold text-stone-900">
@@ -813,7 +813,7 @@ export default function HomePage({
                           strokeLinejoin="round"
                         />
                       </svg>
-                      {perk[locale]}
+                      {getLocalized(perk, locale)}
                     </li>
                   ))}
                 </ul>

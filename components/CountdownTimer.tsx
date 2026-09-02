@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "./LocaleProvider";
-import { tr } from "@/lib/i18n";
+import { tr, type Locale } from "@/lib/i18n";
 import { launchDate } from "@/lib/content";
 
 function calculateTimeLeft(target: string) {
@@ -23,9 +23,19 @@ function pad(n: number) {
   return n.toString().padStart(2, "0");
 }
 
-function formatLaunchDate(target: string, locale: "bg" | "en") {
+function formatLaunchDate(target: string, locale: Locale) {
   const d = new Date(target);
-  return d.toLocaleDateString(locale === "bg" ? "bg-BG" : "en-GB", {
+  const loc =
+    locale === "bg"
+      ? "bg-BG"
+      : locale === "es"
+        ? "es-ES"
+        : locale === "it"
+          ? "it-IT"
+          : locale === "de"
+            ? "de-DE"
+            : "en-GB";
+  return d.toLocaleDateString(loc, {
     day: "numeric",
     month: "long",
     year: "numeric",

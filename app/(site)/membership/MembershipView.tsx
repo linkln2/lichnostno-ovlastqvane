@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "@/components/LocaleProvider";
+import { getLocalized } from "@/lib/i18n";
 import { membershipTiers, site } from "@/lib/content";
 import type { Tier } from "@/lib/api";
 
@@ -225,9 +226,9 @@ export default function MembershipPage({ tiers }: { tiers: Tier[] }) {
             {tiers.map((tier, idx) => {
               const meta = staticByPrice[tier.priceCents];
               const isPopular = meta?.mostPopular ?? idx === 1;
-              const displayName = meta ? meta.name[locale] : tier.name;
+              const displayName = meta ? getLocalized(meta.name, locale) : tier.name;
               const icon = meta?.icon ?? tierIconMap[tier.priceCents];
-              const perks = meta ? meta.perks.map((p) => p[locale]) : tier.perks;
+              const perks = meta ? meta.perks.map((p) => getLocalized(p, locale)) : tier.perks;
               return (
                 <div
                   key={tier.id}

@@ -3,6 +3,7 @@
 import { useParams, notFound } from "next/navigation";
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
+import { getLocalized } from "@/lib/i18n";
 import { legalPages } from "@/lib/legal";
 
 
@@ -19,7 +20,7 @@ export default function LegalPage() {
       <section className="bg-gradient-to-b from-amber-50 to-stone-50 py-12 sm:py-16">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
           <h1 className="text-3xl font-bold text-stone-900 sm:text-4xl">
-            {content.title[locale]}
+            {getLocalized(content.title, locale)}
           </h1>
         </div>
       </section>
@@ -30,10 +31,10 @@ export default function LegalPage() {
           {content.sections.map((section, i) => (
             <div key={i}>
               <h2 className="text-lg font-bold text-stone-900">
-                {section.heading[locale]}
+                {getLocalized(section.heading, locale)}
               </h2>
               <p className="mt-2 leading-relaxed text-stone-600">
-                {section.body[locale]}
+                {getLocalized(section.body, locale)}
               </p>
             </div>
           ))}
