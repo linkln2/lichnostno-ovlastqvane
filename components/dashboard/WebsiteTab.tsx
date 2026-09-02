@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, createContext, useContext } from "react";
 import { GlassCard } from "./GlassCard";
 import { Field, inputClass, textareaClass, FormActions } from "./Modal";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,8 @@ import { Save, RotateCcw, Eye, EyeOff, ChevronDown, ChevronUp, Languages } from 
 // ─── Types ───────────────────────────────────────────────────────
 
 type Bi = { bg?: string; en?: string };
+
+const LangContext = createContext<"bg" | "en">("bg");
 
 type HomepageData = {
   hero: {
@@ -123,83 +125,33 @@ function BiField({
   onChange: (val: Bi) => void;
   type?: "text" | "textarea";
 }) {
-  const [translating, setTranslating] = useState(false);
-
-  async function translate() {
-    const source = value.bg;
-    if (!source) return;
-    setTranslating(true);
-    try {
-      const res = await fetch("/api/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ text: source, sourceLang: "BG", targetLang: "EN" }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Translation failed");
-      onChange({ ...value, en: json.translated });
-    } catch (err) {
-      console.error("DeepL translate failed:", err);
-    } finally {
-      setTranslating(false);
-    }
-  }
+  const lang = useContext(LangContext);
 
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-        {label}
+      <label className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <span>{label}</span>
+        <span className="rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+          {lang.toUpperCase()}
+        </span>
       </label>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs text-stone-400">BG</label>
-          {type === "textarea" ? (
-            <textarea
-              value={value.bg || ""}
-              onChange={(e) => onChange({ ...value, bg: e.target.value })}
-              className={cn(textareaClass, "min-h-[80px]")}
-              rows={3}
-            />
-          ) : (
-            <input
-              type="text"
-              value={value.bg || ""}
-              onChange={(e) => onChange({ ...value, bg: e.target.value })}
-              className={inputClass}
-            />
-          )}
-        </div>
-        <div>
-          <div className="mb-1 flex items-center justify-between">
-            <label className="block text-xs text-stone-400">EN</label>
-            <button
-              type="button"
-              onClick={translate}
-              disabled={translating || !value.bg}
-              className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 disabled:opacity-50 dark:text-amber-400 dark:hover:text-amber-300"
-            >
-              <Languages size={12} />
-              {translating ? "…" : "BG → EN"}
-            </button>
-          </div>
-          {type === "textarea" ? (
-            <textarea
-              value={value.en || ""}
-              onChange={(e) => onChange({ ...value, en: e.target.value })}
-              className={cn(textareaClass, "min-h-[80px]")}
-              rows={3}
-            />
-          ) : (
-            <input
-              type="text"
-              value={value.en || ""}
-              onChange={(e) => onChange({ ...value, en: e.target.value })}
-              className={inputClass}
-            />
-          )}
-        </div>
-      </div>
+      {type === "textarea" ? (
+        <textarea
+          value={value[lang] || ""}
+          onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
+          className={cn(textareaClass, "min-h-[80px]")}
+          rows={3}
+          placeholder={lang === "bg" ? "Български" : "English"}
+        />
+      ) : (
+        <input
+          type="text"
+          value={value[lang] || ""}
+          onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
+          className={inputClass}
+          placeholder={lang === "bg" ? "Български" : "English"}
+        />
+      )}
     </div>
   );
 }
@@ -212,6 +164,8 @@ export function WebsiteTab() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lang, setLang] = useState<"bg" | "en">("bg");
+  const [translating, setTranslating] = useState(false);
 
   const fetchHomepage = useCallback(async () => {
     try {
@@ -282,6 +236,65 @@ export function WebsiteTab() {
     setData((prev) => prev ? { ...prev, [key]: { ...prev[key], ...patch } } : prev);
   }
 
+  function isBi(value: unknown): value is Bi {
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      "bg" in value &&
+      "en" in value &&
+      typeof (value as Bi).bg === "string"
+    );
+  }
+
+  function collectBiLeaves(obj: unknown, leaves: Bi[] = []): Bi[] {
+    if (isBi(obj)) {
+      leaves.push(obj);
+      return leaves;
+    }
+    if (Array.isArray(obj)) {
+      for (const item of obj) collectBiLeaves(item, leaves);
+    } else if (obj && typeof obj === "object") {
+      for (const key of Object.keys(obj as object)) {
+        collectBiLeaves((obj as Record<string, unknown>)[key], leaves);
+      }
+    }
+    return leaves;
+  }
+
+  async function translateAll() {
+    if (!data) return;
+    setTranslating(true);
+    setError(null);
+    try {
+      const leaves = collectBiLeaves(data);
+      const toTranslate = leaves.filter((l) => l.bg && l.bg.trim() !== "");
+      if (toTranslate.length === 0) return;
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          texts: toTranslate.map((l) => l.bg as string),
+          sourceLang: "BG",
+          targetLang: "EN",
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Translation failed");
+      toTranslate.forEach((leaf, i) => {
+        leaf.en = json.translations[i];
+      });
+      setData((prev) => (prev ? JSON.parse(JSON.stringify(prev)) : prev));
+      setLang("en");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Translation failed");
+    } finally {
+      setTranslating(false);
+    }
+  }
+
   if (loading) {
     return (
       <GlassCard className="p-12">
@@ -299,29 +312,62 @@ export function WebsiteTab() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">Website</h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Edit your homepage content. Changes go live immediately after saving.
-          </p>
+    <LangContext.Provider value={lang}>
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">Website</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Edit your homepage content. Changes go live immediately after saving.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center rounded-lg border border-stone-200 bg-white/80 p-0.5 dark:border-stone-700 dark:bg-stone-800/50">
+              <button
+                onClick={() => setLang("bg")}
+                className={cn(
+                  "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                  lang === "bg"
+                    ? "bg-amber-600 text-white"
+                    : "text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
+                )}
+              >
+                BG
+              </button>
+              <button
+                onClick={() => setLang("en")}
+                className={cn(
+                  "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                  lang === "en"
+                    ? "bg-amber-600 text-white"
+                    : "text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
+                )}
+              >
+                EN
+              </button>
+            </div>
+            <button
+              onClick={translateAll}
+              disabled={translating}
+              className="flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-900 dark:bg-amber-900/20 dark:text-amber-300"
+            >
+              <Languages size={14} />
+              {translating ? "Translating…" : "BG → EN"}
+            </button>
+            {saved && (
+              <span className="text-sm text-green-600 dark:text-green-400">✓ Saved</span>
+            )}
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
+            >
+              <Save size={16} />
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {saved && (
-            <span className="text-sm text-green-600 dark:text-green-400">✓ Saved</span>
-          )}
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
-          >
-            <Save size={16} />
-            {saving ? "Saving…" : "Save changes"}
-          </button>
-        </div>
-      </div>
 
       {/* Hero Section */}
       <Section title="Hero" defaultOpen>
@@ -511,9 +557,6 @@ export function WebsiteTab() {
 
       {/* Bottom save bar */}
       <div className="sticky bottom-4 flex items-center justify-end gap-3 rounded-xl border border-white/10 bg-white/80 p-4 backdrop-blur-xl dark:bg-zinc-900/80">
-        {saved && (
-          <span className="text-sm text-green-600 dark:text-green-400">✓ Changes saved</span>
-        )}
         {error && (
           <span className="text-sm text-red-500">{error}</span>
         )}
@@ -527,5 +570,6 @@ export function WebsiteTab() {
         </button>
       </div>
     </div>
+    </LangContext.Provider>
   );
 }

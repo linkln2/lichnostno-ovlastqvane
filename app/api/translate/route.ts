@@ -7,10 +7,15 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { text, sourceLang = "BG", targetLang = "EN" } = body;
+    const { text, texts, sourceLang = "BG", targetLang = "EN" } = body;
+
+    if (Array.isArray(texts) && texts.length > 0) {
+      const translations = await translateText(texts as string[], sourceLang, targetLang);
+      return Response.json({ translations });
+    }
 
     if (!text || typeof text !== "string") {
-      return Response.json({ error: "text is required" }, { status: 400 });
+      return Response.json({ error: "text or texts is required" }, { status: 400 });
     }
 
     const [translated] = await translateText(text, sourceLang, targetLang);
