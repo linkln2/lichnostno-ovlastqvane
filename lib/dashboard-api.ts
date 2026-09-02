@@ -1,8 +1,9 @@
 import { getPayloadInstance } from "@/lib/payload";
+import type { Locale } from "@/lib/i18n";
 export { requireStaff } from "@/lib/auth-request";
 
-// Parse a localized JSON field from Payload (stored as {"bg":"...","en":"..."})
-export function loc(field: unknown, locale = "en"): string {
+// Parse a localized JSON field from Payload (stored as {"bg":"...","en":"...","es":"...",...})
+export function loc(field: unknown, locale: Locale = "en"): string {
   if (typeof field === "string") {
     try {
       const parsed = JSON.parse(field);
@@ -71,7 +72,8 @@ export async function deleteRecord(
   });
 }
 
-// Build a localized field value for Payload (stored as {"bg":"...","en":"..."})
-export function locField(bg: string, en: string) {
-  return { bg, en };
+// Build a localized field value for Payload (stored as {"bg":"...","en":"...",...})
+export function locField(bg: string, en: string, ...rest: Partial<Record<Exclude<Locale, "bg" | "en">, string>>[]) {
+  const merged = Object.assign({}, ...rest);
+  return { bg, en, ...merged };
 }

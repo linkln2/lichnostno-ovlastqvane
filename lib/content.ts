@@ -1,9 +1,9 @@
-import type { Locale } from "./i18n";
+import type { Locale, Multilingual, MultilingualList } from "./i18n";
 
-// Bilingual content for the site. Each entry has bg + en variants.
+// Multilingual content for the site. Bulgarian and English are required; other languages optional.
 
-export type Bi = { bg: string; en: string };
-export type BiList = { bg: string[]; en: string[] };
+export type Bi = Multilingual & { bg: string; en: string };
+export type BiList = MultilingualList & { bg: string[]; en: string[] };
 
 export const site = {
   name: "Личностно овластяване",
@@ -466,9 +466,14 @@ export function getPostBySlug(slug: string): BlogPost | undefined {
   return blogPosts.find((p) => p.slug === slug);
 }
 
+const intlLocales: Record<Locale, string> = {
+  bg: "bg-BG",
+  en: "en-GB",
+};
+
 export function formatDate(iso: string, locale: Locale): string {
   const d = new Date(iso);
-  return d.toLocaleDateString(locale === "bg" ? "bg-BG" : "en-GB", {
+  return d.toLocaleDateString(intlLocales[locale], {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -484,7 +489,7 @@ export function formatDateRange(start: string, end: string, locale: Locale): str
     month: "long",
     year: "numeric",
   };
-  const loc = locale === "bg" ? "bg-BG" : "en-GB";
+  const loc = intlLocales[locale];
   if (sameDay) return s.toLocaleDateString(loc, opts);
   const sStr = s.toLocaleDateString(loc, { day: "numeric", month: "long" });
   const eStr = e.toLocaleDateString(loc, opts);
@@ -492,7 +497,11 @@ export function formatDateRange(start: string, end: string, locale: Locale): str
 }
 
 export function localized(name: Bi, locale: Locale): string {
-  return name[locale];
+  return name[locale] || name.en || name.bg || "";
+}
+
+export function localizedList(list: BiList, locale: Locale): string[] {
+  return list[locale] || list.en || list.bg || [];
 }
 
 // ─── Launch countdown target ────────────────────────────────────────────────

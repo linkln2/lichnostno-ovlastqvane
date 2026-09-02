@@ -8,6 +8,9 @@ export const localeNames: Record<Locale, string> = {
   en: "EN",
 };
 
+export type Multilingual = Partial<Record<Locale, string>>;
+export type MultilingualList = Partial<Record<Locale, string[]>>;
+
 // Centralized translations for UI strings (nav, buttons, labels)
 type Dict = Record<string, Record<Locale, string>>;
 
@@ -176,5 +179,27 @@ export const t: Dict = {
 };
 
 export function tr(key: string, locale: Locale): string {
-  return t[key]?.[locale] ?? key;
+  const entry = t[key];
+  if (!entry) return key;
+  return entry[locale] || entry.en || entry.bg || key;
+}
+
+export function getLocalized(
+  value: Multilingual | string | undefined,
+  locale: Locale,
+  fallback = "",
+): string {
+  if (!value) return fallback;
+  if (typeof value === "string") return value || fallback;
+  return value[locale] || value.en || value.bg || fallback;
+}
+
+export function getLocalizedList(
+  value: MultilingualList | string[] | undefined,
+  locale: Locale,
+  fallback: string[] = [],
+): string[] {
+  if (!value) return fallback;
+  if (Array.isArray(value)) return value;
+  return value[locale] || value.en || value.bg || fallback;
 }

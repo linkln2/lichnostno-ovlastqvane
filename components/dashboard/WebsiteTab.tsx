@@ -5,60 +5,71 @@ import { GlassCard } from "./GlassCard";
 import { Field, inputClass, textareaClass, FormActions } from "./Modal";
 import { cn } from "@/lib/utils";
 import { Save, RotateCcw, Eye, EyeOff, ChevronDown, ChevronUp, Languages } from "lucide-react";
+import { localeNames as publicLocaleNames } from "@/lib/i18n";
 
 // ─── Types ───────────────────────────────────────────────────────
 
-type Bi = { bg?: string; en?: string };
+type DashboardLocale = "bg" | "en" | "es" | "it" | "de";
+const dashboardLocales: DashboardLocale[] = ["bg", "en", "es", "it", "de"];
+const dashboardLocaleNames: Record<DashboardLocale, string> = {
+  bg: "БГ",
+  en: "EN",
+  es: "ES",
+  it: "IT",
+  de: "DE",
+};
 
-const LangContext = createContext<"bg" | "en">("bg");
+type Multilingual = Partial<Record<DashboardLocale, string>>;
+
+const LangContext = createContext<DashboardLocale>("bg");
 
 type HomepageData = {
   hero: {
-    title: Bi;
-    subtitle: Bi;
-    primaryCtaText: Bi;
+    title: Multilingual;
+    subtitle: Multilingual;
+    primaryCtaText: Multilingual;
     primaryCtaHref: string;
-    secondaryCtaText: Bi;
+    secondaryCtaText: Multilingual;
     secondaryCtaHref: string;
     showCountdown: boolean;
     showVideoFeed: boolean;
   };
   mission: {
-    title: Bi;
-    text: Bi;
+    title: Multilingual;
+    text: Multilingual;
     enabled: boolean;
   };
   values: {
-    title: Bi;
+    title: Multilingual;
     enabled: boolean;
-    cards: { title: Bi; description: Bi }[];
+    cards: { title: Multilingual; description: Multilingual }[];
   };
   symbolism: {
-    title: Bi;
+    title: Multilingual;
     enabled: boolean;
-    cards: { title: Bi; description: Bi }[];
+    cards: { title: Multilingual; description: Multilingual }[];
   };
   productsSection: {
     enabled: boolean;
-    heading: Bi;
+    heading: Multilingual;
     maxItems: number;
   };
   membershipSection: {
     enabled: boolean;
-    heading: Bi;
-    description: Bi;
+    heading: Multilingual;
+    description: Multilingual;
   };
   testimonialsSection: {
     enabled: boolean;
-    heading: Bi;
+    heading: Multilingual;
   };
   videoSection: {
     enabled: boolean;
-    heading: Bi;
+    heading: Multilingual;
   };
   blogSection: {
     enabled: boolean;
-    heading: Bi;
+    heading: Multilingual;
     maxItems: number;
   };
 };
@@ -121,8 +132,8 @@ function BiField({
   type = "text",
 }: {
   label: string;
-  value: Bi;
-  onChange: (val: Bi) => void;
+  value: Multilingual;
+  onChange: (val: Multilingual) => void;
   type?: "text" | "textarea";
 }) {
   const lang = useContext(LangContext);
@@ -132,7 +143,7 @@ function BiField({
       <label className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
         <span>{label}</span>
         <span className="rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-500 dark:bg-stone-800 dark:text-stone-400">
-          {lang.toUpperCase()}
+          {dashboardLocaleNames[lang]}
         </span>
       </label>
       {type === "textarea" ? (
@@ -141,7 +152,7 @@ function BiField({
           onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
           className={cn(textareaClass, "min-h-[80px]")}
           rows={3}
-          placeholder={lang === "bg" ? "Български" : "English"}
+          placeholder={dashboardLocaleNames[lang]}
         />
       ) : (
         <input
@@ -149,7 +160,7 @@ function BiField({
           value={value[lang] || ""}
           onChange={(e) => onChange({ ...value, [lang]: e.target.value })}
           className={inputClass}
-          placeholder={lang === "bg" ? "Български" : "English"}
+          placeholder={dashboardLocaleNames[lang]}
         />
       )}
     </div>
@@ -164,7 +175,7 @@ export function WebsiteTab() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lang, setLang] = useState<"bg" | "en">("bg");
+  const [lang, setLang] = useState<DashboardLocale>("bg");
   const [translating, setTranslating] = useState(false);
 
   const fetchHomepage = useCallback(async () => {
@@ -236,18 +247,14 @@ export function WebsiteTab() {
     setData((prev) => prev ? { ...prev, [key]: { ...prev[key], ...patch } } : prev);
   }
 
-  function isBi(value: unknown): value is Bi {
-    return (
-      typeof value === "object" &&
-      value !== null &&
-      "bg" in value &&
-      "en" in value &&
-      typeof (value as Bi).bg === "string"
-    );
+  function isMultilingual(value: unknown): value is Multilingual {
+    if (typeof value !== "object" || value === null) return false;
+    const obj = value as Multilingual;
+    return dashboardLocales.some((l) => typeof obj[l] === "string");
   }
 
-  function collectBiLeaves(obj: unknown, leaves: Bi[] = []): Bi[] {
-    if (isBi(obj)) {
+  function collectBiLeaves(obj: unknown, leaves: Multilingual[] = []): Multilingual[] {
+    if (isMultilingual(obj)) {
       leaves.push(obj);
       return leaves;
     }
@@ -266,6 +273,9 @@ export function WebsiteTab() {
     setTranslating(true);
     setError(null);
     try {
+      if (lang === "bg") return;
+      const sourceLang = "BG";
+      const targetLang = lang === "en" ? "EN" : lang === "es" ? "ES" : lang === "it" ? "IT" : "DE";
       const leaves = collectBiLeaves(data);
       const toTranslate = leaves.filter((l) => l.bg && l.bg.trim() !== "");
       if (toTranslate.length === 0) return;
@@ -275,17 +285,16 @@ export function WebsiteTab() {
         credentials: "include",
         body: JSON.stringify({
           texts: toTranslate.map((l) => l.bg as string),
-          sourceLang: "BG",
-          targetLang: "EN",
+          sourceLang,
+          targetLang,
         }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Translation failed");
       toTranslate.forEach((leaf, i) => {
-        leaf.en = json.translations[i];
+        leaf[lang] = json.translations[i];
       });
       setData((prev) => (prev ? JSON.parse(JSON.stringify(prev)) : prev));
-      setLang("en");
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -323,37 +332,29 @@ export function WebsiteTab() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center rounded-lg border border-stone-200 bg-white/80 p-0.5 dark:border-stone-700 dark:bg-stone-800/50">
-              <button
-                onClick={() => setLang("bg")}
-                className={cn(
-                  "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-                  lang === "bg"
-                    ? "bg-amber-600 text-white"
-                    : "text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
-                )}
-              >
-                BG
-              </button>
-              <button
-                onClick={() => setLang("en")}
-                className={cn(
-                  "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-                  lang === "en"
-                    ? "bg-amber-600 text-white"
-                    : "text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
-                )}
-              >
-                EN
-              </button>
+            <div className="flex flex-wrap items-center rounded-lg border border-stone-200 bg-white/80 p-0.5 dark:border-stone-700 dark:bg-stone-800/50">
+              {dashboardLocales.map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className={cn(
+                    "rounded-md px-2.5 py-2 text-xs font-medium transition-colors",
+                    lang === l
+                      ? "bg-amber-600 text-white"
+                      : "text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
+                  )}
+                >
+                  {dashboardLocaleNames[l]}
+                </button>
+              ))}
             </div>
             <button
               onClick={translateAll}
-              disabled={translating}
+              disabled={translating || lang === "bg"}
               className="flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-900 dark:bg-amber-900/20 dark:text-amber-300"
             >
               <Languages size={14} />
-              {translating ? "Translating…" : "BG → EN"}
+              {translating ? "Translating…" : `BG → ${dashboardLocaleNames[lang]}`}
             </button>
             {saved && (
               <span className="text-sm text-green-600 dark:text-green-400">✓ Saved</span>
@@ -473,7 +474,7 @@ export function WebsiteTab() {
             </div>
           ))}
           <button
-            onClick={() => update("values", { cards: [...data.values.cards, { title: { bg: "", en: "" }, description: { bg: "", en: "" } }] })}
+            onClick={() => update("values", { cards: [...data.values.cards, { title: { bg: "", en: "", es: "", it: "", de: "" }, description: { bg: "", en: "", es: "", it: "", de: "" } }] })}
             className="text-sm text-amber-600 hover:text-amber-700"
           >
             + Add value card

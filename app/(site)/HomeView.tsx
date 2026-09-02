@@ -8,7 +8,7 @@ import { generate } from "useinkjet";
 import { ParticleBurst } from "@/components/ParticleBurst";
 import { SolarSystemOrbits } from "@/components/SolarSystemOrbits";
 import { StarfieldBackground } from "@/components/StarfieldBackground";
-import { tr } from "@/lib/i18n";
+import { tr, getLocalized } from "@/lib/i18n";
 import {
   hero,
   mission,
@@ -321,10 +321,10 @@ export default function HomePage({
                 {tr("hero_badge", locale)}
               </span>
               <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl lg:text-6xl lg:leading-[1.1]">
-                {heroContent.title[locale]}
+                {getLocalized(heroContent.title, locale)}
               </h1>
               <p className="mt-6 text-lg leading-relaxed text-stone-600">
-                {heroContent.subtitle[locale]}
+                {getLocalized(heroContent.subtitle, locale)}
               </p>
             </div>
           </div>
@@ -579,7 +579,7 @@ export default function HomePage({
               {locale === "bg" ? "Нашата мисия и ценности" : "Our mission & values"}
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-stone-600">
-              {missionContent[locale]}
+              {getLocalized(missionContent, locale)}
             </p>
           </div>
 
@@ -593,8 +593,8 @@ export default function HomePage({
                   className="flex flex-1 flex-col rounded-2xl border border-amber-200 bg-white p-6 transition-all hover:border-amber-300 hover:bg-amber-50 hover:shadow-lg dark:border-amber-200/30 dark:bg-white/10 dark:hover:bg-white/20"
                 >
                   <div className="mb-3 flex justify-end text-amber-700">{valueIcons[i]}</div>
-                  <h4 className="text-lg font-semibold text-amber-800">{v.title[locale]}</h4>
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+                  <h4 className="text-lg font-semibold text-amber-800">{getLocalized(v.title, locale)}</h4>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">{getLocalized(v.desc, locale)}</p>
                 </div>
               ))}
             </div>
@@ -628,8 +628,8 @@ export default function HomePage({
                   className="flex flex-1 flex-col rounded-2xl border border-amber-200 bg-white p-6 transition-all hover:border-amber-300 hover:bg-amber-50 hover:shadow-lg dark:border-amber-200/30 dark:bg-white/10 dark:hover:bg-white/20"
                 >
                   <div className="mb-3 flex justify-start text-amber-700">{valueIcons[i + 2]}</div>
-                  <h4 className="text-lg font-semibold text-amber-800">{v.title[locale]}</h4>
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">{v.desc[locale]}</p>
+                  <h4 className="text-lg font-semibold text-amber-800">{getLocalized(v.title, locale)}</h4>
+                  <p className="mt-2 flex-1 text-sm leading-relaxed text-stone-600">{getLocalized(v.desc, locale)}</p>
                 </div>
               ))}
             </div>
@@ -852,7 +852,7 @@ export default function HomePage({
                 <div className="aspect-video w-full overflow-hidden bg-stone-100">
                   <img
                     src={post.cover}
-                    alt={post.title[locale]}
+                    alt={getLocalized(post.title, locale)}
                     className="h-full w-full object-cover transition-transform group-hover:scale-105"
                     loading="lazy"
                   />
@@ -861,13 +861,13 @@ export default function HomePage({
               <div className="flex flex-1 flex-col p-6">
                 <time className="text-xs text-stone-400">{post.date}</time>
                 <h3 className="mt-2 font-semibold text-stone-900 group-hover:text-amber-800">
-                  {post.title[locale]}
+                  {getLocalized(post.title, locale)}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                  {post.excerpt[locale]}
+                  {getLocalized(post.excerpt, locale)}
                 </p>
                 <span className="mt-3 inline-block text-xs text-stone-400">
-                  {post.readTime[locale]}
+                  {getLocalized(post.readTime, locale)}
                 </span>
               </div>
             </Link>

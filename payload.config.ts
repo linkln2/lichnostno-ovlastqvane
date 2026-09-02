@@ -911,6 +911,9 @@ export default buildConfig({
     locales: [
       { label: "Bulgarian", code: "bg" },
       { label: "English", code: "en" },
+      { label: "Spanish", code: "es" },
+      { label: "Italian", code: "it" },
+      { label: "German", code: "de" },
     ],
     fallback: true,
   },
